@@ -1,0 +1,157 @@
+// header.component.scss
+@use '../../../styles' as *;
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px 32px;
+  background-color: $color-background; // Variable statt Hex-Wert
+  height: 80px;
+  box-sizing: border-box;
+
+  // ===== Logo =====
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+
+    &-icon {
+      width: 40px;
+      height: 40px;
+    }
+
+    &-text {
+      font-family: $font-headline; // aus font.scss
+      font-size: 24px;
+      font-weight: 700;
+      color: $color-text-primary;
+      white-space: nowrap;
+    }
+  }
+
+  // ===== Suchleiste =====
+  &__search {
+    position: relative;
+    flex: 1;
+    max-width: 500px;
+
+    &-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 48px 0 20px;
+      border: none;
+      border-radius: 32px;
+      background-color: $color-background-light;
+      font-size: 16px;
+      color: $color-text-primary;
+      cursor: text;
+
+      &::placeholder {
+        color: $color-text-secondary;
+      }
+
+      &:focus {
+        outline: 2px solid $color-primary;
+      }
+    }
+
+    &-icon {
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+    }
+  }
+
+  // ===== User-Bereich =====
+  &__user {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 32px;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: $color-background-light;
+    }
+
+    &-name {
+      font-weight: 600;
+      color: $color-text-primary;
+      white-space: nowrap;
+    }
+
+    &-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    &-chevron {
+      width: 12px;
+      height: 12px;
+    }
+
+    &-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background-color: $color-background;
+      border-radius: 12px;
+      box-shadow: $shadow-elevated; // Mixin/Variable aus eurem System
+      display: flex;
+      flex-direction: column;
+      min-width: 180px;
+      overflow: hidden;
+      z-index: 10;
+
+      button {
+        padding: 12px 16px;
+        text-align: left;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        color: $color-text-primary;
+
+        &:hover {
+          background-color: $color-background-light;
+        }
+      }
+    }
+  }
+
+  // ===== Responsive bis 320px =====
+  @include respond-to(mobile) { // Mixin aus mixins.scss, z.B. @media (max-width: 480px)
+    padding: 12px 16px;
+    gap: 8px;
+
+    &__logo-text {
+      display: none; // nur Icon zeigen, Platz sparen
+    }
+
+    &__search {
+      max-width: none;
+
+      &-input {
+        height: 40px;
+        font-size: 14px;
+      }
+    }
+
+    &__user-name {
+      display: none; // nur Avatar zeigen
+    }
+  }
+}

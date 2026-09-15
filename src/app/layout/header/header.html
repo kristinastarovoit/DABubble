@@ -1,1 +1,32 @@
-<p>header works!</p>
+<!-- header.component.html -->
+<header class="header">
+  <div class="header__logo">
+    <img src="/img/logo.svg" alt="DABubble Logo" class="header__logo-icon" />
+    <span class="header__logo-text">DABubble</span>
+  </div>
+
+  <div class="header__search">
+    <input
+      type="text"
+      class="header__search-input"
+      placeholder="Devspace durchsuchen"
+      [(ngModel)]="searchQuery"
+      (input)="onSearchInput()"
+    />
+    <img src="/icons/search.svg" alt="" class="header__search-icon" />
+    <!-- optional: Dropdown mit Suchergebnissen, wenn searchQuery nicht leer -->
+  </div>
+
+  <div class="header__user" (click)="toggleUserMenu()">
+    <!-- <span class="header__user-name">{{ currentUser.name }}</span> -->
+    <span class="header__user-name">User-Platzhalter</span>
+    <!-- <img [src]="currentUser.avatarUrl" alt="" class="header__user-avatar" /> -->
+     <img src="" alt="" class="header__user-avatar" />
+    <img src="" alt="" class="header__user-chevron" />
+
+    <div class="header__user-menu" *ngIf="isUserMenuOpen">
+      <button (click)="goToProfile()">Profil anzeigen</button>
+      <button (click)="logout()">Abmelden</button>
+    </div>
+  </div>
+</header>
