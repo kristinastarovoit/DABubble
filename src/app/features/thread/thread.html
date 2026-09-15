@@ -1,4 +1,4 @@
-<aside class="thread" *ngIf="isVisible">
+<aside class="thread" [hidden]="!isVisible">
   <div class="thread__header">
     <div class="thread__title">
       <span class="thread__title-text">Thread</span>
