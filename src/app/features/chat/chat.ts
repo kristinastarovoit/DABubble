@@ -16,18 +16,20 @@ export class Chat {
 
   /** The currently selected channel. */
   @Input() activeChannel: Channel | null = null;
+
   /** Messages displayed in the active channel. */
-    @Input() messages: Message[] = [];
+  @Input() messages: Message[] = [];
 
-    /** Emitted when a message thread is requested. */
-    @Output() threadRequested = new EventEmitter<Message>();
-    /** Emitted when the channel member list is requested. */
-    @Output() memberListRequested = new EventEmitter<void>();
+  /** Emitted when a message thread is requested. */
+  @Output() threadRequested = new EventEmitter<Message>();
 
-    /** Opens the thread for a message. */
-    openThread(message: Message): void {
-      this.threadRequested.emit(message);
-    }
+  /** Emitted when the channel member list is requested. */
+  @Output() memberListRequested = new EventEmitter<void>();
+
+  /** Opens the thread for a message. */
+  openThread(message: Message): void {
+    this.threadRequested.emit(message);
+  }
 
   /** Opens the active channel's member list. */
   openMemberList(): void {

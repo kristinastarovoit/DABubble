@@ -16,13 +16,16 @@ interface MessageGroup {
   templateUrl: './message-list.html',
 })
 export class MessageList {
+
   /** Messages displayed in the list. */
    @Input() messages: Message[] = [];
+
   /** The identifier of the signed-in user. */
   @Input() currentUserId = '';
 
   /** Emitted when a message thread is opened. */
   @Output() threadOpened = new EventEmitter<Message>();
+  
   /** Emitted when a message reaction changes. */
   @Output() reactionToggled = new EventEmitter<{ message: Message; emoji: string }>();
 

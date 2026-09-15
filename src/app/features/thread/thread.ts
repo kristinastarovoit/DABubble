@@ -11,19 +11,27 @@ import { Message } from '../../shared/interfaces/message';
   templateUrl: './thread.html',
 })
 export class Thread {
+
+  @Input() isVisible = true;
+
   /** The message that the thread belongs to. */
   @Input() parentMessage: Message | null = null;
+
   /** The name of the channel containing the thread. */
   @Input() channelName = '';
+
   /** The replies displayed in the thread. */
   @Input() replies: Message[] = [];
+
   /** The identifier of the signed-in user. */
   @Input() currentUserId = '';
 
   /** Emitted when the thread is closed. */
   @Output() closed = new EventEmitter<void>();
+
   /** Emitted when a reply is submitted. */
   @Output() replySent = new EventEmitter<string>();
+
   /** Emitted when a reaction on a reply changes. */
   @Output() reactionToggled = new EventEmitter<{ message: Message; emoji: string }>();
 

@@ -9,8 +9,10 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './message-input.html',
 })
 export class MessageInput {
+
   /** Placeholder displayed in the message field. */
-   @Input() placeholder = 'Nachricht schreiben';
+   @Input() placeholder = 'Write Message';
+
   /** Emitted when a non-empty message is submitted. */
   @Output() messageSent = new EventEmitter<string>();
 

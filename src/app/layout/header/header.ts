@@ -12,10 +12,13 @@ import { User } from '../../shared/interfaces/user';
   templateUrl: './header.html',
 })
 export class Header {
+
   /** The currently signed-in user. */
   currentUser!: User;
+
   /** Current value of the global search field. */
   searchQuery = '';
+
   /** Whether the user menu is visible. */
   isUserMenuOpen = false;
 
@@ -29,9 +32,9 @@ export class Header {
   }
 
   /** Navigates to the user profile. */
-  goToProfile(): void {}
+  goToProfile(): void { }
 
   /** Signs the current user out. */
-  logout(): void {}
+  logout(): void { }
 }
 

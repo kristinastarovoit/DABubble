@@ -1,4 +1,4 @@
-<aside class="thread" *ngIf="parentMessage">
+<aside class="thread" *ngIf="isVisible">
   <div class="thread__header">
     <div class="thread__title">
       <span class="thread__title-text">Thread</span>
@@ -9,7 +9,7 @@
     </button>
   </div>
 
-  <div class="thread__content">
+  <div class="thread__content" *ngIf="parentMessage">
     <!-- Ursprüngliche Nachricht -->
     <div class="thread__message">
       <img [src]="parentMessage.authorAvatarUrl" alt="" class="thread__avatar" />
@@ -23,7 +23,7 @@
     </div>
 
     <div class="thread__divider" *ngIf="replies.length > 0">
-      <span>{{ replies.length }} Antworten</span>
+      <span>{{ replies.length }} Reply</span>
     </div>
 
     <!-- Antworten -->
@@ -48,8 +48,12 @@
     </div>
   </div>
 
+  <div class="thread__content" *ngIf="!parentMessage">
+    <span>Thread eingeblendet zur Bearbeitung.</span>
+  </div>
+
   <app-message-input
-    [placeholder]="'Antworten...'"
+    [placeholder]="'Reply...'"
     (messageSent)="sendReply($event)"
   ></app-message-input>
 </aside>
