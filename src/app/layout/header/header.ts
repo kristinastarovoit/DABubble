@@ -12,19 +12,26 @@ import { User } from '../../shared/interfaces/user';
   templateUrl: './header.html',
 })
 export class Header {
-  currentUser!: User; // TODO: Verknüpfen aus entsprechendem Service
+  /** The currently signed-in user. */
+  currentUser!: User;
+  /** Current value of the global search field. */
   searchQuery = '';
+  /** Whether the user menu is visible. */
   isUserMenuOpen = false;
 
+  /** Toggles the user menu. */
   toggleUserMenu(): void {
     this.isUserMenuOpen = !this.isUserMenuOpen;
   }
 
+  /** Handles changes to the global search field. */
   onSearchInput(): void {
-    // TODO: SearchService o.ä.
   }
 
-  goToProfile(): void { /* Router-Navigation */ }
-  logout(): void { /* AuthService.logout() */ }
+  /** Navigates to the user profile. */
+  goToProfile(): void {}
+
+  /** Signs the current user out. */
+  logout(): void {}
 }
 

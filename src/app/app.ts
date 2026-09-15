@@ -11,5 +11,6 @@ import { Thread } from './features/thread/thread';
   styleUrl: './app.scss'
 })
 export class App {
+  /** Application title used by the root component. */
   protected readonly title = signal('dabubble');
 }

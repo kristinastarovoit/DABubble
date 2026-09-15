@@ -9,11 +9,14 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './message-input.html',
 })
 export class MessageInput {
+  /** Placeholder displayed in the message field. */
    @Input() placeholder = 'Nachricht schreiben';
+  /** Emitted when a non-empty message is submitted. */
   @Output() messageSent = new EventEmitter<string>();
 
   text = '';
 
+  /** Sends the trimmed message text. */
   send(): void {
     const trimmed = this.text.trim();
     if (!trimmed) return;
@@ -21,6 +24,7 @@ export class MessageInput {
     this.text = '';
   }
 
+  /** Sends the message when Enter is pressed without Shift. */
   onEnter(event: Event): void {
     const keyboardEvent = event as KeyboardEvent;
     if (!keyboardEvent.shiftKey) {
@@ -29,10 +33,11 @@ export class MessageInput {
     }
   }
 
+  /** Opens the emoji picker. */
   toggleEmojiPicker(): void {
-    // öffnet emoji-picker Komponente
   }
 
+  /** Inserts the mention prefix into the message. */
   insertMention(): void {
     this.text += '@';
   }

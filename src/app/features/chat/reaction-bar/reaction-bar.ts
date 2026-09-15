@@ -9,9 +9,12 @@ import { MessageReaction } from '../../../shared/interfaces/message';
   templateUrl: './reaction-bar.html',
 })
 export class ReactionBar {
+  /** Reactions displayed by the component. */
   @Input() reactions: MessageReaction[] = [];
+  /** Emitted when a reaction is toggled. */
   @Output() reactionToggled = new EventEmitter<string>();
 
+  /** Toggles the selected emoji reaction. */
   toggle(emoji: string): void {
     this.reactionToggled.emit(emoji);
   }
