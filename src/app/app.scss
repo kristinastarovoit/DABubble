@@ -1,6 +1,16 @@
 @use '../styles/variables' as *;
 
-.app-wrapper{
-    width: 100%;
-    background-color: $pastel-purple-bg;
+* {
+  margin: 0px;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+.app-wrapper {
+  width: 100%;
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: $pastel-purple-bg;
+  
 }

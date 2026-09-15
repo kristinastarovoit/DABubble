@@ -1,0 +1,25 @@
+<div class="channel-header">
+  <div class="channel-header__title" (click)="openChannelDetails()">
+    <span class="channel-header__hash">#</span>
+    <!-- <span class="channel-header__name">{{ channel?.name }}</span> -->
+     <span class="channel-header__name">Channelname</span>
+    <img src="app-icons/arrow-down.svg" alt="" class="channel-header__chevron" />
+  </div>
+
+  <div class="channel-header__meta">
+    <div class="channel-header__avatars">
+      <img
+        /* *ngFor="let member of channel?.members | slice:0:3"
+        [src]="member.avatarUrl"
+        alt=""
+        class="channel-header__avatar" */
+      />
+      <!-- <span class="channel-header__count">{{ channel?.members?.length }}</span> -->
+       <span class="channel-header__count">0</span>
+    </div>
+
+    <button class="channel-header__add-btn" (click)="memberIconClicked.emit()">
+      <img src="app-icons/add-members.svg" alt="Add Members" />
+    </button>
+  </div>
+</div>

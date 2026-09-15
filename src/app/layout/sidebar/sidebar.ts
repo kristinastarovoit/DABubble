@@ -1,5 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Channel } from '../../shared/interfaces/channel';
+import { User } from '../../shared/interfaces/user';
 
 
 @Component({
@@ -9,13 +11,13 @@ import { CommonModule } from '@angular/common';
   templateUrl: './sidebar.html',
 })
 export class Sidebar {
-  // @Input() channels: Channel[] = [];
-  // @Input() directMessages: User[] = [];
+  @Input() channels: Channel[] = [];
+  @Input() directMessages: User[] = [];
   @Input() activeChannelId: string | null = null;
   @Input() activeDmId: string | null = null;
 
-  // @Output() channelSelected = new EventEmitter<Channel>();
-  // @Output() directMessageSelected = new EventEmitter<User>();
+  @Output() channelSelected = new EventEmitter<Channel>();
+  @Output() directMessageSelected = new EventEmitter<User>();
   @Output() channelCreateRequested = new EventEmitter<void>();
   @Output() workspaceEditRequested = new EventEmitter<void>();
 
@@ -30,13 +32,13 @@ export class Sidebar {
     this.isDirectMessagesOpen = !this.isDirectMessagesOpen;
   }
 
-  // selectChannel(channel: Channel): void {
-  //   this.channelSelected.emit(channel);
-  // }
+  selectChannel(channel: Channel): void {
+    this.channelSelected.emit(channel);
+  }
 
-  // selectDirectMessage(contact: User): void {
-  //   this.directMessageSelected.emit(contact);
-  // }
+  selectDirectMessage(contact: User): void {
+    this.directMessageSelected.emit(contact);
+  }
 
   openChannelCreate(): void {
     this.channelCreateRequested.emit();

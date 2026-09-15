@@ -1,6 +1,7 @@
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { User } from '../../shared/interfaces/user';
 
 
 
@@ -11,7 +12,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './header.html',
 })
 export class Header {
-  // currentUser!: User; // TODO: Ergänzen aus entsprechendem Service
+  currentUser!: User; // TODO: Verknüpfen aus entsprechendem Service
   searchQuery = '';
   isUserMenuOpen = false;
 
