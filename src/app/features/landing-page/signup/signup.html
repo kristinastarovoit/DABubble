@@ -1,17 +1,65 @@
-<div>
+@if (!isAvatar()) {
   <div>
-    <button></button>
-    <h2>Konto erstellen</h2>
-  </div>
-  <p>Mit deinem Namen und deiner E-Mail-Adresse hast du dein neues DABubble-Konto.</p>
-  <div>
-    <input type="text" placeholder="Name und Nachnahme" />
-    <input type="text" placeholder="beispielname@email.com" />
-    <input type="text" placeholder="Passwort" />
     <div>
-      <input type="checkbox" name="" id="" />
-      <p>Ich stimme der<a href="">Datenschutzerklärung</a>zu.</p>
+      <button type="button" (click)="goToLogin()"><!-- Pfeil zurück --></button>
+      <h2>Konto erstellen</h2>
     </div>
+    <p>Mit deinem Namen und deiner E-Mail-Adresse hast du dein neues DABubble-Konto.</p>
+
+    <div>
+      <input type="text" [formField]="signupForm.name" placeholder="Name und Nachname" />
+      @if (signupForm.name().touched() && signupForm.name().invalid()) {
+        <span>Bitte gib deinen Namen ein.</span>
+      }
+
+      <input type="email" [formField]="signupForm.email" placeholder="beispielname@email.com" />
+      @if (signupForm.email().touched() && signupForm.email().invalid()) {
+        <span>Diese E-Mail-Adresse ist leider ungültig.</span>
+      }
+
+      <input type="password" [formField]="signupForm.password" placeholder="Passwort" />
+      @if (signupForm.password().touched() && signupForm.password().invalid()) {
+        <span>Das Passwort muss mindestens 8 Zeichen lang sein.</span>
+      }
+
+      <div>
+        <input type="checkbox" [formField]="signupForm.acceptedPolicy" id="policy" />
+        <label for="policy"
+          >Ich stimme der <a href="/datenschutz">Datenschutzerklärung</a> zu.</label
+        >
+      </div>
+    </div>
+
+    <button type="button" [disabled]="signupForm().invalid()" (click)="goToAvatarStep()">
+      Weiter
+    </button>
   </div>
-  <button>Weiter</button>
-</div>
+} @else {
+  <div>
+    <div>
+      <button type="button" (click)="goBackToSignup()"><!-- Pfeil zurück --></button>
+      <h2>Wähle deinen Avatar</h2>
+    </div>
+
+    <div>
+      <img [src]="selectedAvatar() || 'app-icons/avatar_default.svg'" alt="Ausgewählter Avatar" />
+    </div>
+
+    <p>{{ model().name }}</p>
+
+    <p>Aus der Liste wählen</p>
+    <div>
+      @for (a of avatar; track a) {
+        <button type="button" [class.selected]="selectedAvatar() === a" (click)="selectAvatar(a)">
+          <img [src]="a" alt="Avatar-Option" />
+        </button>
+      }
+    </div>
+
+    @if (errorMessage()) {
+      <p>{{ errorMessage() }}</p>
+    }
+
+    <button type="button" [disabled]="!selectedAvatar()" (click)="finishSignup()">Weiter</button>
+  </div>
+}

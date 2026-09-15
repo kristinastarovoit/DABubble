@@ -8,12 +8,12 @@ import { UserModel } from '../model/user.model';
 export class UserService {
   private firestore = inject(FIRESTORE);
 
-  createUserProfile(uid: string, name: string, email: string) {
+  createUserProfile(uid: string, name: string, email: string, avatar: string) {
     const user: UserModel = {
       uid,
       name,
       email,
-      avatar: '',
+      avatar,
       status: 'online',
       channels: [],
       createdAt: serverTimestamp(),
