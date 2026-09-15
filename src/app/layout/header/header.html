@@ -1,7 +1,7 @@
 <!-- header.component.html -->
 <header class="header">
   <div class="header__logo">
-    <img src="/img/logo.svg" alt="DABubble Logo" class="header__logo-icon" />
+    <img src="app-icons/logo.svg" alt="DABubble Logo" class="header__logo-icon" />
     <span class="header__logo-text">DABubble</span>
   </div>
 
@@ -13,16 +13,15 @@
       [(ngModel)]="searchQuery"
       (input)="onSearchInput()"
     />
-    <img src="/icons/search.svg" alt="" class="header__search-icon" />
-    <!-- optional: Dropdown mit Suchergebnissen, wenn searchQuery nicht leer -->
+    <img src="app-icons/search.svg" alt="Search Icon" class="header__search-icon" />
   </div>
 
   <div class="header__user" (click)="toggleUserMenu()">
     <!-- <span class="header__user-name">{{ currentUser.name }}</span> -->
     <span class="header__user-name">User-Platzhalter</span>
     <!-- <img [src]="currentUser.avatarUrl" alt="" class="header__user-avatar" /> -->
-     <img src="" alt="" class="header__user-avatar" />
-    <img src="" alt="" class="header__user-chevron" />
+     <img src="app-icons/avatar-placeholder.svg" alt="" class="header__user-avatar" />
+    <img src="app-icons/arrow-down.svg" alt="" class="header__user-chevron" />
 
     <div class="header__user-menu" *ngIf="isUserMenuOpen">
       <button (click)="goToProfile()">Profil anzeigen</button>
