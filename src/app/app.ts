@@ -1,9 +1,12 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Header } from './layout/header/header';
+import { Sidebar } from './layout/sidebar/sidebar';
+import { Chat } from './features/chat/chat';
+import { Thread } from './features/thread/thread';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [Header, Sidebar, Chat, Thread],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
