@@ -90,7 +90,8 @@ export class Signup {
           this.selectedAvatar(),
         );
         this.router.navigateByUrl('/login');
-      } catch {
+      } catch (err) {
+        console.error('Signup error:', err);
         this.errorMessage.set('Registrierung fehlgeschlagen. Bitte versuch es erneut.');
       }
     });
