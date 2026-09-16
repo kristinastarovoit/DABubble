@@ -1,4 +1,6 @@
-<div>
-  <ng-content></ng-content>
-  <span>{{ message() }}</span>
-</div>
+<dialog #toastDialog>
+  <div>
+    <ng-content></ng-content>
+    <span>{{ message() }}</span>
+  </div>
+</dialog>

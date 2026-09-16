@@ -1,4 +1,12 @@
-import { Component, inject, input, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  input,
+  viewChild,
+  ElementRef,
+  AfterViewInit,
+  OnDestroy,
+} from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
@@ -7,14 +15,18 @@ import { Router } from '@angular/router';
   styleUrl: './toast.scss',
   templateUrl: './toast.html',
 })
-export class Toast implements OnInit {
+export class Toast implements AfterViewInit, OnDestroy {
   private router = inject(Router);
 
   message = input.required<string>();
+
+  private dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('toastDialog');
   private timeoutId?: ReturnType<typeof setTimeout>;
 
-  ngOnInit() {
-    setTimeout(() => {
+  ngAfterViewInit() {
+    this.dialogRef().nativeElement.showModal();
+
+    this.timeoutId = setTimeout(() => {
       this.router.navigate(['/login']);
     }, 3000);
   }

@@ -7,6 +7,7 @@ import {
   signOut,
   verifyPasswordResetCode,
   confirmPasswordReset,
+  signInAnonymously,
 } from 'firebase/auth';
 
 import { FIREBASE_AUTH } from '../../app.config';
@@ -37,5 +38,9 @@ export class AuthService {
 
   logout() {
     return signOut(this.auth);
+  }
+
+  loginAsGuest() {
+    return signInAnonymously(this.auth);
   }
 }

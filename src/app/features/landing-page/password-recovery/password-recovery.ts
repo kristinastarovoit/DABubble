@@ -1,9 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
 import { AuthService } from '../../../shared/services/auth';
+import { Toast } from '../../../shared/components/toast/toast';
 
 @Component({
-  imports: [FormField],
+  imports: [FormField, Toast],
   selector: 'app-password-recovery',
   styleUrl: './password-recovery.scss',
   templateUrl: './password-recovery.html',

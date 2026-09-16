@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 
 import { AuthService } from '../../../shared/services/auth';
 import { UserService } from '../../../shared/services/users';
+import { Toast } from '../../../shared/components/toast/toast';
 
 interface SignupFormModel {
   name: string;
@@ -13,7 +14,7 @@ interface SignupFormModel {
 }
 
 @Component({
-  imports: [FormField],
+  imports: [FormField, Toast],
   selector: 'app-signup',
   styleUrl: './signup.scss',
   templateUrl: './signup.html',
@@ -42,6 +43,7 @@ export class Signup {
   protected readonly isAvatar = signal(false);
   protected readonly selectedAvatar = signal('');
   protected readonly errorMessage = signal('');
+  protected readonly accountCreated = signal(false);
 
   protected readonly avatar = [
     'app-icons/avatar_1.svg',
@@ -89,7 +91,7 @@ export class Signup {
           email,
           this.selectedAvatar(),
         );
-        this.router.navigateByUrl('/login');
+        this.accountCreated.set(true);
       } catch (err) {
         console.error('Signup error:', err);
         this.errorMessage.set('Registrierung fehlgeschlagen. Bitte versuch es erneut.');
