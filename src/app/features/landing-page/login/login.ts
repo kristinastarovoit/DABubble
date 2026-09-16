@@ -64,4 +64,32 @@ export class Login {
       this.isGuestLoggingIn.set(false);
     }
   }
+
+  protected isGoogleLoggingIn = signal(false);
+
+  protected async loginWithGoogle() {
+    this.isGoogleLoggingIn.set(true);
+    this.errorMessage.set(null);
+
+    try {
+      const credential = await this.authService.loginWithGoogle();
+      const { creationTime, lastSignInTime } = credential.user.metadata;
+      const isNewUser = creationTime === lastSignInTime;
+
+      if (isNewUser) {
+        await this.userService.createUserProfile(
+          credential.user.uid,
+          credential.user.displayName ?? 'DABubble User',
+          credential.user.email ?? '',
+          credential.user.photoURL ?? 'app-icons/avatar_default.svg',
+        );
+      }
+
+      this.router.navigateByUrl('/dashboard');
+    } catch {
+      this.errorMessage.set('Google login failed. Please try again.');
+    } finally {
+      this.isGoogleLoggingIn.set(false);
+    }
+  }
 }
