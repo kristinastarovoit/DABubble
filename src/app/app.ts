@@ -1,14 +1,11 @@
 import { Component, signal } from '@angular/core';
-import { Header } from './layout/header/header';
-import { Sidebar } from './layout/sidebar/sidebar';
-import { Chat } from './features/chat/chat';
-import { Thread } from './features/thread/thread';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [Header, Sidebar, Chat, Thread],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
 })
 export class App {
   /** Application title used by the root component. */
