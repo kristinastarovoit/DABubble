@@ -87,7 +87,7 @@
     border-radius: 8px;
 
     // &:hover {
-    //   background-color: $light-purple-two;
+    //   color: $light-purple-two;
     // }
   }
 
@@ -104,11 +104,17 @@
   &__section-icon {
     width: 20px;
     height: 20px;
+    &:hover {
+      color:$midtone-purple-three; 
+    }
   }
 
   &__section-title {
     font-weight: 600;
     color: $black;
+     &:hover {
+      color:$midtone-purple-three; 
+    }
   }
 
   &__list {
@@ -129,9 +135,10 @@
     cursor: pointer;
     color: $dark-grey;
 
-    // &:hover {
-    //   background-color: $color-background-light;
-    // }
+    &:hover {
+
+      color:$midtone-purple-three; 
+    }
 
     // &--active {
     //   background-color: $color-primary-light;
