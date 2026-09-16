@@ -25,19 +25,20 @@
       </div>
     </div>
 
-    <div class="thread__divider" *ngIf="replies.length > 0">
+  </div>
+
+  <div class="thread__content" *ngIf="replies.length > 0">
+    <div class="thread__divider">
       <span>{{ replies.length }} Reply</span>
     </div>
 
-    <!-- Antworten -->
     <div
       *ngFor="let reply of replies"
       class="thread__message"
       [class.thread__message--own]="reply.authorId === currentUserId"
     >
-      <!-- <img [src]="reply.authorAvatarUrl" alt="" class="thread__avatar" /> -->
-        <img src="app-icons/avatar-placeholder.svg" alt="">
-        
+      <img src="app-icons/avatar-placeholder.svg" alt="">
+
       <div class="thread__message-content">
         <div class="thread__meta">
           <span class="thread__author">{{ reply.authorName }}</span>
