@@ -7,9 +7,12 @@ import { ThreadMessage } from '../interfaces/thread';
 import { onAuthStateChanged } from 'firebase/auth';
 
 @Service()
+/** Provides Firestore operations and reactive channel data for the current user. */
 export class ChannelService {
     private db = inject(FIREBASE_FIRESTORE);
     private auth = inject(FIREBASE_AUTH);
+
+    /** The channels in which the currently authenticated user is a member. */
     channels = signal<Channel[]>([]);
 
     constructor() {
@@ -34,7 +37,12 @@ export class ChannelService {
         });
     }
 
-    async addChannel(name: string, description: string) {
+    /** Creates a channel and adds the current user as its first member.
+     *
+     * @param name The display name of the new channel.
+     * @param description The description of the new channel.
+     */
+    async addChannel(name: string, description: string): Promise<void> {
         const user = this.auth.currentUser?.uid;
         if (!user) { return }
 
@@ -49,7 +57,12 @@ export class ChannelService {
 
 
     // noch anpassen, je nachdem welcher channel gerade offen ist / ob einer offen ist
-    async addMembersToChannel(memberIds: string[], channelId: string) {
+    /** Adds one or more users to a channel without removing existing members.
+     *
+     * @param memberIds The user IDs to add to the channel.
+     * @param channelId The ID of the channel to update.
+     */
+    async addMembersToChannel(memberIds: string[], channelId: string): Promise<void> {
         const channelRef = doc(this.db, "channels", channelId);
         await updateDoc(channelRef, {
             memberIds: arrayUnion(...memberIds)
@@ -57,21 +70,35 @@ export class ChannelService {
         console.log("User for channel written with ID: ", channelRef.id);
     }
 
-    async editChannelName(name: string, channelId: string) {
+    /** Updates the name of an existing channel.
+     *
+     * @param name The new channel name.
+     * @param channelId The ID of the channel to update.
+     */
+    async editChannelName(name: string, channelId: string): Promise<void> {
         const channelRef = doc(this.db, "channels", channelId);
         await updateDoc(channelRef, {
             name: name
         });
     }
 
-    async editChannelDescription(description: string, channelId: string) {
+    /** Updates the description of an existing channel.
+     *
+     * @param description The new channel description.
+     * @param channelId The ID of the channel to update.
+     */
+    async editChannelDescription(description: string, channelId: string): Promise<void> {
         const channelRef = doc(this.db, "channels", channelId);
         await updateDoc(channelRef, {
             description: description
         });
     }
 
-    async leaveChannel(channelId: string) {
+    /** Removes the current user from a channel.
+     *
+     * @param channelId The ID of the channel to leave.
+     */
+    async leaveChannel(channelId: string): Promise<void> {
         const user = this.auth.currentUser?.uid;
         if (!user) { return };
         const channelRef = doc(this.db, "channels", channelId);
@@ -92,11 +119,21 @@ export class ChannelService {
     // While it is possible to delete a collection from a mobile/web client, doing so has negative 
     // security and performance implications.
 
-    async deleteChannel(channelId: string) {
+    /** Permanently deletes a channel document from Firestore.
+     *
+     * @param channelId The ID of the channel to delete.
+     */
+    async deleteChannel(channelId: string): Promise<void> {
         await deleteDoc(doc(this.db, "channels", channelId));
     }
 
-    async addMessageToChannel(channelId: string, messageText: string, senderId: string) {
+    /** Adds a message to a channel's message subcollection.
+     *
+     * @param channelId The ID of the channel receiving the message.
+     * @param messageText The text content of the message.
+     * @param senderId The ID of the user sending the message.
+     */
+    async addMessageToChannel(channelId: string, messageText: string, senderId: string): Promise<void> {
         const messageRef = await addDoc(collection(this.db, "channels", channelId, "messages"), {
             createdAt: serverTimestamp(),
             senderId: senderId,
@@ -105,7 +142,14 @@ export class ChannelService {
         console.log("message in channel written with ID: ", messageRef.id);
     }
 
-    async addChannelThread(channelId: string, messageId: string, threadMessage: string, senderId: string) {
+    /** Adds a reply to a channel message and increments its thread count.
+     *
+     * @param channelId The ID of the channel containing the message.
+     * @param messageId The ID of the message receiving the reply.
+     * @param threadMessage The text content of the reply.
+     * @param senderId The ID of the user sending the reply.
+     */
+    async addChannelThread(channelId: string, messageId: string, threadMessage: string, senderId: string): Promise<void> {
         const threadMessageRef = await addDoc(collection(this.db, "channels", channelId, "messages", messageId, "thread"), {
             text: threadMessage,
             senderId: senderId,
@@ -120,7 +164,13 @@ export class ChannelService {
         });
     }
 
-    getMessages(channelId: string) {
+    // unsubscribe in ngondestroy in der component
+    /** Subscribes to all messages in a channel.
+     *
+     * @param channelId The ID of the channel whose messages should be observed.
+     * @returns A signal containing the messages and a function that removes the listener.
+     */
+    getMessages(channelId: string): { messages: ReturnType<typeof signal<Message[]>>; unsubscribe: () => void } {
         const messages = signal<Message[]>([]);
         const messagesRef = collection(this.db, 'channels', channelId, 'messages');
         const unsubscribe = onSnapshot(messagesRef, snapshot => {
@@ -131,7 +181,14 @@ export class ChannelService {
         return { messages, unsubscribe };
     }
 
-    getThreads(channelId: string, messageId: string) {
+    // unsubscribe in ngondestroy in der component
+    /** Subscribes to all thread replies for a channel message.
+     *
+     * @param channelId The ID of the channel containing the message.
+     * @param messageId The ID of the message whose thread should be observed.
+     * @returns A signal containing the thread replies and a function that removes the listener.
+     */
+    getThreads(channelId: string, messageId: string): { threadMessage: ReturnType<typeof signal<ThreadMessage[]>>; unsubscribe: () => void } {
         const threadMessage = signal<ThreadMessage[]>([]);
         const threadRef = collection(this.db, 'channels', channelId, 'messages', messageId, "thread");
         const unsubscribe = onSnapshot(threadRef, snapshot => {
