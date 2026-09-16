@@ -1,0 +1,67 @@
+@if (!isAvatar()) {
+  <div>
+    <div>
+      <button type="button" (click)="goToLogin()"><!-- back arrow --></button>
+      <h2>Create account</h2>
+    </div>
+    <p>With your name and email address, you'll have your new DABubble account.</p>
+
+    <div>
+      <input type="text" [formField]="signupForm.name" placeholder="First and last name" />
+      @if (signupForm.name().touched() && signupForm.name().invalid()) {
+        <span>Please enter your name.</span>
+      }
+
+      <input type="email" [formField]="signupForm.email" placeholder="examplename@email.com" />
+      @if (signupForm.email().touched() && signupForm.email().invalid()) {
+        <span>This email address is invalid.</span>
+      }
+
+      <input type="password" [formField]="signupForm.password" placeholder="Password" />
+      @if (signupForm.password().touched() && signupForm.password().invalid()) {
+        <span>The password must be at least 8 characters long.</span>
+      }
+
+      <div>
+        <input type="checkbox" [formField]="signupForm.acceptedPolicy" id="policy" />
+        <label for="policy">I agree to the <a href="/datenschutz">Privacy Policy</a>.</label>
+      </div>
+    </div>
+
+    <button type="button" [disabled]="signupForm().invalid()" (click)="goToAvatarStep()">
+      Next
+    </button>
+  </div>
+} @else {
+  <div>
+    <div>
+      <button type="button" (click)="goBackToSignup()"><!-- back arrow --></button>
+      <h2>Choose your avatar</h2>
+    </div>
+
+    <div>
+      <img [src]="selectedAvatar() || 'app-icons/avatar_default.svg'" alt="Selected avatar" />
+    </div>
+
+    <p>{{ model().name }}</p>
+
+    <p>Choose from the list</p>
+    <div>
+      @for (a of avatar; track a) {
+        <button type="button" [class.selected]="selectedAvatar() === a" (click)="selectAvatar(a)">
+          <img [src]="a" alt="Avatar option" />
+        </button>
+      }
+    </div>
+
+    @if (errorMessage()) {
+      <p>{{ errorMessage() }}</p>
+    }
+
+    <button type="button" [disabled]="!selectedAvatar()" (click)="finishSignup()">Next</button>
+  </div>
+}
+
+@if (accountCreated()) {
+  <app-toast message="Account created successfully!"> </app-toast>
+}
