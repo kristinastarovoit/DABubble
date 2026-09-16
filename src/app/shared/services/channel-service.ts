@@ -1,7 +1,9 @@
 import { Service, inject, signal } from '@angular/core';
 import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../../app.config';
 import { Channel } from '../interfaces/channel';
-import { collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove, serverTimestamp, increment } from "firebase/firestore";
+import { Message } from '../interfaces/message';
+import { ThreadMessage } from '../interfaces/thread';
 
 @Service()
 export class ChannelService {
@@ -38,7 +40,7 @@ export class ChannelService {
 
 
     // noch anpassen, je nachdem welcher channel gerade offen ist / ob einer offen ist
-    async addMemberToChannel(memberIds: string[], channelId: string) {
+    async addMembersToChannel(memberIds: string[], channelId: string) {
         const channelRef = doc(this.db, "channels", channelId);
         await updateDoc(channelRef, {
             memberIds: arrayUnion(...memberIds)
@@ -85,5 +87,50 @@ export class ChannelService {
         await deleteDoc(doc(this.db, "channels", channelId));
     }
 
-    // addMembers
+    async addMessageToChannel(channelId: string, messageText: string, senderId: string) {
+        const messageRef = await addDoc(collection(this.db, "channels", channelId, "messages"), {
+            createdAt: serverTimestamp(),
+            senderId: senderId,
+            text: messageText,
+        });
+        console.log("message in channel written with ID: ", messageRef.id);
+    }
+
+    async addChannelThread(channelId: string, messageId: string, threadMessage: string, senderId: string) {
+        const threadMessageRef = await addDoc(collection(this.db, "channels", channelId, "messages", messageId, "thread"), {
+            text: threadMessage,
+            senderId: senderId,
+            createdAt: serverTimestamp(),
+
+        });
+        console.log("Thread message written with ID: ", threadMessageRef.id);
+
+        const threadRef = doc(this.db, "channels", channelId, "messages", messageId);
+        await updateDoc(threadRef, {
+            threadCount: increment(1)
+        });
+    }
+
+    getMessages(channelId: string) {
+        const messages = signal<Message[]>([]);
+        const messagesRef = collection(this.db, 'channels', channelId, 'messages');
+        const unsubscribe = onSnapshot(messagesRef, snapshot => {
+            messages.set(
+                snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Message) }))
+            );
+        });
+        return { messages, unsubscribe };
+    }
+
+    getThreads(channelId: string, messageId: string) {
+        const threadMessage = signal<ThreadMessage[]>([]);
+        const threadRef = collection(this.db, 'channels', channelId, 'messages', messageId, "thread");
+        const unsubscribe = onSnapshot(threadRef, snapshot => {
+            threadMessage.set(
+                snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as ThreadMessage) }))
+            );
+        });
+        return { threadMessage, unsubscribe };
+    }
+
 }
