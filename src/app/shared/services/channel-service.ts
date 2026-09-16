@@ -47,6 +47,7 @@ export class ChannelService {
 
     // addMembers
     // leaveChannel
-    
+    // deleteChannel
+
 
 }

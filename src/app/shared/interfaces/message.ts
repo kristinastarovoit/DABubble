@@ -4,6 +4,6 @@ export interface Message {
     createdAt: Timestamp,
     senderId: string,
     text: string,
-    threadCount: number,
-    reactions: Record<string, string[]>;
+    threadCount?: number,
+    reactions?: Record<string, string[]>;
 }
