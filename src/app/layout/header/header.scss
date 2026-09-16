@@ -60,7 +60,7 @@
       }
 
       &:focus {
-        border: none;
+        outline: none;
       }
     }
 
@@ -150,7 +150,7 @@
   }
 }
 
-.wrapper{
+.wrapper {
   display: flex;
   align-items: center;
 }

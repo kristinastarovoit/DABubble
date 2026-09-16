@@ -5,7 +5,8 @@
       <span class="sidebar__title-text">Devspace</span>
     </div>
     <button class="sidebar__edit-btn" (click)="openWorkspaceEdit()">
-      <img src="app-icons/edit.svg" alt="Edit" />
+      <img src="app-icons/edit.svg" alt="Edit" class="sidebar__edit-icon sidebar__edit-icon--default" />
+      <img src="app-icons/edit-purple.svg" alt="Edit" class="sidebar__edit-icon sidebar__edit-icon--hover" />
     </button>
   </div>
 
@@ -36,7 +37,7 @@
 
       <li class="sidebar__item sidebar__item--add" (click)="openChannelCreate()">
         <img src="app-icons/add.svg" alt="Add Icon" class="sidebar__item-icon" />
-        <span class="sidebar__item-name">Channel hinzufügen</span>
+        <span class="sidebar__item-name">Add Channel</span>
       </li>
     </ul>
   </div>
@@ -51,7 +52,7 @@
         [class.sidebar__chevron--collapsed]="!isDirectMessagesOpen"
       />
       <img src="app-icons/account.svg" alt="Account Icon" class="sidebar__section-icon" />
-      <span class="sidebar__section-title">Direktnachrichten</span>
+      <span class="sidebar__section-title">Direct Messages</span>
     </div>
 
     <ul class="sidebar__list" *ngIf="isDirectMessagesOpen">

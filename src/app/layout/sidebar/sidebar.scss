@@ -1,6 +1,5 @@
 @use '../../../styles/' as *;
 
-
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -17,21 +16,21 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 24px;
+    padding: 24px 16px;
   }
 
   &__title {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 16px;
 
     &-icon {
-      width: 24px;
-      height: 24px;
+      width: 60px;
+      height: 60px;
     }
 
     &-text {
-      font-size: 20px;
+      font-size: 1.5rem;
       font-weight: 700;
       color: $black;
     }
@@ -43,10 +42,36 @@
     cursor: pointer;
     padding: 8px;
     border-radius: 50%;
+    
 
-    // &:hover {
-    //   background-color: $color-background-light;
-    // }
+    &:hover {
+      background-color: $pastel-purple-bg;
+    }
+  }
+
+  &__edit-icon {
+    width: 40px;
+    height: 40px;
+    display: block;
+    img {
+      width: 40px;
+      height: 40px;
+    }
+
+    &--hover {
+      display: none;
+    }
+  }
+
+  &__edit-btn:hover {
+    .sidebar__edit-icon--default {
+      display: none;
+    }
+
+    .sidebar__edit-icon--hover {
+      display: block;
+      transform: scale(0.6);
+    }
   }
 
   &__section {
@@ -62,7 +87,7 @@
     border-radius: 8px;
 
     // &:hover {
-    //   background-color: $color-background-light;
+    //   background-color: $light-purple-two;
     // }
   }
 
@@ -157,6 +182,4 @@
     //   background-color: $color-online;
     // }
   }
-
-  
 }
