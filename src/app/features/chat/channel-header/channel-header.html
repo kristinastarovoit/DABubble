@@ -8,12 +8,13 @@
 
   <div class="channel-header__meta">
     <div class="channel-header__avatars">
-      <img
+      <!-- <img
          *ngFor="let member of channel?.members | slice:0:3"
         [src]="member.avatarUrl"
         alt=""
         class="channel-header__avatar" 
-      />
+      /> -->
+      <img src="app-icons/avatar-placeholder.svg" alt="">
       <span class="channel-header__count">{{ channel?.members?.length }}</span>
     </div>
 
