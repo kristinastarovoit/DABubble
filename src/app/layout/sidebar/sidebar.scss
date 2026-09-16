@@ -1,0 +1,161 @@
+@use '../../../styles/' as *;
+
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  flex-shrink: 0;
+  border-radius: 30px;
+  padding: 24px 16px;
+  background-color: $white;
+  box-sizing: border-box;
+  overflow-y: auto;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &-icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    &-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: $black;
+    }
+  }
+
+  &__edit-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+
+    // &:hover {
+    //   background-color: $color-background-light;
+    // }
+  }
+
+  &__section {
+    margin-bottom: 16px;
+  }
+
+  &__section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 4px;
+    cursor: pointer;
+    border-radius: 8px;
+
+    // &:hover {
+    //   background-color: $color-background-light;
+    // }
+  }
+
+  &__chevron {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.15s ease;
+
+    &--collapsed {
+      transform: rotate(-90deg);
+    }
+  }
+
+  &__section-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  &__section-title {
+    font-weight: 600;
+    color: $black;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px 8px 32px;
+    border-radius: 24px;
+    cursor: pointer;
+    color: $dark-grey;
+
+    // &:hover {
+    //   background-color: $color-background-light;
+    // }
+
+    // &--active {
+    //   background-color: $color-primary-light;
+    //   color: $color-primary;
+    //   font-weight: 600;
+    // }
+
+    // &--add {
+    //   color: $color-text-secondary;
+    // }
+
+    &-icon {
+      width: 20px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+
+    &-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  &__avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  &__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  &__status {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    // background-color: $color-offline;
+    // border: 2px solid $color-background;
+
+    // &--online {
+    //   background-color: $color-online;
+    // }
+  }
+
+  
+}
