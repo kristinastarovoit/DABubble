@@ -1,9 +1,10 @@
 import { Service, inject, signal } from '@angular/core';
 import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../../app.config';
 import { Channel } from '../interfaces/channel';
-import { collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove, serverTimestamp, increment } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove, serverTimestamp, increment, query, where } from "firebase/firestore";
 import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
+import { onAuthStateChanged } from 'firebase/auth';
 
 @Service()
 export class ChannelService {
@@ -12,16 +13,24 @@ export class ChannelService {
     channels = signal<Channel[]>([]);
 
     constructor() {
-        const channelsRef = collection(this.db, 'channels');
-        onSnapshot(channelsRef, snapshot => {
-            const channels = snapshot.docs.map(
-                doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                } as Channel)
-            );
-            this.channels.set(channels);
-            console.log(this.channels());
+        onAuthStateChanged(this.auth, (user) => {
+            if (!user) {
+                this.channels.set([]);
+                return;
+            }
+            const channelsRef = collection(this.db, 'channels');
+            const q = query(channelsRef, where('memberIds', 'array-contains', user.uid));
+
+            onSnapshot(q, snapshot => {
+                const channels = snapshot.docs.map(
+                    doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    } as Channel)
+                );
+                this.channels.set(channels);
+                console.log(this.channels());
+            });
         });
     }
 
