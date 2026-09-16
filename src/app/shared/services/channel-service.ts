@@ -1,7 +1,7 @@
 import { Service, inject, signal } from '@angular/core';
 import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../../app.config';
 import { Channel } from '../interfaces/channel';
-import { collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove, serverTimestamp, increment, query, where } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove, serverTimestamp, increment, query, where, getDocs } from "firebase/firestore";
 import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -38,14 +38,21 @@ export class ChannelService {
     }
 
     /** Creates a channel and adds the current user as its first member.
+     * Does nothing if no user is logged in, or if a channel with the
+     * same name already exists.
      *
      * @param name The display name of the new channel.
      * @param description The description of the new channel.
+     * @returns A promise that resolves once the channel has been created,
+     * or immediately if creation was skipped.
      */
     async addChannel(name: string, description: string): Promise<void> {
         const user = this.auth.currentUser?.uid;
+        const channelsRef = collection(this.db, 'channels');
+        const q = query(channelsRef, where('name', '==', name));
+        const snapshot = await getDocs(q);
         if (!user) { return }
-
+        if (!snapshot.empty) { return }
         const channelRef = await addDoc(collection(this.db, "channels"), {
             name: name,
             description: description,
