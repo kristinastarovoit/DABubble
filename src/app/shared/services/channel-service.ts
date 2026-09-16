@@ -164,28 +164,58 @@ export class ChannelService {
         });
     }
 
-    async addReactionToChannelMessage(channelId: string, messageId: string, reaction: string, userId: string) {
+    /** Adds a user's reaction to a channel message.
+     *
+     * @param channelId The ID of the channel containing the message.
+     * @param messageId The ID of the message to react to.
+     * @param reaction The reaction identifier.
+     * @param userId The ID of the reacting user.
+     */
+    async addReactionToChannelMessage(channelId: string, messageId: string, reaction: string, userId: string): Promise<void> {
         const messageRef = doc(this.db, "channels", channelId, "messages", messageId);
         await updateDoc(messageRef, {
             [`reactions.${reaction}`]: arrayUnion(userId)
         });
     }
 
-    async addReactionToThreadMessage(channelId: string, messageId: string, reaction: string, userId: string, threadId: string) {
+    /** Adds a user's reaction to a channel thread reply.
+     *
+     * @param channelId The ID of the channel containing the message.
+     * @param messageId The ID of the parent message.
+     * @param reaction The reaction identifier.
+     * @param userId The ID of the reacting user.
+     * @param threadId The ID of the thread reply.
+     */
+    async addReactionToThreadMessage(channelId: string, messageId: string, reaction: string, userId: string, threadId: string): Promise<void> {
         const messageRef = doc(this.db, "channels", channelId, "messages", messageId, "thread", threadId);
         await updateDoc(messageRef, {
             [`reactions.${reaction}`]: arrayUnion(userId)
         });
     }
 
-    async removeReactionFromChannelMessage(channelId: string, messageId: string, reaction: string, userId: string) {
+    /** Removes a user's reaction from a channel message.
+     *
+     * @param channelId The ID of the channel containing the message.
+     * @param messageId The ID of the message to update.
+     * @param reaction The reaction identifier.
+     * @param userId The ID of the user whose reaction should be removed.
+     */
+    async removeReactionFromChannelMessage(channelId: string, messageId: string, reaction: string, userId: string): Promise<void> {
         const messageRef = doc(this.db, "channels", channelId, "messages", messageId);
         await updateDoc(messageRef, {
             [`reactions.${reaction}`]: arrayRemove(userId)
         });
     }
 
-    async removeReactionFromThreadMessage(channelId: string, messageId: string, reaction: string, userId: string, threadId: string) {
+    /** Removes a user's reaction from a channel thread reply.
+     *
+     * @param channelId The ID of the channel containing the message.
+     * @param messageId The ID of the parent message.
+     * @param reaction The reaction identifier.
+     * @param userId The ID of the user whose reaction should be removed.
+     * @param threadId The ID of the thread reply.
+     */
+    async removeReactionFromThreadMessage(channelId: string, messageId: string, reaction: string, userId: string, threadId: string): Promise<void> {
         const messageRef = doc(this.db, "channels", channelId, "messages", messageId, "thread", threadId);
         await updateDoc(messageRef, {
             [`reactions.${reaction}`]: arrayRemove(userId)
