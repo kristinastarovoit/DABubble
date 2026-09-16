@@ -1,7 +1,7 @@
 import { Service, inject, signal } from '@angular/core';
 import { FIREBASE_FIRESTORE } from '../../app.config';
 import { Dm } from '../interfaces/dm';
-import { collection, onSnapshot, addDoc, doc, updateDoc, serverTimestamp, increment } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, doc, updateDoc, serverTimestamp, increment, arrayUnion, arrayRemove } from "firebase/firestore";
 import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
 
@@ -89,6 +89,34 @@ export class DmService {
         const threadRef = doc(this.db, "dms", dmId, "messages", messageId);
         await updateDoc(threadRef, {
             threadCount: increment(1)
+        });
+    }
+
+    async addReactionToDmMessage(dmId: string, messageId: string, reaction: string, userId: string) {
+        const messageRef = doc(this.db, "dms", dmId, "messages", messageId);
+        await updateDoc(messageRef, {
+            [`reactions.${reaction}`]: arrayUnion(userId)
+        });
+    }
+
+    async addReactionToDmThreadMessage(dmId: string, messageId: string, reaction: string, userId: string, threadId: string) {
+        const messageRef = doc(this.db, "dms", dmId, "messages", messageId, "thread", threadId);
+        await updateDoc(messageRef, {
+            [`reactions.${reaction}`]: arrayUnion(userId)
+        });
+    }
+
+    async removeReactionFromDmMessage(dmId: string, messageId: string, reaction: string, userId: string) {
+        const messageRef = doc(this.db, "dms", dmId, "messages", messageId);
+        await updateDoc(messageRef, {
+            [`reactions.${reaction}`]: arrayRemove(userId)
+        });
+    }
+
+    async removeReactionFromDmThreadMessage(dmId: string, messageId: string, reaction: string, userId: string, threadId: string) {
+        const messageRef = doc(this.db, "dms", dmId, "messages", messageId, "thread", threadId);
+        await updateDoc(messageRef, {
+            [`reactions.${reaction}`]: arrayRemove(userId)
         });
     }
 }
