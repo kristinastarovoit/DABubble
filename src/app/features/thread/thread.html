@@ -3,7 +3,7 @@
     <div class="thread__title">
       <span class="thread__title-text">Thread</span>
       <!-- <span class="thread__channel-name">#{{ channelName }}</span> -->
-      <span class="thread__channel-name"># Entwicklerteam</span>
+      <span class="thread__channel-name"># Dev Team</span>
     </div>
     <button class="thread__close-btn" (click)="close()">
       <img src="app-icons/close.svg" alt="Close" />
@@ -14,7 +14,7 @@
     <!-- Ursprüngliche Nachricht -->
     <div class="thread__message">
       <!-- <img [src]="parentMessage.authorAvatarUrl" alt="" class="thread__avatar" /> -->
-       <img src="app-icons/avatar-placeholder.svg" alt="">
+       <img class="thread__avatar" src="app-icons/avatar-placeholder.svg" alt="">
 
       <div class="thread__message-content">
         <div class="thread__meta">
@@ -37,7 +37,7 @@
       class="thread__message"
       [class.thread__message--own]="reply.authorId === currentUserId"
     >
-      <img src="app-icons/avatar-placeholder.svg" alt="">
+      <img class="thread__avatar" src="app-icons/avatar-placeholder.svg" alt="">
 
       <div class="thread__message-content">
         <div class="thread__meta">

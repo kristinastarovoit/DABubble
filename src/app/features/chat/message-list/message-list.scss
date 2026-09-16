@@ -7,6 +7,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  font-family: 'Nunito';
 
   &__divider {
     display: flex;
@@ -20,13 +21,15 @@
       content: '';
       flex: 1;
       height: 1px;
-    //   background-color: $color-border;
+      background-color: $border-purple;
     }
 
     span {
-      padding: 0 16px;
-      font-size: 13px;
-    //   color: $color-text-secondary;
+      padding: 5px 15px;
+      font-size: 1rem;
+      color: $black;
+      border: 1px solid $border-purple;
+      border-radius: 50px;
       white-space: nowrap;
     }
   }
@@ -37,9 +40,9 @@
     padding: 8px 12px;
     border-radius: 12px;
 
-    // &:hover {
-    //   background-color: $color-background-light;
-    // }
+    &:hover {
+      background-color: $pastel-purple-bg;
+    }
 
     &--own {
       flex-direction: row-reverse;
@@ -49,7 +52,7 @@
       }
 
       .message-list__bubble {
-        // background-color: $color-primary;
+        background-color: $pastel-purple-bg;
         color: $white;
       }
 
@@ -60,8 +63,8 @@
   }
 
   &__avatar {
-    width: 48px;
-    height: 48px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
@@ -82,22 +85,24 @@
 
   &__author {
     font-weight: 700;
-    font-size: 15px;
-    // color: $color-text-primary;
+    font-size: 1.1rem;
+    color: $black;
   }
 
   &__time {
-    font-size: 12px;
-    // color: $color-text-secondary;
+    font-size: 0.8rem;
+    color: $dark-grey;
   }
 
   &__bubble {
-    // background-color: $color-background-light;
+    background-color: $pastel-purple-bg;
     padding: 12px 18px;
-    border-radius: 20px;
-    font-size: 15px;
+    border-top-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    font-size: 1.1rem;
     line-height: 1.4;
-    // color: $color-text-primary;
+    color: $black;
     white-space: pre-wrap;
     word-break: break-word;
   }
@@ -108,7 +113,7 @@
     border: none;
     cursor: pointer;
     padding: 0;
-    font-size: 13px;
+    font-size: 0.8rem;
     font-weight: 600;
     // color: $color-primary;
 

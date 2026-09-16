@@ -41,7 +41,11 @@ export class MessageList {
 
       if (!group) {
         group = {
-          dateLabel: date.toLocaleDateString('de-DE'),
+          dateLabel: date.toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+          }),
           messages: [],
         };
         groups.set(key, group);

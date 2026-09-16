@@ -27,6 +27,11 @@ export class Header {
     this.isUserMenuOpen = !this.isUserMenuOpen;
   }
 
+  /** Closes the user menu. */
+  closeUserMenu(): void {
+    this.isUserMenuOpen = false;
+  }
+
   /** Handles changes to the global search field. */
   onSearchInput(): void {
   }
