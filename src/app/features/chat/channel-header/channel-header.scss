@@ -16,33 +16,34 @@
     cursor: pointer;
     padding: 8px 12px;
     border-radius: 24px;
+    
 
-    // &:hover {
-    //   background-color: $color-background-light;
-    // }
+    &:hover {
+      background-color: $pastel-purple-bg;
+      color: $midtone-purple-three;
+    }
   }
 
   &__hash {
-    font-size: 20px;
+    font-size: 1.3rem;
     font-weight: 700;
-    // color: $color-text-secondary;
   }
 
   &__name {
-    font-size: 20px;
+    font-size: 1.5rem;
     font-weight: 700;
-    // color: $color-text-primary;
+    color: $black;
   }
 
   &__chevron {
-    width: 14px;
-    height: 14px;
+    width: 20px;
+    height: 20px;
   }
 
   &__meta {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
   }
 
   &__avatars {
@@ -51,11 +52,11 @@
     cursor: pointer;
     padding: 6px 12px;
     border-radius: 24px;
-    // background-color: $color-background-light;
+    background-color: $white;
 
-    // &:hover {
-    //   background-color: $color-border;
-    // }
+    &:hover {
+      background-color: $pastel-purple-bg;
+    }
   }
 
   &__avatar {
@@ -73,9 +74,9 @@
 
   &__count {
     margin-left: 8px;
-    font-size: 14px;
+    font-size: 1.2rem;
     font-weight: 600;
-    // color: $color-text-primary;
+    color: $black;
   }
 
   &__add-btn {
@@ -86,12 +87,12 @@
     border-radius: 50%;
 
     // &:hover {
-    //   background-color: $color-background-light;
+    //  bild austauschen
     // }
 
     img {
-      width: 20px;
-      height: 20px;
+      width: 32px;
+      height: 32px;
     }
   }
 }

@@ -20,13 +20,15 @@
       content: '';
       flex: 1;
       height: 1px;
-    background-color: #eceefe;
+      background-color: $border-purple;
     }
 
     span {
       padding: 0 16px;
-      font-size: 13px;
-    //   color: $color-text-secondary;
+      font-size: 1rem;
+      color: $black;
+      border: 1px solid $border-purple;
+      border-radius: 50px;
       white-space: nowrap;
     }
   }
@@ -37,9 +39,9 @@
     padding: 8px 12px;
     border-radius: 12px;
 
-    // &:hover {
-    //   background-color: $color-background-light;
-    // }
+    &:hover {
+      background-color: $pastel-purple-bg;
+    }
 
     &--own {
       flex-direction: row-reverse;
@@ -60,8 +62,8 @@
   }
 
   &__avatar {
-    width: 48px;
-    height: 48px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
@@ -82,13 +84,13 @@
 
   &__author {
     font-weight: 700;
-    font-size: 15px;
-    // color: $color-text-primary;
+    font-size: 1.1rem;
+    color: $black;
   }
 
   &__time {
-    font-size: 12px;
-    // color: $color-text-secondary;
+    font-size: 0.8rem;
+    color: $dark-grey;
   }
 
   &__bubble {
@@ -97,7 +99,7 @@
     border-top-right-radius: 20px;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
-    font-size: 15px;
+    font-size: 1.1rem;
     line-height: 1.4;
     color: $black;
     white-space: pre-wrap;
@@ -110,7 +112,7 @@
     border: none;
     cursor: pointer;
     padding: 0;
-    font-size: 13px;
+    font-size: 0.8rem;
     font-weight: 600;
     // color: $color-primary;
 

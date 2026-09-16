@@ -11,7 +11,6 @@
   height: 80px;
   box-sizing: border-box;
 
-  // ===== Logo =====
   &__logo {
     display: flex;
     align-items: center;
@@ -25,18 +24,17 @@
 
     &-text {
       //   font-family: ;
-      font-size: 24px;
+      font-size: 1.5rem;
       font-weight: 700;
       color: $black;
       white-space: nowrap;
     }
   }
 
-  // ===== Suchleiste =====
   &__search {
     position: relative;
     flex: 1;
-    max-width: 500px;
+    max-width: 600px;
 
     &-input {
       width: 100%;
@@ -45,7 +43,7 @@
       border: none;
       border-radius: 32px;
       background-color: $white;
-      font-size: 16px;
+      font-size: 1.5rem;
       color: $dark-grey;
       cursor: text;
 
@@ -54,7 +52,7 @@
       }
 
       &:focus {
-        outline: 2px solid $black;
+        border: none;
       }
     }
 
@@ -69,7 +67,6 @@
     }
   }
 
-  // ===== User-Bereich =====
   &__user {
     position: relative;
     display: flex;
@@ -81,35 +78,39 @@
     border-radius: 32px;
     transition: background-color 0.15s ease;
 
-    // &:hover {
-    //   background-color: $color-background-light;
-    // }
+    &:hover {
+      color: $midtone-purple-three;
+    }
 
     &-name {
       font-weight: 600;
+      font-size: 2rem;
       color: $black;
       white-space: nowrap;
     }
 
     &-avatar {
-      width: 48px;
-      height: 48px;
+      width: 70px;
+      height: 70px;
       border-radius: 50%;
       object-fit: cover;
     }
 
     &-chevron {
-      width: 12px;
-      height: 12px;
+      width: 30px;
+      height: 30px;
     }
 
     &-menu {
       position: absolute;
       top: calc(100% + 8px);
       right: 0;
-      //   background-color: $color-background;
-      border-radius: 12px;
-      //   box-shadow:
+      background-color: $white;
+      border-top-left-radius: 30px;
+      border-bottom-left-radius: 30px;
+      border-bottom-right-radius: 30px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+      clip-path: inset(0px -10px -10px -10px);
       display: flex;
       flex-direction: column;
       min-width: 180px;
@@ -121,13 +122,15 @@
         text-align: left;
         background: none;
         border: none;
+        border-radius: 30px;
         cursor: pointer;
-        font-size: 14px;
-        // color: $color-text-primary;
+        font-size: 1.2rem;
+        color: $black;
 
-        // &:hover {
-        //   background-color: $color-background-light;
-        // }
+        &:hover {
+          background-color: $pastel-purple-bg;
+          color: $midtone-purple-three;
+        }
       }
     }
   }
