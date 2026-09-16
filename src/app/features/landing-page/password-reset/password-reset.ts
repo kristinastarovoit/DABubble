@@ -31,7 +31,7 @@ export class PasswordReset implements OnInit {
       await this.authService.verifyResetCode(this.oobCode);
       this.isCodeValid.set(true);
     } catch {
-      // Code ungültig/abgelaufen, isCodeValid bleibt false
+      // Code invalid/expired, isCodeValid stays false
     } finally {
       this.isVerifying.set(false);
     }
@@ -40,16 +40,16 @@ export class PasswordReset implements OnInit {
   protected model = signal({ password: '', passwordConfirm: '' });
 
   protected resetForm = form(this.model, (schemaPath) => {
-    required(schemaPath.password, { message: 'Bitte geben Sie ein neues Passwort ein.' });
+    required(schemaPath.password, { message: 'Please enter a new password.' });
     minLength(schemaPath.password, 8, {
-      message: 'Das Passwort muss mindestens 8 Zeichen lang sein.',
+      message: 'The password must be at least 8 characters long.',
     });
 
-    required(schemaPath.passwordConfirm, { message: 'Bitte bestätigen Sie Ihr Passwort.' });
+    required(schemaPath.passwordConfirm, { message: 'Please confirm your password.' });
     validate(schemaPath.passwordConfirm, ({ value, valueOf, stateOf }) => {
       if (!stateOf(schemaPath.password).touched()) return null;
       if (value() !== valueOf(schemaPath.password)) {
-        return { kind: 'passwordMismatch', message: 'Die Passwörter stimmen nicht überein.' };
+        return { kind: 'passwordMismatch', message: 'The passwords do not match.' };
       }
       return null;
     });
@@ -69,9 +69,7 @@ export class PasswordReset implements OnInit {
       await this.authService.confirmResetCode(this.oobCode, this.model().password);
       this.wasReset.set(true);
     } catch {
-      this.errorMessage.set(
-        'Passwort konnte nicht geändert werden. Bitte fordern Sie einen neuen Link an.',
-      );
+      this.errorMessage.set('Password could not be changed. Please request a new link.');
     } finally {
       this.isSubmitting.set(false);
     }

@@ -75,7 +75,7 @@ export class Signup {
 
   async finishSignup() {
     if (!this.selectedAvatar()) {
-      this.errorMessage.set('Bitte wähle einen Avatar aus.');
+      this.errorMessage.set('Please choose an avatar.');
       return;
     }
 
@@ -94,7 +94,7 @@ export class Signup {
         this.accountCreated.set(true);
       } catch (err) {
         console.error('Signup error:', err);
-        this.errorMessage.set('Registrierung fehlgeschlagen. Bitte versuch es erneut.');
+        this.errorMessage.set('Registration failed. Please try again.');
       }
     });
   }

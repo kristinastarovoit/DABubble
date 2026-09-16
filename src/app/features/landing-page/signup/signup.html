@@ -1,57 +1,55 @@
 @if (!isAvatar()) {
   <div>
     <div>
-      <button type="button" (click)="goToLogin()"><!-- Pfeil zurück --></button>
-      <h2>Konto erstellen</h2>
+      <button type="button" (click)="goToLogin()"><!-- back arrow --></button>
+      <h2>Create account</h2>
     </div>
-    <p>Mit deinem Namen und deiner E-Mail-Adresse hast du dein neues DABubble-Konto.</p>
+    <p>With your name and email address, you'll have your new DABubble account.</p>
 
     <div>
-      <input type="text" [formField]="signupForm.name" placeholder="Name und Nachname" />
+      <input type="text" [formField]="signupForm.name" placeholder="First and last name" />
       @if (signupForm.name().touched() && signupForm.name().invalid()) {
-        <span>Bitte gib deinen Namen ein.</span>
+        <span>Please enter your name.</span>
       }
 
-      <input type="email" [formField]="signupForm.email" placeholder="beispielname@email.com" />
+      <input type="email" [formField]="signupForm.email" placeholder="examplename@email.com" />
       @if (signupForm.email().touched() && signupForm.email().invalid()) {
-        <span>Diese E-Mail-Adresse ist leider ungültig.</span>
+        <span>This email address is invalid.</span>
       }
 
-      <input type="password" [formField]="signupForm.password" placeholder="Passwort" />
+      <input type="password" [formField]="signupForm.password" placeholder="Password" />
       @if (signupForm.password().touched() && signupForm.password().invalid()) {
-        <span>Das Passwort muss mindestens 8 Zeichen lang sein.</span>
+        <span>The password must be at least 8 characters long.</span>
       }
 
       <div>
         <input type="checkbox" [formField]="signupForm.acceptedPolicy" id="policy" />
-        <label for="policy"
-          >Ich stimme der <a href="/datenschutz">Datenschutzerklärung</a> zu.</label
-        >
+        <label for="policy">I agree to the <a href="/datenschutz">Privacy Policy</a>.</label>
       </div>
     </div>
 
     <button type="button" [disabled]="signupForm().invalid()" (click)="goToAvatarStep()">
-      Weiter
+      Next
     </button>
   </div>
 } @else {
   <div>
     <div>
-      <button type="button" (click)="goBackToSignup()"><!-- Pfeil zurück --></button>
-      <h2>Wähle deinen Avatar</h2>
+      <button type="button" (click)="goBackToSignup()"><!-- back arrow --></button>
+      <h2>Choose your avatar</h2>
     </div>
 
     <div>
-      <img [src]="selectedAvatar() || 'app-icons/avatar_default.svg'" alt="Ausgewählter Avatar" />
+      <img [src]="selectedAvatar() || 'app-icons/avatar_default.svg'" alt="Selected avatar" />
     </div>
 
     <p>{{ model().name }}</p>
 
-    <p>Aus der Liste wählen</p>
+    <p>Choose from the list</p>
     <div>
       @for (a of avatar; track a) {
         <button type="button" [class.selected]="selectedAvatar() === a" (click)="selectAvatar(a)">
-          <img [src]="a" alt="Avatar-Option" />
+          <img [src]="a" alt="Avatar option" />
         </button>
       }
     </div>
@@ -60,10 +58,10 @@
       <p>{{ errorMessage() }}</p>
     }
 
-    <button type="button" [disabled]="!selectedAvatar()" (click)="finishSignup()">Weiter</button>
+    <button type="button" [disabled]="!selectedAvatar()" (click)="finishSignup()">Next</button>
   </div>
 }
 
 @if (accountCreated()) {
-  <app-toast message="Konto erfolgreich erstellt!"> </app-toast>
+  <app-toast message="Account created successfully!"> </app-toast>
 }

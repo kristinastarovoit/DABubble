@@ -14,8 +14,8 @@ export class PasswordRecovery {
   private authService = inject(AuthService);
 
   protected recoveryForm = form(this.model, (schemaPath) => {
-    required(schemaPath.email, { message: 'Bitte geben Sie Ihre E-Mail-Adresse ein.' });
-    email(schemaPath.email, { message: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.' });
+    required(schemaPath.email, { message: 'Please enter your email address.' });
+    email(schemaPath.email, { message: 'Please enter a valid email address.' });
   });
 
   protected isSubmitting = signal(false);
@@ -34,7 +34,7 @@ export class PasswordRecovery {
       if ((error as { code?: string }).code === 'auth/user-not-found') {
         this.wasSent.set(true);
       } else {
-        this.errorMessage.set('Etwas ist schiefgelaufen. Bitte versuchen Sie es später erneut.');
+        this.errorMessage.set('Something went wrong. Please try again later.');
       }
     } finally {
       this.isSubmitting.set(false);
