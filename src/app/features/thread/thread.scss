@@ -1,6 +1,5 @@
 @use '../../../styles/variables' as *;
 
-
 .thread {
   display: flex;
   flex-direction: column;
@@ -9,7 +8,8 @@
   height: 100%;
   min-height: 500px;
   background-color: $white;
-//   border-left: 1px solid $color-border;
+  border-radius: 30px;
+  //   border-left: 1px solid $color-border;
   box-sizing: border-box;
 
   &__header {
@@ -17,7 +17,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 20px 24px;
-    // border-bottom: 1px solid $color-border;
+    box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.06);
   }
 
   &__title {
@@ -28,13 +28,13 @@
     &-text {
       font-size: 18px;
       font-weight: 700;
-    //   color: $color-text-primary;
+      color: $black;
     }
   }
 
   &__channel-name {
     font-size: 14px;
-    // color: $color-primary;
+    color: $light-purple-two;
     cursor: pointer;
   }
 
@@ -71,7 +71,7 @@
       content: '';
       flex: 1;
       height: 1px;
-    //   background-color: $color-border;
+      //   background-color: $color-border;
     }
   }
 
@@ -82,10 +82,10 @@
     &--own {
       flex-direction: row-reverse;
 
-    //   .thread__bubble {
-    //     background-color: $color-primary;
-    //     color: $color-white;
-    //   }
+      //   .thread__bubble {
+      //     background-color: $color-primary;
+      //     color: $color-white;
+      //   }
 
       .thread__meta {
         flex-direction: row-reverse;
@@ -130,13 +130,13 @@
     padding: 10px 16px;
     border-radius: 16px;
     font-size: 14px;
-    // color: $color-text-primary;
+    // color: rgba(173, 176, 217, 1);
     white-space: pre-wrap;
     word-break: break-word;
   }
 
-//   @include respond-to(mobile) {
-//     width: 100%;
-//     // Auf Mobile: eigene volle Ansicht statt Seitenpanel
-//   }
+  //   @include respond-to(mobile) {
+  //     width: 100%;
+  //     // Auf Mobile: eigene volle Ansicht statt Seitenpanel
+  //   }
 }
