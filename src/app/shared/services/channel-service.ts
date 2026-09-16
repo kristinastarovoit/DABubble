@@ -164,6 +164,34 @@ export class ChannelService {
         });
     }
 
+    async addReactionToChannelMessage(channelId: string, messageId: string, reaction: string, userId: string) {
+        const messageRef = doc(this.db, "channels", channelId, "messages", messageId);
+        await updateDoc(messageRef, {
+            [`reactions.${reaction}`]: arrayUnion(userId)
+        });
+    }
+
+    async addReactionToThreadMessage(channelId: string, messageId: string, reaction: string, userId: string, threadId: string) {
+        const messageRef = doc(this.db, "channels", channelId, "messages", messageId, "thread", threadId);
+        await updateDoc(messageRef, {
+            [`reactions.${reaction}`]: arrayUnion(userId)
+        });
+    }
+
+    async removeReactionFromChannelMessage(channelId: string, messageId: string, reaction: string, userId: string) {
+        const messageRef = doc(this.db, "channels", channelId, "messages", messageId);
+        await updateDoc(messageRef, {
+            [`reactions.${reaction}`]: arrayRemove(userId)
+        });
+    }
+
+    async removeReactionFromThreadMessage(channelId: string, messageId: string, reaction: string, userId: string, threadId: string) {
+        const messageRef = doc(this.db, "channels", channelId, "messages", messageId, "thread", threadId);
+        await updateDoc(messageRef, {
+            [`reactions.${reaction}`]: arrayRemove(userId)
+        });
+    }
+
     // unsubscribe in ngondestroy in der component
     /** Subscribes to all messages in a channel.
      *
