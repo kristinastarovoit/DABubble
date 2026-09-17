@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DmService } from '../../../shared/services/dm-service';
 
 @Component({
   imports: [CommonModule, FormsModule],
@@ -11,18 +12,34 @@ import { FormsModule } from '@angular/forms';
 export class MessageInput {
 
   /** Placeholder displayed in the message field. */
-   @Input() placeholder = 'Write Message';
+  @Input() placeholder = 'Write Message';
+
+  /** Identifier of the direct-message conversation. */
+  @Input() dmId: string | null = null;
+
+  /** Identifier of the user sending the direct message. */
+  @Input() senderId = '';
 
   /** Emitted when a non-empty message is submitted. */
   @Output() messageSent = new EventEmitter<string>();
 
+  /** Current message text. */
   text = '';
 
+  private readonly dmService = inject(DmService, { optional: true });
+
   /** Sends the trimmed message text. */
-  send(): void {
+  async send(): Promise<void> {
     const trimmed = this.text.trim();
     if (!trimmed) return;
-    this.messageSent.emit(trimmed);
+
+    if (this.dmId && this.senderId) {
+      if (!this.dmService) return;
+      await this.dmService.addMessageToDm(this.dmId, trimmed, this.senderId);
+    } else {
+      this.messageSent.emit(trimmed);
+    }
+
     this.text = '';
   }
 
