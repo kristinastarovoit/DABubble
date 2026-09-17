@@ -43,7 +43,7 @@ export class Chat {
       id: `${createdAt.getTime()}`,
       channelId: this.activeChannel?.id,
       authorId: 'current-user',
-      authorName: 'Du',
+      authorName: 'You',
       authorAvatarUrl: '',
       text,
       createdAt,
