@@ -8,7 +8,7 @@ import { provideRouter } from '@angular/router';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
-import { getFirestore, Firestore } from 'firebase/firestore';
+
 
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
