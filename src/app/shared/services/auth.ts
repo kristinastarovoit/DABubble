@@ -30,6 +30,14 @@ export class AuthService {
     return sendPasswordResetEmail(this.auth, email);
   }
 
+  verifyResetCode(oobCode: string) {
+    return verifyPasswordResetCode(this.auth, oobCode);
+  }
+
+  confirmResetCode(oobCode: string, newPassword: string) {
+    return confirmPasswordReset(this.auth, oobCode, newPassword);
+  }
+
   logout() {
     return signOut(this.auth);
   }

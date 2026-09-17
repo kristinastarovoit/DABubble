@@ -1,0 +1,59 @@
+<aside class="thread" [hidden]="!isVisible">
+  <div class="thread__header">
+    <div class="thread__title">
+      <span class="thread__title-text">Thread</span>
+      <span class="thread__channel-name">#{{ channelName }}</span>
+    </div>
+    <button class="thread__close-btn" (click)="close()">
+      <img src="/icons/close.svg" alt="Schließen" />
+    </button>
+  </div>
+
+  <div class="thread__content" *ngIf="parentMessage">
+    <!-- Ursprüngliche Nachricht -->
+    <div class="thread__message">
+      <img [src]="parentMessage.authorAvatarUrl" alt="" class="thread__avatar" />
+      <div class="thread__message-content">
+        <div class="thread__meta">
+          <span class="thread__author">{{ parentMessage.authorName }}</span>
+          <span class="thread__time">{{ parentMessage.time }}</span>
+        </div>
+        <div class="thread__bubble">{{ parentMessage.text }}</div>
+      </div>
+    </div>
+
+    <div class="thread__divider" *ngIf="replies.length > 0">
+      <span>{{ replies.length }} Reply</span>
+    </div>
+
+    <!-- Antworten -->
+    <div
+      *ngFor="let reply of replies"
+      class="thread__message"
+      [class.thread__message--own]="reply.authorId === currentUserId"
+    >
+      <img [src]="reply.authorAvatarUrl" alt="" class="thread__avatar" />
+      <div class="thread__message-content">
+        <div class="thread__meta">
+          <span class="thread__author">{{ reply.authorName }}</span>
+          <span class="thread__time">{{ reply.time }}</span>
+        </div>
+        <div class="thread__bubble">{{ reply.text }}</div>
+
+        <app-reaction-bar
+          [reactions]="reply.reactions"
+          (reactionToggled)="onReactionToggled(reply, $event)"
+        ></app-reaction-bar>
+      </div>
+    </div>
+  </div>
+
+  <div class="thread__content" *ngIf="!parentMessage">
+    <span>Thread eingeblendet zur Bearbeitung.</span>
+  </div>
+
+  <app-message-input
+    [placeholder]="'Reply...'"
+    (messageSent)="sendReply($event)"
+  ></app-message-input>
+</aside>

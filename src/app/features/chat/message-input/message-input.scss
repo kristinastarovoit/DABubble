@@ -1,0 +1,78 @@
+@use '../../../../styles/variables' as *;
+
+.message-input {
+  display: flex;
+  flex-direction: column;
+  margin: 0 32px 24px;
+  padding: 12px 16px;
+  border: 1px solid $border-purple;
+  border-radius: 20px;
+  background-color: $white;
+  flex-shrink: 0;
+  font-family: 'Nunito';
+
+  &__field {
+    resize: none;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 1rem;
+    color: $black;
+    min-height: 24px;
+    max-height: 160px;
+    padding: 4px 0;
+
+    &::placeholder {
+      color: $dark-grey;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+
+  &__icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: $pastel-purple-bg;
+    }
+
+    img {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__send-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    img {
+      width: 30px;
+      height: 30px;
+    }
+  }
+}
