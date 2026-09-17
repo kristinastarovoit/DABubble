@@ -12,11 +12,14 @@ import { DmService } from '../../shared/services/dm-service';
   styleUrl: './sidebar.scss',
   templateUrl: './sidebar.html',
 })
+/** Displays channels and direct-message contacts in the application sidebar. */
 export class Sidebar {
+  /** Provides the available channels and channel selection state. */
   channelService = inject(ChannelService);
+
+  /** Provides direct-message data and selection state. */
   dmService = inject(DmService);
-  /** Available workspace channels. */
-  // @Input() channels: Channel[] = [];
+  
   /** Available direct-message contacts. */
   @Input() directMessages: User[] = [];
   /** Identifier of the active channel. */
@@ -33,7 +36,10 @@ export class Sidebar {
   /** Emitted when workspace editing is requested. */
   @Output() workspaceEditRequested = new EventEmitter<void>();
 
+  /** Whether the channels section is expanded. */
   isChannelsOpen = true;
+
+  /** Whether the direct-messages section is expanded. */
   isDirectMessagesOpen = true;
 
   /** Toggles the channel section. */

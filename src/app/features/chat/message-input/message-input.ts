@@ -8,47 +8,41 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './message-input.scss',
   templateUrl: './message-input.html',
 })
+/** Provides the input field and actions for composing messages. */
 export class MessageInput {
 
   /** Placeholder displayed in the message field. */
-   @Input() placeholder = 'Write Message';
+  @Input() placeholder = 'Write Message';
 
   /** Emitted when a non-empty message is submitted. */
   // @Output() messageSent = new EventEmitter<string>();
 
-  // text = '';
+  /** Contains the current message draft. */
+  text = signal('');
 
-  /** Sends the trimmed message text. */
-  // send(): void {
-  //   const trimmed = this.text.trim();
-  //   if (!trimmed) return;
-  //   this.messageSent.emit(trimmed);
-  //   this.text = '';
-  // }
+  /** Emits a trimmed message when it is submitted. */
+  send = output<string>();
 
   /** Sends the message when Enter is pressed without Shift. */
-  // onEnter(event: Event): void {
-  //   const keyboardEvent = event as KeyboardEvent;
-  //   if (!keyboardEvent.shiftKey) {
-  //     keyboardEvent.preventDefault();
-  //     this.send();
-  //   }
-  // }
+  onEnter(event: Event): void {
+    const keyboardEvent = event as KeyboardEvent;
+    if (!keyboardEvent.shiftKey) {
+      keyboardEvent.preventDefault();
+      this.sendMessage();
+    }
+  }
 
   /** Opens the emoji picker. */
   toggleEmojiPicker(): void {
   }
 
   /** Inserts the mention prefix into the message. */
-  // insertMention(): void {
-  //   this.text += '@';
-  // }
+  insertMention(): void {
+    this.text.set(this.text() + '@');
+  }
 
-
-  text = signal('');
-  send = output<string>();
-
-  sendMessage() {
+  /** Sends the trimmed message text. */
+  sendMessage(): void {
     const value = this.text().trim();
     if (!value) { return; }
 

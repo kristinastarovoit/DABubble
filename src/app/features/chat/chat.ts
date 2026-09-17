@@ -4,11 +4,11 @@ import { ChannelHeader } from './channel-header/channel-header';
 import { MessageList } from './message-list/message-list';
 import { MessageInput } from './message-input/message-input';
 import { Message } from '../../shared/interfaces/message';
-import { Channel } from '../../shared/interfaces/channel';
 import { ChannelService } from '../../shared/services/channel-service';
 import { DmService } from '../../shared/services/dm-service';
 import { FIREBASE_AUTH } from '../../app.config';
 import { LandingPage } from '../landing-page/landing-page';
+
 @Component({
   imports: [CommonModule, ChannelHeader, MessageInput, MessageList, LandingPage],
   selector: 'app-chat',
@@ -16,12 +16,6 @@ import { LandingPage } from '../landing-page/landing-page';
   templateUrl: './chat.html',
 })
 export class Chat {
-
-  /** The currently selected channel. */
-  // @Input() activeChannel: Channel | null = null;
-
-  /** Messages displayed in the active channel. */
-  // @Input() messages: Message[] = [];
 
   /** Emitted when a message thread is requested. */
   // @Output() threadRequested = new EventEmitter<Message>();
@@ -59,6 +53,11 @@ export class Chat {
 
   /** Unsubscribes from the active message listener when the conversation changes. */
   private currentUnsubscribe: (() => void) | undefined;
+
+  /** The channel matching the currently selected channel ID. */
+  activeChannel = computed(() =>
+    this.channelService.channels().find(channel => channel.id === this.channelId())
+  );
 
   /** Creates a reactive listener for the currently selected conversation. */
   constructor() {
@@ -103,27 +102,4 @@ export class Chat {
       this.dmService.addMessageToDm(dmId, text, uid);
     }
   }
-
-
-  /** Receives a message submitted in the input field. */
-  // sendMessage(text: string): void {
-  //   const createdAt = new Date();
-  //   const message: Message = {
-  //     id: `${createdAt.getTime()}`,
-  //     channelId: this.activeChannel?.id,
-  //     authorId: 'current-user',
-  //     authorName: 'You',
-  //     authorAvatarUrl: '',
-  //     text,
-  //     createdAt,
-  //     time: createdAt.toLocaleTimeString('de-DE', {
-  //       hour: '2-digit',
-  //       minute: '2-digit',
-  //     }),
-  //     reactions: [],
-  //     replyCount: 0,
-  //   };
-
-  //   this.messages = [...this.messages, message];
-  // }
 }

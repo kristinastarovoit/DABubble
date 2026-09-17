@@ -1,28 +1,17 @@
 <section class="chat">
-  <!-- <app-channel-header
-    [channel]="activeChannel"
-    (memberIconClicked)="openMemberList()"
-  ></app-channel-header>
-
-  <app-message-list
-    [messages]="messages"
-    (threadOpened)="openThread($event)"
-  ></app-message-list>
-
-  <app-message-input
-    [placeholder]="'Message to #' + (activeChannel?.name ?? '')"
-    /* (messageSent)="sendMessage($event)" */
-        /* (messageSent)="this.channelService.addMessageToChannel($event)" */
-
-  ></app-message-input> -->
   @if (channelId() || dmId()) {
-    <app-channel-header
-    /* [channel]="activeChannel" */
-    /* (memberIconClicked)="openMemberList()" */
+  <app-channel-header 
+  /* (memberIconClicked)="openMemberList()" */
   ></app-channel-header>
-  <app-message-list [messages]="messages()" />
-  <app-message-input (send)="onSend($event)" />
+
+  <app-message-list [messages]="messages()" 
+  /* (threadOpened)="openThread($event)" */ />
+
+  <app-message-input (send)="onSend($event)" 
+  [placeholder]="'Message to #' + (activeChannel()?.name ?? '')" 
+    /* (messageSent)="sendMessage($event)" */ 
+    /* (messageSent)="this.channelService.addMessageToChannel($event)" */ />
   } @else {
-    <app-landing-page></app-landing-page>
-    }
+  <app-landing-page></app-landing-page>
+  }
 </section>

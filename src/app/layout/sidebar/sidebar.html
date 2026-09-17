@@ -31,23 +31,11 @@
         <span class="sidebar__item-name">{{ channel.name }}</span>
       </li>
       }
-
-      <!-- <li
-        *ngFor="let channel of channels"
-        class="sidebar__item"
-        [class.sidebar__item--active]="channel.id === activeChannelId"
-        (click)="selectChannel(channel)"
-      >
-        <span class="sidebar__item-icon">#</span>
-        <span class="sidebar__item-name">{{ channel.name }}</span>
-         <span class="sidebar__item-name">Channel-Platzhalter</span>
-      </li>
-
       <li class="sidebar__item sidebar__item--add" (click)="openChannelCreate()">
         <img src="app-icons/add.svg" alt="Add Icon" class="sidebar__item-icon sidebar__item-icon--default" />
         <img src="app-icons/add_purple.svg" alt="Add Icon" class="sidebar__item-icon sidebar__item-icon--hover" />
         <span class="sidebar__item-name">Add Channel</span>
-      </li> -->
+      </li>
     </ul>
     }
   </div>
