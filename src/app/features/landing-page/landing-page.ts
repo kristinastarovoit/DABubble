@@ -5,7 +5,7 @@ import { filter, map, startWith } from 'rxjs';
 
 @Component({
   selector: 'app-landing-page',
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet],
   templateUrl: './landing-page.html',
   styleUrl: './landing-page.scss',
 })
