@@ -1,5 +1,5 @@
 import { Service, inject } from '@angular/core';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 
 import { FIREBASE_FIRESTORE } from '../../app.config';
 import { UserModel } from '../model/user.model';
@@ -20,5 +20,10 @@ export class UserService {
     };
 
     return setDoc(doc(this.firestore, 'users', uid), user);
+  }
+
+  async getUserProfile(uid: string): Promise<UserModel | undefined> {
+    const snapshot = await getDoc(doc(this.firestore, 'users', uid));
+    return snapshot.exists() ? (snapshot.data() as UserModel) : undefined;
   }
 }

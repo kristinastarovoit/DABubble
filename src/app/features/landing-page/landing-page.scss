@@ -1,10 +1,11 @@
 :host {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  min-height: 100dvh;
+  width: 100%;
   padding-inline: 75px;
-  padding-block-start: clamp(5px, calc(-167.28px + 22.436vh), 75px);
-  padding-block-end: clamp(5px, calc(-100.85px + 13.782vh), 48px);
+  padding-block-start: clamp(5px, calc(-261px + 28vh), 75px);
+  padding-block-end: clamp(5px, calc(-158.4px + 17.2vh), 48px);
   background: #eceefe;
 }
 

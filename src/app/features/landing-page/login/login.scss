@@ -209,7 +209,10 @@
 
 .login-btn {
   display: flex;
+  justify-content: center;
+  position: relative;
   gap: 30px;
+  width: 100%;
 
   button {
     padding: 12px 25px;
@@ -227,6 +230,13 @@
     border: none;
     cursor: pointer;
     transition: all 170ms ease-in-out;
+
+    &:disabled {
+      background: #d1d1e0;
+      color: #a0a0b8;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
 
     &:hover {
       background: #797ef3;
@@ -255,10 +265,30 @@
 
 .error-msg {
   position: absolute;
+  width: 100%;
   align-self: flex-start;
-  top: 65px;
+  top: 62px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(237, 30, 121, 0.06);
+  border: 1px solid rgba(237, 30, 121, 0.2);
+  border-radius: 12px;
   color: #ed1e79;
   font-weight: 400;
   font-size: 1rem;
   line-height: 100%;
+  animation: fadeInDown 0.2s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

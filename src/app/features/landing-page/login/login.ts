@@ -34,7 +34,15 @@ export class Login {
     this.errorMessage.set(null);
 
     try {
-      await this.authService.login(this.model().email, this.model().password);
+      const credential = await this.authService.login(this.model().email, this.model().password);
+      const userProfile = await this.userService.getUserProfile(credential.user.uid);
+
+      if (!userProfile) {
+        await this.authService.logout();
+        this.errorMessage.set('No user profile found for this account. Please sign up again.');
+        return;
+      }
+
       this.router.navigateByUrl('/dashboard');
     } catch {
       this.errorMessage.set('Email or password is incorrect. Please try again');
