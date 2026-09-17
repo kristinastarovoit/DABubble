@@ -12,11 +12,11 @@
   <div class="thread__content" *ngIf="parentMessage">
     <!-- Ursprüngliche Nachricht -->
     <div class="thread__message">
-      <img [src]="parentMessage.authorAvatarUrl" alt="" class="thread__avatar" />
+      <!-- <img [src]="parentMessage.authorAvatarUrl" alt="" class="thread__avatar" /> -->
       <div class="thread__message-content">
         <div class="thread__meta">
-          <span class="thread__author">{{ parentMessage.authorName }}</span>
-          <span class="thread__time">{{ parentMessage.time }}</span>
+          <!-- <span class="thread__author">{{ parentMessage.authorName }}</span>
+          <span class="thread__time">{{ parentMessage.time }}</span> -->
         </div>
         <div class="thread__bubble">{{ parentMessage.text }}</div>
       </div>
@@ -30,18 +30,18 @@
     <div
       *ngFor="let reply of replies"
       class="thread__message"
-      [class.thread__message--own]="reply.authorId === currentUserId"
+      /* [class.thread__message--own]="reply.authorId === currentUserId" */
     >
-      <img [src]="reply.authorAvatarUrl" alt="" class="thread__avatar" />
+      <!-- <img [src]="reply.authorAvatarUrl" alt="" class="thread__avatar" /> -->
       <div class="thread__message-content">
         <div class="thread__meta">
-          <span class="thread__author">{{ reply.authorName }}</span>
-          <span class="thread__time">{{ reply.time }}</span>
+          <!-- <span class="thread__author">{{ reply.authorName }}</span>
+          <span class="thread__time">{{ reply.time }}</span> -->
         </div>
         <div class="thread__bubble">{{ reply.text }}</div>
 
         <app-reaction-bar
-          [reactions]="reply.reactions"
+          /* [reactions]="reply.reactions" */
           (reactionToggled)="onReactionToggled(reply, $event)"
         ></app-reaction-bar>
       </div>
@@ -54,6 +54,6 @@
 
   <app-message-input
     [placeholder]="'Reply...'"
-    (messageSent)="sendReply($event)"
+    /* (messageSent)="sendReply($event)" */
   ></app-message-input>
 </aside>

@@ -1,10 +1,11 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChannelHeader } from './channel-header/channel-header';
 import { MessageList } from './message-list/message-list';
 import { MessageInput } from './message-input/message-input';
 import { Message } from '../../shared/interfaces/message';
 import { Channel } from '../../shared/interfaces/channel';
+import { ChannelService } from '../../shared/services/channel-service';
 
 @Component({
   imports: [CommonModule, ChannelHeader, MessageInput, MessageList],
@@ -36,25 +37,29 @@ export class Chat {
     this.memberListRequested.emit();
   }
 
-  /** Receives a message submitted in the input field. */
-  sendMessage(text: string): void {
-    const createdAt = new Date();
-    const message: Message = {
-      id: `${createdAt.getTime()}`,
-      channelId: this.activeChannel?.id,
-      authorId: 'current-user',
-      authorName: 'You',
-      authorAvatarUrl: '',
-      text,
-      createdAt,
-      time: createdAt.toLocaleTimeString('de-DE', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      reactions: [],
-      replyCount: 0,
-    };
+  channelService = inject(ChannelService);
 
-    this.messages = [...this.messages, message];
-  }
+
+
+  /** Receives a message submitted in the input field. */
+  // sendMessage(text: string): void {
+  //   const createdAt = new Date();
+  //   const message: Message = {
+  //     id: `${createdAt.getTime()}`,
+  //     channelId: this.activeChannel?.id,
+  //     authorId: 'current-user',
+  //     authorName: 'You',
+  //     authorAvatarUrl: '',
+  //     text,
+  //     createdAt,
+  //     time: createdAt.toLocaleTimeString('de-DE', {
+  //       hour: '2-digit',
+  //       minute: '2-digit',
+  //     }),
+  //     reactions: [],
+  //     replyCount: 0,
+  //   };
+
+  //   this.messages = [...this.messages, message];
+  // }
 }

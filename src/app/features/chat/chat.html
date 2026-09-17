@@ -11,6 +11,8 @@
 
   <app-message-input
     [placeholder]="'Message to #' + (activeChannel?.name ?? '')"
-    (messageSent)="sendMessage($event)"
+    /* (messageSent)="sendMessage($event)" */
+        /* (messageSent)="this.channelService.addMessageToChannel($event)" */
+
   ></app-message-input>
 </section>

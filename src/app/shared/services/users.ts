@@ -1,12 +1,12 @@
 import { Service, inject } from '@angular/core';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 
-import { FIRESTORE } from '../../app.config';
+import { FIREBASE_FIRESTORE } from '../../app.config';
 import { UserModel } from '../model/user.model';
 
 @Service()
 export class UserService {
-  private firestore = inject(FIRESTORE);
+  private firestore = inject(FIREBASE_FIRESTORE);
 
   createUserProfile(uid: string, name: string, email: string, avatar: string) {
     const user: UserModel = {

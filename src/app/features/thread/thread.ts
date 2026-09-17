@@ -42,28 +42,28 @@ export class Thread {
   }
 
   /** Emits a new reply text. */
-  sendReply(text: string): void {
-    const createdAt = new Date();
-    const reply: Message = {
-      id: `${createdAt.getTime()}`,
-      channelId: this.parentMessage?.channelId,
-      threadParentId: this.parentMessage?.id,
-      authorId: 'current-user',
-      authorName: 'Du',
-      authorAvatarUrl: '',
-      text,
-      createdAt,
-      time: createdAt.toLocaleTimeString('de-DE', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      reactions: [],
-      replyCount: 0,
-    };
+  // sendReply(text: string): void {
+  //   const createdAt = new Date();
+  //   const reply: Message = {
+  //     id: `${createdAt.getTime()}`,
+  //     channelId: this.parentMessage?.channelId,
+  //     threadParentId: this.parentMessage?.id,
+  //     authorId: 'current-user',
+  //     authorName: 'Du',
+  //     authorAvatarUrl: '',
+  //     text,
+  //     createdAt,
+  //     time: createdAt.toLocaleTimeString('de-DE', {
+  //       hour: '2-digit',
+  //       minute: '2-digit',
+  //     }),
+  //     reactions: [],
+  //     replyCount: 0,
+  //   };
 
-    this.replies = [...this.replies, reply];
-    this.replySent.emit(text);
-  }
+  //   this.replies = [...this.replies, reply];
+  //   this.replySent.emit(text);
+  // }
 
   /** Emits a changed reaction for a reply. */
   onReactionToggled(reply: Message, emoji: string): void {
