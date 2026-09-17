@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth';
 import { form, FormField, minLength, required, validate } from '@angular/forms/signals';
 import { Toast } from '../../../shared/components/toast/toast';
@@ -13,6 +13,7 @@ import { Toast } from '../../../shared/components/toast/toast';
 export class PasswordReset implements OnInit {
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   private oobCode = '';
 
@@ -73,5 +74,9 @@ export class PasswordReset implements OnInit {
     } finally {
       this.isSubmitting.set(false);
     }
+  }
+
+  goToLogin() {
+    this.router.navigateByUrl('/login');
   }
 }
