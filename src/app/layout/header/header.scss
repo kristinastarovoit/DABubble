@@ -92,6 +92,14 @@
 
     &:hover {
       color: $midtone-purple-three;
+
+      .header__user-chevron--default {
+        display: none;
+      }
+
+      .header__user-chevron--hover {
+        display: block;
+      }
     }
 
     &-name {
@@ -99,6 +107,9 @@
       font-size: 1.5rem;
       color: $black;
       white-space: nowrap;
+      &:hover {
+        color: $midtone-purple-three;
+      }
     }
 
     &-avatar {
@@ -111,6 +122,10 @@
     &-chevron {
       width: 30px;
       height: 30px;
+
+      &--hover {
+        display: none;
+      }
     }
 
     &-menu {

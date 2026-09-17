@@ -43,6 +43,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background-color 0.2s ease;
 
     &:hover {
       background-color: $pastel-purple-bg;
@@ -65,8 +66,8 @@
     justify-content: center;
 
     &:disabled {
-      opacity: 0.3;
-      // cursor: not-allowed;
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     img {
