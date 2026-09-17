@@ -18,6 +18,7 @@
     width: 100%;
 
     h2 {
+      font-family: 'Nunito';
       font-size: 2.875rem;
       font-weight: 700;
       line-height: 120%;
@@ -55,6 +56,7 @@
   }
 
   p {
+    font-family: 'Nunito';
     font-size: 1.25rem;
     font-weight: 400;
     line-height: 120%;
@@ -108,6 +110,7 @@
       border-radius: 100px;
       border: 1px solid transparent;
       background-color: #eceefe;
+      font-family: 'Nunito';
       font-weight: 500;
       font-size: 1.125rem;
       line-height: 120%;
@@ -137,6 +140,7 @@
   background: #444df2;
   font-size: 1.125rem;
   color: white;
+  font-family: 'Nunito';
   font-weight: 700;
   line-height: 100%;
   border: none;
@@ -158,6 +162,7 @@
   align-self: flex-start;
   top: 65px;
   color: #ed1e79;
+  font-family: 'Nunito';
   font-weight: 400;
   font-size: 1rem;
   line-height: 100%;
@@ -167,9 +172,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px; // ersetzt input { margin-right: 8px }
+  gap: 8px;
 
   label {
+    font-family: 'Nunito';
     font-size: 1.25rem;
     font-weight: 400;
     line-height: 120%;
@@ -271,6 +277,7 @@
   width: 100%;
 
   .picker-label {
+    font-family: 'Nunito';
     font-size: 1rem;
     font-weight: 400;
     color: #000000;
@@ -312,12 +319,14 @@
 }
 
 :host p.user-name {
+  font-family: 'Nunito';
   font-size: 2rem;
   font-weight: 700;
 }
 
 .error-msg-avatar {
   color: #ed1e79;
+  font-family: 'Nunito';
   font-size: 1rem;
   font-weight: 400;
   text-align: center;
