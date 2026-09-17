@@ -1,0 +1,16 @@
+<section class="chat">
+  <app-channel-header
+    [channel]="activeChannel"
+    (memberIconClicked)="openMemberList()"
+  ></app-channel-header>
+
+  <app-message-list
+    [messages]="messages"
+    (threadOpened)="openThread($event)"
+  ></app-message-list>
+
+  <app-message-input
+    [placeholder]="'Nachricht an #' + (activeChannel?.name ?? '')"
+    (messageSent)="sendMessage($event)"
+  ></app-message-input>
+</section>

@@ -1,0 +1,96 @@
+@use '../../../../styles/variables' as *;
+
+.channel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  border-bottom: 1px solid $dark-grey;
+  flex-shrink: 0;
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 24px;
+
+    // &:hover {
+    //   background-color: $color-background-light;
+    // }
+  }
+
+  &__hash {
+    font-size: 20px;
+    font-weight: 700;
+    // color: $color-text-secondary;
+  }
+
+  &__name {
+    font-size: 20px;
+    font-weight: 700;
+    // color: $color-text-primary;
+  }
+
+  &__chevron {
+    width: 14px;
+    height: 14px;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &__avatars {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 24px;
+    // background-color: $color-background-light;
+
+    // &:hover {
+    //   background-color: $color-border;
+    // }
+  }
+
+  &__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    // border: 2px solid $color-background;
+    margin-left: -8px;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+
+  &__count {
+    margin-left: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    // color: $color-text-primary;
+  }
+
+  &__add-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+
+    // &:hover {
+    //   background-color: $color-background-light;
+    // }
+
+    img {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
