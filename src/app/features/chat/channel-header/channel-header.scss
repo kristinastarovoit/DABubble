@@ -9,6 +9,7 @@
   box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.06);
   font-family: 'Nunito';
   flex-shrink: 0;
+  
 
   &__title {
     display: flex;
@@ -17,8 +18,8 @@
     cursor: pointer;
     padding: 8px 12px;
     border-radius: 24px;
+    transition: background-color 0.2s ease;
     
-
     &:hover {
       background-color: $pastel-purple-bg;
       color: $midtone-purple-three;
@@ -54,6 +55,7 @@
     padding: 6px 12px;
     border-radius: 24px;
     background-color: $white;
+    transition: background-color 0.2s ease;
 
     &:hover {
       background-color: $pastel-purple-bg;
@@ -87,13 +89,26 @@
     padding: 8px;
     border-radius: 50%;
 
-    // &:hover {
-    //  bild austauschen
-    // }
+    &:hover {
+      .channel-header__add-icon--default {
+        display: none;
+      }
 
-    img {
-      width: 32px;
-      height: 32px;
+      .channel-header__add-icon--hover {
+        display: block;
+        background-color: $pastel-purple-bg;
+        border-radius: 50%;
+      }
+    }
+  }
+
+  &__add-icon {
+    width: 32px;
+    height: 32px;
+    display: block;
+
+    &--hover {
+      display: none;
     }
   }
 }
