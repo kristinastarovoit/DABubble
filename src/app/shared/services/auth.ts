@@ -50,4 +50,12 @@ export class AuthService {
     const provider = new GoogleAuthProvider();
     return signInWithPopup(this.auth, provider);
   }
+
+  verifyResetCode(oobCode: string) {
+    return verifyPasswordResetCode(this.auth, oobCode);
+  }
+
+  confirmResetCode(oobCode: string, newPassword: string) {
+    return confirmPasswordReset(this.auth, oobCode, newPassword);
+  }
 }
