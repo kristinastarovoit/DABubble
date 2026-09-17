@@ -9,7 +9,8 @@
       class="message-list__item"
       [class.message-list__item--own]="message.authorId === currentUserId"
     >
-      <img [src]="message.authorAvatarUrl" alt="" class="message-list__avatar" />
+      <!-- <img [src]="message.authorAvatarUrl" alt="" class="message-list__avatar" /> -->
+      <img class="message-list__avatar" src="app-icons/avatar-placeholder.svg" alt="">
 
       <div class="message-list__content">
         <div class="message-list__meta">
@@ -29,7 +30,7 @@
           class="message-list__thread-link"
           (click)="threadOpened.emit(message)"
         >
-          {{ message.replyCount }} Antworten
+          {{ message.replyCount }} replies
         </button>
       </div>
     </div>

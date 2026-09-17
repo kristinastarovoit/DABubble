@@ -8,10 +8,10 @@
 
   <div class="message-input__actions">
     <button class="message-input__icon-btn" (click)="toggleEmojiPicker()">
-      <img src="/icons/emoji.svg" alt="Emoji" />
+      <img src="app-icons/emoji.svg" alt="Emoji" />
     </button>
     <button class="message-input__icon-btn" (click)="insertMention()">
-      <img src="/icons/at.svg" alt="Erwähnen" />
+      <img src="app-icons/tagg.svg" alt="Mention" />
     </button>
 
     <button
@@ -19,7 +19,7 @@
       [disabled]="!text.trim()"
       (click)="send()"
     >
-      <img src="/icons/send.svg" alt="Senden" />
+      <img src="app-icons/send.svg" alt="Send" />
     </button>
   </div>
 </div>

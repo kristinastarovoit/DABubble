@@ -5,7 +5,7 @@ import { Toast } from '../../../shared/components/toast/toast';
 import { Router } from '@angular/router';
 
 @Component({
-  imports: [],
+  imports: [FormField, Toast],
   selector: 'app-password-recovery',
   styleUrl: './password-recovery.scss',
   templateUrl: './password-recovery.html',

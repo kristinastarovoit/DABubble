@@ -38,5 +38,23 @@ export class Chat {
 
   /** Receives a message submitted in the input field. */
   sendMessage(text: string): void {
+    const createdAt = new Date();
+    const message: Message = {
+      id: `${createdAt.getTime()}`,
+      channelId: this.activeChannel?.id,
+      authorId: 'current-user',
+      authorName: 'You',
+      authorAvatarUrl: '',
+      text,
+      createdAt,
+      time: createdAt.toLocaleTimeString('de-DE', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      reactions: [],
+      replyCount: 0,
+    };
+
+    this.messages = [...this.messages, message];
   }
 }

@@ -12,6 +12,7 @@ import { Message } from '../../shared/interfaces/message';
 })
 export class Thread {
 
+  /** Controls whether the thread is visible. */
   @Input() isVisible = true;
 
   /** The message that the thread belongs to. */
@@ -42,6 +43,25 @@ export class Thread {
 
   /** Emits a new reply text. */
   sendReply(text: string): void {
+    const createdAt = new Date();
+    const reply: Message = {
+      id: `${createdAt.getTime()}`,
+      channelId: this.parentMessage?.channelId,
+      threadParentId: this.parentMessage?.id,
+      authorId: 'current-user',
+      authorName: 'Du',
+      authorAvatarUrl: '',
+      text,
+      createdAt,
+      time: createdAt.toLocaleTimeString('de-DE', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      reactions: [],
+      replyCount: 0,
+    };
+
+    this.replies = [...this.replies, reply];
     this.replySent.emit(text);
   }
 

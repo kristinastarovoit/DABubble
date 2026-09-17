@@ -2,23 +2,25 @@
   <div class="channel-header__title" (click)="openChannelDetails()">
     <span class="channel-header__hash">#</span>
     <!-- <span class="channel-header__name">{{ channel?.name }}</span> -->
-    <span class="channel-header__name">Entwicklerteam</span>
-    <img src="app-icons/arrow-down.svg" alt="" class="channel-header__chevron" />
+    <span class="channel-header__name">Dev Team</span>
+    <img src="app-icons/arrow_down.svg" alt="" class="channel-header__chevron" />
   </div>
 
   <div class="channel-header__meta">
     <div class="channel-header__avatars">
-      <img
+      <!-- <img
          *ngFor="let member of channel?.members | slice:0:3"
         [src]="member.avatarUrl"
         alt=""
         class="channel-header__avatar" 
-      />
+      /> -->
+      <img class="channel-header__avatar" src="app-icons/avatar-placeholder.svg" alt="">
       <span class="channel-header__count">{{ channel?.members?.length }}</span>
     </div>
 
     <button class="channel-header__add-btn" (click)="memberIconClicked.emit()">
-      <img src="app-icons/add-members.svg" alt="Add Members" />
+      <img src="app-icons/add-members.svg" alt="Add Members" class="channel-header__add-icon channel-header__add-icon--default" />
+      <img src="app-icons/add_members_purple.svg" alt="Add Members" class="channel-header__add-icon channel-header__add-icon--hover" />
     </button>
   </div>
 </div>

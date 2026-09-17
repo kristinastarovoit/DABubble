@@ -10,7 +10,7 @@
   ></app-message-list>
 
   <app-message-input
-    [placeholder]="'Nachricht an #' + (activeChannel?.name ?? '')"
+    [placeholder]="'Message to #' + (activeChannel?.name ?? '')"
     (messageSent)="sendMessage($event)"
   ></app-message-input>
 </section>

@@ -5,7 +5,8 @@
       <span class="sidebar__title-text">Devspace</span>
     </div>
     <button class="sidebar__edit-btn" (click)="openWorkspaceEdit()">
-      <img src="app-icons/edit.svg" alt="Edit" />
+      <img src="app-icons/edit.svg" alt="Edit" class="sidebar__edit-icon sidebar__edit-icon--default" />
+      <img src="app-icons/edit-purple.svg" alt="Edit" class="sidebar__edit-icon sidebar__edit-icon--hover" />
     </button>
   </div>
 
@@ -13,12 +14,13 @@
   <div class="sidebar__section">
     <div class="sidebar__section-header" (click)="toggleChannels()">
       <img
-        src="/icons/chevron-down.svg"
+        src="app-icons/arrow_down.svg"
         alt=""
         class="sidebar__chevron"
         [class.sidebar__chevron--collapsed]="!isChannelsOpen"
       />
-      <img src="app-icons/channels.svg" alt="Channels Icon" class="sidebar__section-icon" />
+      <img src="app-icons/channels.svg" alt="Channels Icon" class="sidebar__section-icon sidebar__section-icon--default" />
+      <img src="app-icons/channels_purple.svg" alt="Channels Icon" class="sidebar__section-icon sidebar__section-icon--hover" />
       <span class="sidebar__section-title">Channels</span>
     </div>
 
@@ -35,8 +37,9 @@
       </li>
 
       <li class="sidebar__item sidebar__item--add" (click)="openChannelCreate()">
-        <img src="app-icons/add.svg" alt="Add Icon" class="sidebar__item-icon" />
-        <span class="sidebar__item-name">Channel hinzufügen</span>
+        <img src="app-icons/add.svg" alt="Add Icon" class="sidebar__item-icon sidebar__item-icon--default" />
+        <img src="app-icons/add_purple.svg" alt="Add Icon" class="sidebar__item-icon sidebar__item-icon--hover" />
+        <span class="sidebar__item-name">Add Channel</span>
       </li>
     </ul>
   </div>
@@ -45,13 +48,14 @@
   <div class="sidebar__section">
     <div class="sidebar__section-header" (click)="toggleDirectMessages()">
       <img
-        src="app-icons/arrow-down.svg"
+        src="app-icons/arrow_down.svg"
         alt=""
         class="sidebar__chevron"
         [class.sidebar__chevron--collapsed]="!isDirectMessagesOpen"
       />
-      <img src="app-icons/account.svg" alt="Account Icon" class="sidebar__section-icon" />
-      <span class="sidebar__section-title">Direktnachrichten</span>
+      <img src="app-icons/account.svg" alt="Account Icon" class="sidebar__section-icon sidebar__section-icon--default" />
+      <img src="app-icons/account_purple.svg" alt="Account Icon" class="sidebar__section-icon sidebar__section-icon--hover" />
+      <span class="sidebar__section-title">Direct Messages</span>
     </div>
 
     <ul class="sidebar__list" *ngIf="isDirectMessagesOpen">

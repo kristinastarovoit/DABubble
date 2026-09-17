@@ -1,12 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../shared/services/auth';
+import { UserService } from '../../../shared/services/users';
+import { email, form, FormField, required } from '@angular/forms/signals';
 
 @Component({
   selector: 'app-login',
-  imports: [],
+  imports: [RouterLink, FormField],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
 export class Login {
+  private authService = inject(AuthService);
+  private userService = inject(UserService);
+  private router = inject(Router);
 
   protected model = signal({ email: '', password: '' });
 
