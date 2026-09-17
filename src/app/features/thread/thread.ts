@@ -2,7 +2,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MessageInput } from '../chat/message-input/message-input';
 import { ReactionBar } from '../chat/reaction-bar/reaction-bar';
-import { Message } from '../../shared/interfaces/message';
+import { Message, MessageReaction } from '../../shared/interfaces/message';
+import { Timestamp } from 'firebase/firestore';
 
 @Component({
   imports: [CommonModule, MessageInput, ReactionBar],
@@ -42,31 +43,30 @@ export class Thread {
   }
 
   /** Emits a new reply text. */
-  // sendReply(text: string): void {
-  //   const createdAt = new Date();
-  //   const reply: Message = {
-  //     id: `${createdAt.getTime()}`,
-  //     channelId: this.parentMessage?.channelId,
-  //     threadParentId: this.parentMessage?.id,
-  //     authorId: 'current-user',
-  //     authorName: 'Du',
-  //     authorAvatarUrl: '',
-  //     text,
-  //     createdAt,
-  //     time: createdAt.toLocaleTimeString('de-DE', {
-  //       hour: '2-digit',
-  //       minute: '2-digit',
-  //     }),
-  //     reactions: [],
-  //     replyCount: 0,
-  //   };
+  sendReply(text: string): void {
+    const createdAt = Timestamp.now();
+    const reply: Message = {
+      createdAt,
+      senderId: this.currentUserId,
+      text,
+    };
 
-  //   this.replies = [...this.replies, reply];
-  //   this.replySent.emit(text);
-  // }
+    this.replies = [...this.replies, reply];
+    this.replySent.emit(text);
+  }
 
   /** Emits a changed reaction for a reply. */
   onReactionToggled(reply: Message, emoji: string): void {
     this.reactionToggled.emit({ message: reply, emoji });
+  }
+
+  /** Converts a Firestore reaction map for the reaction bar. */
+  messageReactions(message: Message): MessageReaction[] {
+    return Object.entries(message.reactions ?? {}).map(([emoji, userIds]) => ({
+      emoji,
+      count: userIds.length,
+      userIds,
+      reactedByCurrentUser: userIds.includes(this.currentUserId),
+    }));
   }
 }

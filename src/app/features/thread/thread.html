@@ -2,46 +2,49 @@
   <div class="thread__header">
     <div class="thread__title">
       <span class="thread__title-text">Thread</span>
-      <span class="thread__channel-name">#{{ channelName }}</span>
+      <span class="thread__channel-name" *ngIf="channelName"># {{ channelName }}</span>
     </div>
     <button class="thread__close-btn" (click)="close()">
-      <img src="/icons/close.svg" alt="Schließen" />
+      <img src="app-icons/close.svg" alt="Close" />
     </button>
   </div>
 
   <div class="thread__content" *ngIf="parentMessage">
-    <!-- Ursprüngliche Nachricht -->
     <div class="thread__message">
-      <!-- <img [src]="parentMessage.authorAvatarUrl" alt="" class="thread__avatar" /> -->
+      <img class="thread__avatar" src="app-icons/avatar-placeholder.svg" alt="">
+
       <div class="thread__message-content">
         <div class="thread__meta">
-          <!-- <span class="thread__author">{{ parentMessage.authorName }}</span>
-          <span class="thread__time">{{ parentMessage.time }}</span> -->
+          <span class="thread__author">{{ parentMessage.senderId }}</span>
+          <span class="thread__time">{{ parentMessage.createdAt?.toDate() | date: 'shortTime' }}</span>
         </div>
         <div class="thread__bubble">{{ parentMessage.text }}</div>
       </div>
     </div>
 
-    <div class="thread__divider" *ngIf="replies.length > 0">
-      <span>{{ replies.length }} Reply</span>
+  </div>
+
+  <div class="thread__content" *ngIf="replies.length > 0">
+    <div class="thread__divider">
+      <span>{{ replies.length }} {{ replies.length === 1 ? 'Reply' : 'Replies' }}</span>
     </div>
 
-    <!-- Antworten -->
     <div
       *ngFor="let reply of replies"
       class="thread__message"
-      /* [class.thread__message--own]="reply.authorId === currentUserId" */
+      [class.thread__message--own]="reply.senderId === currentUserId"
     >
-      <!-- <img [src]="reply.authorAvatarUrl" alt="" class="thread__avatar" /> -->
+      <img class="thread__avatar" src="app-icons/avatar-placeholder.svg" alt="">
+
       <div class="thread__message-content">
         <div class="thread__meta">
-          <!-- <span class="thread__author">{{ reply.authorName }}</span>
-          <span class="thread__time">{{ reply.time }}</span> -->
+          <span class="thread__author">{{ reply.senderId }}</span>
+          <span class="thread__time">{{ reply.createdAt?.toDate() | date: 'shortTime' }}</span>
         </div>
         <div class="thread__bubble">{{ reply.text }}</div>
 
         <app-reaction-bar
-          /* [reactions]="reply.reactions" */
+          [reactions]="messageReactions(reply)"
           (reactionToggled)="onReactionToggled(reply, $event)"
         ></app-reaction-bar>
       </div>
@@ -54,6 +57,6 @@
 
   <app-message-input
     [placeholder]="'Reply...'"
-    /* (messageSent)="sendReply($event)" */
+    (messageSent)="sendReply($event)"
   ></app-message-input>
 </aside>
