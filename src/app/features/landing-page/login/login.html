@@ -1,13 +1,28 @@
 <div class="landing-page">
-  <h2>Anmeldung</h2>
-  <p>Wir empfehlen dir, die E-Mail-Adresse zu nutzen, die du bei der Arbeit verwendest.</p>
-  <input type="text" placeholder="beispielname@email.com" />
-  <input type="text" placeholder="Passwort" />
-  <a href="">Passwort vergessen?</a>
-  <div>ODER</div>
-  <button>Anmelden mit Google</button>
+  <h2>Login</h2>
+  <p>We recommend using the email address you use at work.</p>
+  <input type="email" placeholder="examplename@email.com" [formField]="loginForm.email" />
+  @if (loginForm.email().invalid() && loginForm.email().touched()) {
+    <span>{{ loginForm.email().errors()[0].message }}</span>
+  }
+
+  <input type="password" placeholder="Password" [formField]="loginForm.password" />
+  @if (loginForm.password().invalid() && loginForm.password().touched()) {
+    <span>{{ loginForm.password().errors()[0].message }}</span>
+  }
+  <a routerLink="/password-recovery">Forgot password?</a>
+  <div>OR</div>
+  <button>Log in with Google</button>
   <div>
-    <button>Anmelden</button>
-    <button>Gäste-landing-page</button>
+    <button type="button" (click)="onSubmit()" [disabled]="loginForm().invalid() || isSubmitting()">
+      {{ isSubmitting() ? 'Logging in…' : 'Log in' }}
+    </button>
+
+    @if (errorMessage()) {
+      <span>{{ errorMessage() }}</span>
+    }
+    <button type="button" (click)="loginAsGuest()" [disabled]="isGuestLoggingIn()">
+      {{ isGuestLoggingIn() ? 'Logging in…' : 'Guest login' }}
+    </button>
   </div>
 </div>

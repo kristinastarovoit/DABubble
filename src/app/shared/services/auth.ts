@@ -5,6 +5,9 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
+  verifyPasswordResetCode,
+  confirmPasswordReset,
+  signInAnonymously,
 } from 'firebase/auth';
 
 import { FIREBASE_AUTH } from '../../app.config';
@@ -25,7 +28,19 @@ export class AuthService {
     return sendPasswordResetEmail(this.auth, email);
   }
 
+  verifyResetCode(oobCode: string) {
+    return verifyPasswordResetCode(this.auth, oobCode);
+  }
+
+  confirmResetCode(oobCode: string, newPassword: string) {
+    return confirmPasswordReset(this.auth, oobCode, newPassword);
+  }
+
   logout() {
     return signOut(this.auth);
+  }
+
+  loginAsGuest() {
+    return signInAnonymously(this.auth);
   }
 }
