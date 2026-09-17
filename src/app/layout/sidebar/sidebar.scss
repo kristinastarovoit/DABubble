@@ -1,36 +1,36 @@
 @use '../../../styles/' as *;
 
-
 .sidebar {
   display: flex;
   flex-direction: column;
-  width: 300px;
+  width: 350px;
   flex-shrink: 0;
   border-radius: 30px;
-  padding: 24px 16px;
+  padding: 0px 30px;
   background-color: $white;
   box-sizing: border-box;
   overflow-y: auto;
+  font-family: 'Nunito';
 
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 24px;
+    padding: 24px 16px;
   }
 
   &__title {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 16px;
 
     &-icon {
-      width: 24px;
-      height: 24px;
+      width: 60px;
+      height: 60px;
     }
 
     &-text {
-      font-size: 20px;
+      font-size: 1.5rem;
       font-weight: 700;
       color: $black;
     }
@@ -42,10 +42,38 @@
     cursor: pointer;
     padding: 8px;
     border-radius: 50%;
+    transition: background-color 0.2s ease;
+    
 
-    // &:hover {
-    //   background-color: $color-background-light;
-    // }
+    &:hover {
+      background-color: $pastel-purple-bg;
+    }
+  }
+
+  &__edit-icon {
+    width: 40px;
+    height: 40px;
+    display: block;
+    
+    img {
+      width: 40px;
+      height: 40px;
+    }
+
+    &--hover {
+      display: none;
+    }
+  }
+
+  &__edit-btn:hover {
+    .sidebar__edit-icon--default {
+      display: none;
+    }
+
+    .sidebar__edit-icon--hover {
+      display: block;
+      transform: scale(0.6);
+    }
   }
 
   &__section {
@@ -61,7 +89,7 @@
     border-radius: 8px;
 
     // &:hover {
-    //   background-color: $color-background-light;
+    //   color: $light-purple-two;
     // }
   }
 
@@ -78,11 +106,28 @@
   &__section-icon {
     width: 20px;
     height: 20px;
+
+    &--hover {
+      display: none;
+    }
+  }
+
+  &__section-header:hover {
+    .sidebar__section-icon--default {
+      display: none;
+    }
+
+    .sidebar__section-icon--hover {
+      display: block;
+    }
   }
 
   &__section-title {
     font-weight: 600;
     color: $black;
+     &:hover {
+      color:$midtone-purple-three; 
+    }
   }
 
   &__list {
@@ -103,9 +148,10 @@
     cursor: pointer;
     color: $dark-grey;
 
-    // &:hover {
-    //   background-color: $color-background-light;
-    // }
+    &:hover {
+
+      color:$midtone-purple-three; 
+    }
 
     // &--active {
     //   background-color: $color-primary-light;
@@ -121,6 +167,20 @@
       width: 20px;
       flex-shrink: 0;
       text-align: center;
+
+      &--hover {
+        display: none;
+      }
+    }
+
+    &--add:hover {
+      .sidebar__item-icon--default {
+        display: none;
+      }
+
+      .sidebar__item-icon--hover {
+        display: block;
+      }
     }
 
     &-name {
@@ -156,6 +216,4 @@
     //   background-color: $color-online;
     // }
   }
-
-  
 }

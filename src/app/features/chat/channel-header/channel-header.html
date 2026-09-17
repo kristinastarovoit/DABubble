@@ -2,7 +2,7 @@
   <div class="channel-header__title" (click)="openChannelDetails()">
     <span class="channel-header__hash">#</span>
     <!-- <span class="channel-header__name">{{ channel?.name }}</span> -->
-    <span class="channel-header__name">Entwicklerteam</span>
+    <span class="channel-header__name">Dev Team</span>
     <img src="app-icons/arrow_down.svg" alt="" class="channel-header__chevron" />
   </div>
 
@@ -14,12 +14,13 @@
         alt=""
         class="channel-header__avatar" 
       /> -->
-      <img src="app-icons/avatar-placeholder.svg" alt="">
+      <img class="channel-header__avatar" src="app-icons/avatar-placeholder.svg" alt="">
       <span class="channel-header__count">{{ channel?.members?.length }}</span>
     </div>
 
     <button class="channel-header__add-btn" (click)="memberIconClicked.emit()">
-      <img src="app-icons/add-members.svg" alt="Add Members" />
+      <img src="app-icons/add-members.svg" alt="Add Members" class="channel-header__add-icon channel-header__add-icon--default" />
+      <img src="app-icons/add_members_purple.svg" alt="Add Members" class="channel-header__add-icon channel-header__add-icon--hover" />
     </button>
   </div>
 </div>
