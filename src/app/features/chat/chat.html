@@ -5,14 +5,17 @@
   ></app-channel-header>
 
   <app-message-list
-    [messages]="messages"
+    [messages]="displayedMessages"
+    [dmId]="activeDmId"
+    [channelId]="activeChannel?.id ?? null"
+    [currentUserId]="effectiveUserId"
     (threadOpened)="openThread($event)"
   ></app-message-list>
 
   <app-message-input
-    [placeholder]="'Message to #' + (activeChannel?.name ?? '')"
-    /* (messageSent)="sendMessage($event)" */
-        /* (messageSent)="this.channelService.addMessageToChannel($event)" */
-
+    [placeholder]="activeChannel ? 'Message to #' + activeChannel.name : 'Message to ' + activeDmName"
+    [dmId]="activeDmId"
+    [senderId]="effectiveUserId"
+    (messageSent)="sendMessage($event)"
   ></app-message-input>
 </section>

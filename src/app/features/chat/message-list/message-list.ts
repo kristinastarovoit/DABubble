@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleCha
 import { CommonModule } from '@angular/common';
 import { ReactionBar } from '../reaction-bar/reaction-bar';
 import { Message, MessageReaction } from '../../../shared/interfaces/message';
+import { ChannelService } from '../../../shared/services/channel-service';
 import { DmService } from '../../../shared/services/dm-service';
 
 /** Groups messages under a calendar date. */
@@ -24,6 +25,9 @@ export class MessageList implements OnChanges, OnDestroy {
   /** Loads direct-message messages when a conversation is selected. */
   @Input() dmId: string | null = null;
 
+  /** Loads channel messages when a channel is selected. */
+  @Input() channelId: string | null = null;
+
   /** The identifier of the signed-in user. */
   @Input() currentUserId = '';
 
@@ -34,24 +38,25 @@ export class MessageList implements OnChanges, OnDestroy {
   @Output() reactionToggled = new EventEmitter<{ message: Message; emoji: string }>();
 
   private readonly dmService = inject(DmService, { optional: true });
-  private dmMessages = signal<Message[]>([]);
-  private unsubscribeFromDm?: () => void;
+  private readonly channelService = inject(ChannelService, { optional: true });
+  private backendMessages = signal<Message[]>([]);
+  private unsubscribeFromBackend?: () => void;
 
   /** Updates the Firestore listener when the selected direct message changes. */
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['dmId']) {
-      this.subscribeToDirectMessages();
+    if (changes['dmId'] || changes['channelId']) {
+      this.subscribeToBackendMessages();
     }
   }
 
   /** Removes the active Firestore listener when the component is destroyed. */
   ngOnDestroy(): void {
-    this.unsubscribeFromDm?.();
+    this.unsubscribeFromBackend?.();
   }
 
   /** Uses live DM messages when a DM is active, otherwise the input messages. */
   get displayedMessages(): Message[] {
-    return this.dmId ? this.dmMessages() : this.messages;
+    return this.dmId || this.channelId ? this.backendMessages() : this.messages;
   }
 
   /** Groups messages by their calendar date. */
@@ -96,18 +101,23 @@ export class MessageList implements OnChanges, OnDestroy {
     }));
   }
 
-  /** Starts a live message listener for the selected direct-message conversation. */
-  private subscribeToDirectMessages(): void {
-    this.unsubscribeFromDm?.();
-    this.unsubscribeFromDm = undefined;
-    this.dmMessages.set([]);
+  /** Starts a live listener for the selected channel or direct-message conversation. */
+  private subscribeToBackendMessages(): void {
+    this.unsubscribeFromBackend?.();
+    this.unsubscribeFromBackend = undefined;
+    this.backendMessages.set([]);
 
-    if (!this.dmId || !this.dmService) {
+    if (this.dmId && this.dmService) {
+      const subscription = this.dmService.getMessages(this.dmId);
+      this.backendMessages = subscription.messages;
+      this.unsubscribeFromBackend = subscription.unsubscribe;
       return;
     }
 
-    const subscription = this.dmService.getMessages(this.dmId);
-    this.dmMessages = subscription.messages;
-    this.unsubscribeFromDm = subscription.unsubscribe;
+    if (this.channelId && this.channelService) {
+      const subscription = this.channelService.getMessages(this.channelId);
+      this.backendMessages = subscription.messages;
+      this.unsubscribeFromBackend = subscription.unsubscribe;
+    }
   }
 }

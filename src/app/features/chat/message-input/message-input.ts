@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DmService } from '../../../shared/services/dm-service';
+import { FIREBASE_AUTH } from '../../../app.config';
 
 @Component({
   imports: [CommonModule, FormsModule],
@@ -27,15 +28,18 @@ export class MessageInput {
   text = '';
 
   private readonly dmService = inject(DmService, { optional: true });
+  private readonly auth = inject(FIREBASE_AUTH);
 
   /** Sends the trimmed message text. */
   async send(): Promise<void> {
     const trimmed = this.text.trim();
     if (!trimmed) return;
 
-    if (this.dmId && this.senderId) {
-      if (!this.dmService) return;
-      await this.dmService.addMessageToDm(this.dmId, trimmed, this.senderId);
+    const senderId = this.senderId || this.auth.currentUser?.uid || '';
+
+    if (this.dmId) {
+      if (!senderId || !this.dmService) return;
+      await this.dmService.addMessageToDm(this.dmId, trimmed, senderId);
     } else {
       this.messageSent.emit(trimmed);
     }

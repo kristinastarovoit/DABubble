@@ -6,6 +6,7 @@ import { MessageInput } from './message-input/message-input';
 import { Message } from '../../shared/interfaces/message';
 import { Channel } from '../../shared/interfaces/channel';
 import { ChannelService } from '../../shared/services/channel-service';
+import { FIREBASE_AUTH } from '../../app.config';
 
 @Component({
   imports: [CommonModule, ChannelHeader, MessageInput, MessageList],
@@ -20,6 +21,15 @@ export class Chat {
 
   /** Messages displayed in the active channel. */
   @Input() messages: Message[] = [];
+
+  /** The selected direct-message conversation. */
+  @Input() activeDmId: string | null = null;
+
+  /** The selected direct-message contact name. */
+  @Input() activeDmName = '';
+
+  /** The identifier of the signed-in user. */
+  @Input() currentUserId = '';
 
   /** Emitted when a message thread is requested. */
   @Output() threadRequested = new EventEmitter<Message>();
@@ -37,29 +47,27 @@ export class Chat {
     this.memberListRequested.emit();
   }
 
-  channelService = inject(ChannelService);
+  private readonly channelService = inject(ChannelService);
+  private readonly auth = inject(FIREBASE_AUTH);
 
+  /** Returns the input messages for MessageList's backend-aware rendering. */
+  get displayedMessages(): Message[] {
+    return this.messages;
+  }
 
+  /** Resolves the current user ID when the template or send action needs it. */
+  get effectiveUserId(): string {
+    return this.auth.currentUser?.uid ?? this.currentUserId;
+  }
 
-  /** Receives a message submitted in the input field. */
-  // sendMessage(text: string): void {
-  //   const createdAt = new Date();
-  //   const message: Message = {
-  //     id: `${createdAt.getTime()}`,
-  //     channelId: this.activeChannel?.id,
-  //     authorId: 'current-user',
-  //     authorName: 'You',
-  //     authorAvatarUrl: '',
-  //     text,
-  //     createdAt,
-  //     time: createdAt.toLocaleTimeString('de-DE', {
-  //       hour: '2-digit',
-  //       minute: '2-digit',
-  //     }),
-  //     reactions: [],
-  //     replyCount: 0,
-  //   };
+  /** Stores a message in the active channel. */
+  async sendMessage(text: string): Promise<void> {
+    const senderId = this.effectiveUserId;
+    if (!senderId) return;
 
-  //   this.messages = [...this.messages, message];
-  // }
+    if (this.activeChannel) {
+      await this.channelService.addMessageToChannel(this.activeChannel.id, text, senderId);
+    }
+  }
+
 }
