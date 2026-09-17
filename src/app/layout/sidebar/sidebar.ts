@@ -1,7 +1,9 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Channel } from '../../shared/interfaces/channel';
 import { User } from '../../shared/interfaces/user';
+import { ChannelService } from '../../shared/services/channel-service';
+import { DmService } from '../../shared/services/dm-service';
 
 
 @Component({
@@ -10,9 +12,14 @@ import { User } from '../../shared/interfaces/user';
   styleUrl: './sidebar.scss',
   templateUrl: './sidebar.html',
 })
+/** Displays channels and direct-message contacts in the application sidebar. */
 export class Sidebar {
-  /** Available workspace channels. */
-  @Input() channels: Channel[] = [];
+  /** Provides the available channels and channel selection state. */
+  channelService = inject(ChannelService);
+
+  /** Provides direct-message data and selection state. */
+  dmService = inject(DmService);
+  
   /** Available direct-message contacts. */
   @Input() directMessages: User[] = [];
   /** Identifier of the active channel. */
@@ -29,7 +36,10 @@ export class Sidebar {
   /** Emitted when workspace editing is requested. */
   @Output() workspaceEditRequested = new EventEmitter<void>();
 
+  /** Whether the channels section is expanded. */
   isChannelsOpen = true;
+
+  /** Whether the direct-messages section is expanded. */
   isDirectMessagesOpen = true;
 
   /** Toggles the channel section. */
@@ -44,11 +54,15 @@ export class Sidebar {
 
   /** Selects a channel. */
   selectChannel(channel: Channel): void {
+    this.channelService.selectChannel(channel.id);
+    this.dmService.activeDmId.set(undefined);
     this.channelSelected.emit(channel);
   }
 
   /** Selects a direct-message contact. */
   selectDirectMessage(contact: User): void {
+    this.dmService.selectDm(contact.id);
+    this.channelService.activeChannelId.set(undefined);
     this.directMessageSelected.emit(contact);
   }
 

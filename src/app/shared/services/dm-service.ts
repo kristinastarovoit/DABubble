@@ -14,11 +14,17 @@ export class DmService {
 
     /** The direct-message conversations available to the application. */
     dms = signal<Dm[]>([]);
+    activeDmId = signal<string | undefined>(undefined);
+
+    selectDm(dmId: string): void {
+        this.activeDmId.set(dmId);
+    }
 
     constructor() {
         onAuthStateChanged(this.auth, (user) => {
             if (!user) {
                 this.dms.set([]);
+                this.activeDmId.set(undefined);
                 return;
             }
             const dmsRef = collection(this.db, 'dms');
@@ -29,6 +35,9 @@ export class DmService {
                     doc => ({ id: doc.id, ...doc.data() } as Dm)
                 );
                 this.dms.set(dms);
+                if (!this.activeDmId() && dms.length > 0) {
+                    this.activeDmId.set(dms[0].id);
+                }
                 console.log(this.dms());
             });
         });
@@ -50,13 +59,16 @@ export class DmService {
      * @param dmId The ID of the direct-message conversation.
      * @returns A signal containing the messages and a function that removes the listener.
      */
-    getMessages(dmId: string): { messages: ReturnType<typeof signal<Message[]>>; unsubscribe: () => void } {
+    getMessages(
+        dmId: string,
+        onMessages?: (messages: Message[]) => void
+    ): { messages: ReturnType<typeof signal<Message[]>>; unsubscribe: () => void } {
         const messages = signal<Message[]>([]);
         const messagesRef = collection(this.db, 'dms', dmId, 'messages');
         const unsubscribe = onSnapshot(messagesRef, snapshot => {
-            messages.set(
-                snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Message) }))
-            );
+            const dmMessages = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Message) }));
+            messages.set(dmMessages);
+            onMessages?.(dmMessages);
         });
         return { messages, unsubscribe };
     }

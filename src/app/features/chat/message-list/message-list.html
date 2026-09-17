@@ -1,4 +1,4 @@
-<div class="message-list">
+<!-- <div class="message-list">
   <ng-container *ngFor="let group of groupedMessages">
     <div class="message-list__divider">
       <span>{{ group.dateLabel }}</span>
@@ -7,32 +7,65 @@
     <div
       *ngFor="let message of group.messages"
       class="message-list__item"
-      /* [class.message-list__item--own]="message.authorId === currentUserId" */
+      [class.message-list__item--own]="message.authorId === currentUserId"
     >
-      <!-- <img [src]="message.authorAvatarUrl" alt="" class="message-list__avatar" /> -->
+      <img [src]="message.authorAvatarUrl" alt="" class="message-list__avatar" />
       <img class="message-list__avatar" src="app-icons/avatar-placeholder.svg" alt="">
 
       <div class="message-list__content">
         <div class="message-list__meta">
-          <!-- <span class="message-list__author">{{ message.authorName }}</span>
-          <span class="message-list__time">{{ message.time }}</span> -->
+          <span class="message-list__author">{{ message.authorName }}</span>
+          <span class="message-list__time">{{ message.time }}</span>
         </div>
 
         <div class="message-list__bubble">{{ message.text }}</div>
 
         <app-reaction-bar
-          /* [reactions]="message.reactions" */
+          [reactions]="message.reactions"
           (reactionToggled)="onReactionToggled(message, $event)"
         ></app-reaction-bar>
 
         <button
-          /* *ngIf="message.replyCount" */
+          *ngIf="message.replyCount"
           class="message-list__thread-link"
           (click)="threadOpened.emit(message)"
         >
-          <!-- {{ message.replyCount }} replies -->
+          {{ message.replyCount }} replies
         </button>
       </div>
     </div>
   </ng-container>
+</div> -->
+
+<div class="message-list">
+  @for (group of groupedMessages(); track group.dateLabel) {
+  <div class="message-list__divider">
+    <span>{{ group.dateLabel }}</span>
+  </div>
+
+  @for (message of group.messages; track message.id) {
+  <div class="message-list__item" [class.message-list__item--own]="message.senderId === currentUserId()">
+    <img class="message-list__avatar" src="app-icons/avatar-placeholder.svg" alt="" />
+
+    <div class="message-list__content">
+      <div class="message-list__meta">
+        <span class="message-list__author">{{ message.senderId }}</span>
+        <span class="message-list__time">{{ message.createdAt.toDate() | date: 'shortTime' }}</span>
+      </div>
+
+      <div class="message-list__bubble">{{ message.text }}</div>
+
+      <app-reaction-bar 
+      /* [reactions]="message.reactions" */
+        (reactionToggled)="onReactionToggled(message, $event)"></app-reaction-bar>
+
+      @if (message.threadCount) {
+      <button class="message-list__thread-link" (click)="threadOpened.emit(message)">
+        {{ message.threadCount }} Antworten
+      </button>
+      }
+    </div>
+  </div>
+  }
+  }
 </div>

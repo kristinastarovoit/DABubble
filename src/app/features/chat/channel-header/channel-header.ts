@@ -1,6 +1,9 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, computed, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Channel } from '../../../shared/interfaces/channel';
+import { Message } from '../../../shared/interfaces/message';
+import { ChannelService } from '../../../shared/services/channel-service';
+import { FIREBASE_AUTH } from '../../../app.config';
 
 @Component({
   imports: [CommonModule],
@@ -9,9 +12,6 @@ import { Channel } from '../../../shared/interfaces/channel';
   templateUrl: './channel-header.html',
 })
 export class ChannelHeader {
-
-  /** The channel represented by the header. */
-  @Input() channel: Channel | null = null;
 
   /** Emitted when the member icon is clicked. */
   @Output() memberIconClicked = new EventEmitter<void>();
@@ -22,5 +22,39 @@ export class ChannelHeader {
   /** Requests the channel details view. */
   openChannelDetails(): void {
     this.channelDetailsRequested.emit();
+  }
+
+  /** Provides the available channels and their messages. */
+  channelService = inject(ChannelService);
+
+  /** Identifier of the currently selected channel. */
+  channelId = computed(() => this.channelService.activeChannelId());
+
+  /** The channel matching the currently selected channel ID. */
+  activeChannel = computed(() =>
+    this.channelService.channels().find(channel => channel.id === this.channelId())
+  );
+
+  /** Messages belonging to the currently selected channel. */
+  messages = signal<Message[]>([]);
+
+  /** Unsubscribes from the current message listener when the channel changes. */
+  private currentUnsubscribe: (() => void) | undefined;
+
+  /** Creates the message listener for the active channel. */
+  constructor() {
+    effect(() => {
+      this.currentUnsubscribe?.();
+
+      const channelId = this.channelId();
+
+      if (channelId) {
+        const { unsubscribe } = this.channelService.getMessages(
+          channelId,
+          messages => this.messages.set(messages)
+        );
+        this.currentUnsubscribe = unsubscribe;
+      }
+    });
   }
 }

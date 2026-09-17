@@ -1,7 +1,7 @@
 import { Service, inject, signal } from '@angular/core';
 import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../../app.config';
 import { Channel } from '../interfaces/channel';
-import { collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove, serverTimestamp, increment, query, where, getDocs } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove, serverTimestamp, increment, query, where, getDocs, queryEqual } from "firebase/firestore";
 import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -14,17 +14,23 @@ export class ChannelService {
 
     /** The channels in which the currently authenticated user is a member. */
     channels = signal<Channel[]>([]);
+    activeChannelId = signal<string | undefined>(undefined);
+
+    selectChannel(channelId: string): void {
+        this.activeChannelId.set(channelId);
+    }
 
     constructor() {
         onAuthStateChanged(this.auth, (user) => {
             if (!user) {
                 this.channels.set([]);
+                this.activeChannelId.set(undefined);
                 return;
             }
             const channelsRef = collection(this.db, 'channels');
-            const q = query(channelsRef, where('memberIds', 'array-contains', user.uid));
-
-            onSnapshot(q, snapshot => {
+            // const q = query(channelsRef, where('memberIds', 'array-contains', user.uid));
+            // Anpassen: sobald Userlogin daten vorhanden, und channel erstellbar, channelsref nach onsnapshot mit q ersetzen
+            onSnapshot(channelsRef, snapshot => {
                 const channels = snapshot.docs.map(
                     doc => ({
                         id: doc.id,
@@ -32,10 +38,14 @@ export class ChannelService {
                     } as Channel)
                 );
                 this.channels.set(channels);
+                if (!this.activeChannelId() && channels.length > 0) {
+                    this.activeChannelId.set(channels[0].id);
+                }
                 console.log(this.channels());
             });
         });
     }
+
 
     /** Creates a channel and adds the current user as its first member.
      * Does nothing if no user is logged in, or if a channel with the
@@ -235,13 +245,16 @@ export class ChannelService {
      * @param channelId The ID of the channel whose messages should be observed.
      * @returns A signal containing the messages and a function that removes the listener.
      */
-    getMessages(channelId: string): { messages: ReturnType<typeof signal<Message[]>>; unsubscribe: () => void } {
+    getMessages(
+        channelId: string,
+        onMessages?: (messages: Message[]) => void
+    ): { messages: ReturnType<typeof signal<Message[]>>; unsubscribe: () => void } {
         const messages = signal<Message[]>([]);
         const messagesRef = collection(this.db, 'channels', channelId, 'messages');
         const unsubscribe = onSnapshot(messagesRef, snapshot => {
-            messages.set(
-                snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Message) }))
-            );
+            const channelMessages = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Message) }));
+            messages.set(channelMessages);
+            onMessages?.(channelMessages);
         });
         return { messages, unsubscribe };
     }

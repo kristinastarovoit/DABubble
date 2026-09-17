@@ -1,65 +1,105 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, input, computed, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChannelHeader } from './channel-header/channel-header';
 import { MessageList } from './message-list/message-list';
 import { MessageInput } from './message-input/message-input';
 import { Message } from '../../shared/interfaces/message';
-import { Channel } from '../../shared/interfaces/channel';
 import { ChannelService } from '../../shared/services/channel-service';
+import { DmService } from '../../shared/services/dm-service';
+import { FIREBASE_AUTH } from '../../app.config';
+import { LandingPage } from '../landing-page/landing-page';
 
 @Component({
-  imports: [CommonModule, ChannelHeader, MessageInput, MessageList],
+  imports: [CommonModule, ChannelHeader, MessageInput, MessageList, LandingPage],
   selector: 'app-chat',
   styleUrl: './chat.scss',
   templateUrl: './chat.html',
 })
 export class Chat {
 
-  /** The currently selected channel. */
-  @Input() activeChannel: Channel | null = null;
-
-  /** Messages displayed in the active channel. */
-  @Input() messages: Message[] = [];
-
   /** Emitted when a message thread is requested. */
-  @Output() threadRequested = new EventEmitter<Message>();
+  // @Output() threadRequested = new EventEmitter<Message>();
 
   /** Emitted when the channel member list is requested. */
-  @Output() memberListRequested = new EventEmitter<void>();
+  // @Output() memberListRequested = new EventEmitter<void>();
 
   /** Opens the thread for a message. */
-  openThread(message: Message): void {
-    this.threadRequested.emit(message);
-  }
+  // openThread(message: Message): void {
+  //   this.threadRequested.emit(message);
+  // }
 
   /** Opens the active channel's member list. */
-  openMemberList(): void {
-    this.memberListRequested.emit();
+  // openMemberList(): void {
+  //   this.memberListRequested.emit();
+  // }
+
+  /** Provides channel data and channel message listeners. */
+  private channelService = inject(ChannelService);
+
+  /** Provides direct-message data and direct-message listeners. */
+  private dmService = inject(DmService);
+
+  /** Provides the currently authenticated user for sending messages. */
+  private auth = inject(FIREBASE_AUTH);
+
+  /** Identifier of the currently selected channel. */
+  channelId = computed(() => this.channelService.activeChannelId());
+
+  /** Identifier of the currently selected direct-message conversation. */
+  dmId = computed(() => this.dmService.activeDmId());
+
+  /** Messages displayed for the active channel or direct-message conversation. */
+  messages = signal<Message[]>([]);
+
+  /** Unsubscribes from the active message listener when the conversation changes. */
+  private currentUnsubscribe: (() => void) | undefined;
+
+  /** The channel matching the currently selected channel ID. */
+  activeChannel = computed(() =>
+    this.channelService.channels().find(channel => channel.id === this.channelId())
+  );
+
+  /** Creates a reactive listener for the currently selected conversation. */
+  constructor() {
+    effect(() => {
+      this.currentUnsubscribe?.();
+
+      const channelId = this.channelId();
+      const dmId = this.dmId();
+
+      if (channelId) {
+        const { unsubscribe } = this.channelService.getMessages(
+          channelId,
+          messages => this.messages.set(messages)
+        );
+        this.currentUnsubscribe = unsubscribe;
+      } else if (dmId) {
+        const { unsubscribe } = this.dmService.getMessages(
+          dmId,
+          messages => this.messages.set(messages)
+        );
+        this.currentUnsubscribe = unsubscribe;
+      }
+    });
   }
 
-  channelService = inject(ChannelService);
+  /** Removes the active Firestore message listener. */
+  ngOnDestroy() {
+    this.currentUnsubscribe?.();
+  }
 
+  /** Sends a message to the active channel or direct-message conversation. */
+  onSend(text: string) {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) { return; }
 
+    const channelId = this.channelId();
+    const dmId = this.dmId();
 
-  /** Receives a message submitted in the input field. */
-  // sendMessage(text: string): void {
-  //   const createdAt = new Date();
-  //   const message: Message = {
-  //     id: `${createdAt.getTime()}`,
-  //     channelId: this.activeChannel?.id,
-  //     authorId: 'current-user',
-  //     authorName: 'You',
-  //     authorAvatarUrl: '',
-  //     text,
-  //     createdAt,
-  //     time: createdAt.toLocaleTimeString('de-DE', {
-  //       hour: '2-digit',
-  //       minute: '2-digit',
-  //     }),
-  //     reactions: [],
-  //     replyCount: 0,
-  //   };
-
-  //   this.messages = [...this.messages, message];
-  // }
+    if (channelId) {
+      this.channelService.addMessageToChannel(channelId, text, uid);
+    } else if (dmId) {
+      this.dmService.addMessageToDm(dmId, text, uid);
+    }
+  }
 }
