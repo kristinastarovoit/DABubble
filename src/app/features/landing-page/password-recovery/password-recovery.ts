@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
 import { AuthService } from '../../../shared/services/auth';
 import { Toast } from '../../../shared/components/toast/toast';
+import { Router } from '@angular/router';
 
 @Component({
   imports: [FormField, Toast],
@@ -12,6 +13,7 @@ import { Toast } from '../../../shared/components/toast/toast';
 export class PasswordRecovery {
   protected model = signal({ email: '' });
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   protected recoveryForm = form(this.model, (schemaPath) => {
     required(schemaPath.email, { message: 'Please enter your email address.' });
@@ -40,5 +42,9 @@ export class PasswordRecovery {
       this.isSubmitting.set(false);
       this.wasSent.set(true);
     }
+  }
+
+  goToLogin() {
+    this.router.navigateByUrl('/login');
   }
 }

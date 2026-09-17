@@ -1,9 +1,9 @@
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { User } from '../../shared/interfaces/user';
-
-
+import { AuthService } from '../../shared/services/auth';
+import { Router } from '@angular/router';
 
 @Component({
   imports: [CommonModule, FormsModule],
@@ -12,6 +12,8 @@ import { User } from '../../shared/interfaces/user';
   templateUrl: './header.html',
 })
 export class Header {
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   /** The currently signed-in user. */
   currentUser!: User;
@@ -33,13 +35,14 @@ export class Header {
   }
 
   /** Handles changes to the global search field. */
-  onSearchInput(): void {
-  }
+  onSearchInput(): void {}
 
   /** Navigates to the user profile. */
-  goToProfile(): void { }
+  goToProfile(): void {}
 
   /** Signs the current user out. */
-  logout(): void { }
+  async logout(): Promise<void> {
+    await this.authService.logout();
+    this.router.navigateByUrl('/login');
+  }
 }
-
