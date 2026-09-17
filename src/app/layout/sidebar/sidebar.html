@@ -26,14 +26,13 @@
 
     <ul class="sidebar__list" *ngIf="isChannelsOpen">
       <li
-        *ngFor="let channel of channels"
+        *ngFor="let channel of displayedChannels"
         class="sidebar__item"
         [class.sidebar__item--active]="channel.id === activeChannelId"
         (click)="selectChannel(channel)"
       >
         <span class="sidebar__item-icon">#</span>
-        <!-- <span class="sidebar__item-name">{{ channel.name }}</span> -->
-         <span class="sidebar__item-name">Channel-Platzhalter</span>
+        <span class="sidebar__item-name">{{ channel.name }}</span>
       </li>
 
       <li class="sidebar__item sidebar__item--add" (click)="openChannelCreate()">
@@ -60,22 +59,24 @@
 
     <ul class="sidebar__list" *ngIf="isDirectMessagesOpen">
       <li
-        *ngFor="let contact of directMessages"
+        *ngFor="let contact of displayedDirectMessages"
         class="sidebar__item"
-        [class.sidebar__item--active]="contact.id === activeDmId"
+        [class.sidebar__item--active]="contact.dmId === activeDmId"
         (click)="selectDirectMessage(contact)"
       >
         <div class="sidebar__avatar-wrapper">
-          <!-- <img [src]="contact.avatarUrl" alt="" class="sidebar__avatar" /> -->
-           <img src="app-icons/avatar-placeholder.svg" alt="" class="sidebar__avatar" />
+          <img
+            [src]="contact.avatarUrl || 'app-icons/avatar-placeholder.svg'"
+            [alt]="contact.name"
+            class="sidebar__avatar"
+          />
           <span
             class="sidebar__status"
             [class.sidebar__status--online]="contact.isOnline"
           ></span>
         </div>
         <span class="sidebar__item-name">
-          <!-- {{ contact.name }} -->
-            Name-Platzhalter
+          {{ contact.name }}
           <span *ngIf="contact.isCurrentUser">(You)</span>
         </span>
       </li>
