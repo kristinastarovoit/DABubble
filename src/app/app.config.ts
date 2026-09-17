@@ -4,7 +4,7 @@ import {
   InjectionToken,
   inject,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
@@ -20,7 +20,7 @@ export const FIREBASE_FIRESTORE = new InjectionToken<Firestore>('firebase.firest
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    provideRouter(routes, withComponentInputBinding()),
     {
       provide: FIREBASE_APP,
       useFactory: () => initializeApp(environment.firebase),

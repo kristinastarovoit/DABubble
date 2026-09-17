@@ -1,24 +1,17 @@
 <div class="message-input">
-  <textarea
-    class="message-input__field"
-    [placeholder]="placeholder"
-    [(ngModel)]="text"
-    (keydown.enter)="onEnter($event)"
-  ></textarea>
+  <textarea /* class="message-input__field" [placeholder]="placeholder" [(ngModel)]="text"
+    (keydown.enter)="onEnter($event)" */ [value]="text()" (input)="text.set($any($event.target).value)"
+    (keydown.enter)="sendMessage()" [placeholder]="placeholder"></textarea>
 
   <div class="message-input__actions">
-    <button class="message-input__icon-btn" (click)="toggleEmojiPicker()">
+    <!-- <button class="message-input__icon-btn" (click)="toggleEmojiPicker()">
       <img src="app-icons/emoji.svg" alt="Emoji" />
     </button>
     <button class="message-input__icon-btn" (click)="insertMention()">
       <img src="app-icons/tagg.svg" alt="Mention" />
-    </button>
+    </button> -->
 
-    <button
-      class="message-input__send-btn"
-      [disabled]="!text.trim()"
-      (click)="send()"
-    >
+    <button class="message-input__send-btn" /* [disabled]="!text.trim()" (click)="send()" */ (click)="sendMessage()">
       <img src="app-icons/send.svg" alt="Send" />
     </button>
   </div>

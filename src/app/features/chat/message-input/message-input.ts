@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -14,33 +14,45 @@ export class MessageInput {
    @Input() placeholder = 'Write Message';
 
   /** Emitted when a non-empty message is submitted. */
-  @Output() messageSent = new EventEmitter<string>();
+  // @Output() messageSent = new EventEmitter<string>();
 
-  text = '';
+  // text = '';
 
   /** Sends the trimmed message text. */
-  send(): void {
-    const trimmed = this.text.trim();
-    if (!trimmed) return;
-    this.messageSent.emit(trimmed);
-    this.text = '';
-  }
+  // send(): void {
+  //   const trimmed = this.text.trim();
+  //   if (!trimmed) return;
+  //   this.messageSent.emit(trimmed);
+  //   this.text = '';
+  // }
 
   /** Sends the message when Enter is pressed without Shift. */
-  onEnter(event: Event): void {
-    const keyboardEvent = event as KeyboardEvent;
-    if (!keyboardEvent.shiftKey) {
-      keyboardEvent.preventDefault();
-      this.send();
-    }
-  }
+  // onEnter(event: Event): void {
+  //   const keyboardEvent = event as KeyboardEvent;
+  //   if (!keyboardEvent.shiftKey) {
+  //     keyboardEvent.preventDefault();
+  //     this.send();
+  //   }
+  // }
 
   /** Opens the emoji picker. */
   toggleEmojiPicker(): void {
   }
 
   /** Inserts the mention prefix into the message. */
-  insertMention(): void {
-    this.text += '@';
+  // insertMention(): void {
+  //   this.text += '@';
+  // }
+
+
+  text = signal('');
+  send = output<string>();
+
+  sendMessage() {
+    const value = this.text().trim();
+    if (!value) { return; }
+
+    this.send.emit(value);
+    this.text.set('');
   }
 }

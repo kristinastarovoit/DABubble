@@ -5,7 +5,7 @@ import { Signup } from './features/landing-page/signup/signup';
 import { PasswordRecovery } from './features/landing-page/password-recovery/password-recovery';
 import { PasswordReset } from './features/landing-page/password-reset/password-reset';
 import { Dashboard } from './shared/components/dashboard/dashboard';
-
+import { Chat } from './features/chat/chat';
 export const routes: Routes = [
   {
     path: '',
@@ -19,4 +19,6 @@ export const routes: Routes = [
     ],
   },
   { path: 'dashboard', component: Dashboard },
+  { path: 'channels/:channelId', component: Chat },
+  { path: 'dms/:dmId', component: Chat },
 ];

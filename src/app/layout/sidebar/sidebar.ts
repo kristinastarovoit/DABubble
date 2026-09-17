@@ -1,7 +1,9 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Channel } from '../../shared/interfaces/channel';
 import { User } from '../../shared/interfaces/user';
+import { ChannelService } from '../../shared/services/channel-service';
+import { DmService } from '../../shared/services/dm-service';
 
 
 @Component({
@@ -11,6 +13,8 @@ import { User } from '../../shared/interfaces/user';
   templateUrl: './sidebar.html',
 })
 export class Sidebar {
+  channelService = inject(ChannelService);
+  dmService = inject(DmService);
   /** Available workspace channels. */
   @Input() channels: Channel[] = [];
   /** Available direct-message contacts. */
@@ -44,11 +48,15 @@ export class Sidebar {
 
   /** Selects a channel. */
   selectChannel(channel: Channel): void {
+    this.channelService.selectChannel(channel.id);
+    this.dmService.activeDmId.set(undefined);
     this.channelSelected.emit(channel);
   }
 
   /** Selects a direct-message contact. */
   selectDirectMessage(contact: User): void {
+    this.dmService.selectDm(contact.id);
+    this.channelService.activeChannelId.set(undefined);
     this.directMessageSelected.emit(contact);
   }
 
