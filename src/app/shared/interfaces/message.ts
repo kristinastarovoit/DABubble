@@ -7,7 +7,7 @@ export interface Message {
     threadCount?: number,
     reactions?: Record<string, string[]>;
 }
-// {"😭": ['user-id', 'user-id1']}
+
 
 /** Represents a chat or thread message. */
 // export interface Message {

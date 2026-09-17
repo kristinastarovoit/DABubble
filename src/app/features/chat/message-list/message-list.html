@@ -7,30 +7,29 @@
     <div
       *ngFor="let message of group.messages"
       class="message-list__item"
-      /* [class.message-list__item--own]="message.authorId === currentUserId" */
+      [class.message-list__item--own]="message.senderId === currentUserId"
     >
-      <!-- <img [src]="message.authorAvatarUrl" alt="" class="message-list__avatar" /> -->
       <img class="message-list__avatar" src="app-icons/avatar-placeholder.svg" alt="">
 
       <div class="message-list__content">
         <div class="message-list__meta">
-          <!-- <span class="message-list__author">{{ message.authorName }}</span>
-          <span class="message-list__time">{{ message.time }}</span> -->
+          <span class="message-list__author">{{ message.senderId }}</span>
+          <span class="message-list__time">{{ message.createdAt?.toDate() | date: 'shortTime' }}</span>
         </div>
 
         <div class="message-list__bubble">{{ message.text }}</div>
 
         <app-reaction-bar
-          /* [reactions]="message.reactions" */
+          [reactions]="messageReactions(message)"
           (reactionToggled)="onReactionToggled(message, $event)"
         ></app-reaction-bar>
 
         <button
-          /* *ngIf="message.replyCount" */
+          *ngIf="message.threadCount"
           class="message-list__thread-link"
           (click)="threadOpened.emit(message)"
         >
-          <!-- {{ message.replyCount }} replies -->
+          {{ message.threadCount }} replies
         </button>
       </div>
     </div>
