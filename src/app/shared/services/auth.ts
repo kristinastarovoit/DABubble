@@ -5,6 +5,11 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
+  verifyPasswordResetCode,
+  confirmPasswordReset,
+  signInAnonymously,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from 'firebase/auth';
 
 import { FIREBASE_AUTH } from '../../app.config';
@@ -27,5 +32,14 @@ export class AuthService {
 
   logout() {
     return signOut(this.auth);
+  }
+
+  loginAsGuest() {
+    return signInAnonymously(this.auth);
+  }
+
+  loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    return signInWithPopup(this.auth, provider);
   }
 }
