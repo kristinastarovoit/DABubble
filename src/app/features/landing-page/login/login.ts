@@ -18,8 +18,8 @@ export class Login {
   protected model = signal({ email: '', password: '' });
 
   protected loginForm = form(this.model, (schemaPath) => {
-    required(schemaPath.email, { message: 'Please enter your email address.' });
-    email(schemaPath.email, { message: 'Please enter a valid email address.' });
+    required(schemaPath.email, { message: '*Please enter your email address.' });
+    email(schemaPath.email, { message: '*Please enter a valid email address.' });
 
     required(schemaPath.password, { message: 'Please enter your password.' });
   });
@@ -35,9 +35,9 @@ export class Login {
 
     try {
       await this.authService.login(this.model().email, this.model().password);
-      this.router.navigateByUrl('/dashboard'); // TODO: your actual route for the chat area
+      this.router.navigateByUrl('/dashboard');
     } catch {
-      this.errorMessage.set('Email or password is incorrect.');
+      this.errorMessage.set('Email or password is incorrect. Please try again');
     } finally {
       this.isSubmitting.set(false);
     }
