@@ -1,67 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../../shared/services/auth';
-import { UserService } from '../../../shared/services/users';
-import { email, form, FormField, required } from '@angular/forms/signals';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-login',
-  imports: [RouterLink, FormField],
+  imports: [],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
 export class Login {
-  private authService = inject(AuthService);
-  private userService = inject(UserService);
-  private router = inject(Router);
 
-  protected model = signal({ email: '', password: '' });
-
-  protected loginForm = form(this.model, (schemaPath) => {
-    required(schemaPath.email, { message: 'Please enter your email address.' });
-    email(schemaPath.email, { message: 'Please enter a valid email address.' });
-
-    required(schemaPath.password, { message: 'Please enter your password.' });
-  });
-
-  protected isSubmitting = signal(false);
-  protected errorMessage = signal<string | null>(null);
-
-  protected async onSubmit() {
-    if (this.loginForm().invalid()) return;
-
-    this.isSubmitting.set(true);
-    this.errorMessage.set(null);
-
-    try {
-      await this.authService.login(this.model().email, this.model().password);
-      this.router.navigateByUrl('/dashboard'); // TODO: your actual route for the chat area
-    } catch {
-      this.errorMessage.set('Email or password is incorrect.');
-    } finally {
-      this.isSubmitting.set(false);
-    }
-  }
-
-  protected isGuestLoggingIn = signal(false);
-
-  protected async loginAsGuest() {
-    this.isGuestLoggingIn.set(true);
-    this.errorMessage.set(null);
-
-    try {
-      const credential = await this.authService.loginAsGuest();
-      await this.userService.createUserProfile(
-        credential.user.uid,
-        'Guest',
-        `guest-${credential.user.uid}@dabubble.local`,
-        'app-icons/avatar_default.svg',
-      );
-      this.router.navigateByUrl('/dashboard'); // TODO: your actual route
-    } catch {
-      this.errorMessage.set('Guest login failed. Please try again.');
-    } finally {
-      this.isGuestLoggingIn.set(false);
-    }
-  }
 }
