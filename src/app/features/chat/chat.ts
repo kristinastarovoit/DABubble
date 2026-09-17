@@ -39,16 +39,28 @@ export class Chat {
   //   this.memberListRequested.emit();
   // }
 
+  /** Provides channel data and channel message listeners. */
   private channelService = inject(ChannelService);
+
+  /** Provides direct-message data and direct-message listeners. */
   private dmService = inject(DmService);
+
+  /** Provides the currently authenticated user for sending messages. */
   private auth = inject(FIREBASE_AUTH);
 
+  /** Identifier of the currently selected channel. */
   channelId = computed(() => this.channelService.activeChannelId());
+
+  /** Identifier of the currently selected direct-message conversation. */
   dmId = computed(() => this.dmService.activeDmId());
 
+  /** Messages displayed for the active channel or direct-message conversation. */
   messages = signal<Message[]>([]);
+
+  /** Unsubscribes from the active message listener when the conversation changes. */
   private currentUnsubscribe: (() => void) | undefined;
 
+  /** Creates a reactive listener for the currently selected conversation. */
   constructor() {
     effect(() => {
       this.currentUnsubscribe?.();
@@ -72,10 +84,12 @@ export class Chat {
     });
   }
 
+  /** Removes the active Firestore message listener. */
   ngOnDestroy() {
     this.currentUnsubscribe?.();
   }
 
+  /** Sends a message to the active channel or direct-message conversation. */
   onSend(text: string) {
     const uid = this.auth.currentUser?.uid;
     if (!uid) { return; }

@@ -16,6 +16,10 @@
 
   ></app-message-input> -->
   @if (channelId() || dmId()) {
+    <app-channel-header
+    /* [channel]="activeChannel" */
+    /* (memberIconClicked)="openMemberList()" */
+  ></app-channel-header>
   <app-message-list [messages]="messages()" />
   <app-message-input (send)="onSend($event)" />
   } @else {

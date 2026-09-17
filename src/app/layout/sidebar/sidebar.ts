@@ -16,7 +16,7 @@ export class Sidebar {
   channelService = inject(ChannelService);
   dmService = inject(DmService);
   /** Available workspace channels. */
-  @Input() channels: Channel[] = [];
+  // @Input() channels: Channel[] = [];
   /** Available direct-message contacts. */
   @Input() directMessages: User[] = [];
   /** Identifier of the active channel. */
