@@ -54,6 +54,8 @@ export class Chat {
   /** Unsubscribes from the active message listener when the conversation changes. */
   private currentUnsubscribe: (() => void) | undefined;
 
+  uid = this.auth.currentUser?.uid;
+
   /** The channel matching the currently selected channel ID. */
   activeChannel = computed(() =>
     this.channelService.channels().find(channel => channel.id === this.channelId())
@@ -90,16 +92,15 @@ export class Chat {
 
   /** Sends a message to the active channel or direct-message conversation. */
   onSend(text: string) {
-    const uid = this.auth.currentUser?.uid;
-    if (!uid) { return; }
+    if (!this.uid) { return; }
 
     const channelId = this.channelId();
     const dmId = this.dmId();
 
     if (channelId) {
-      this.channelService.addMessageToChannel(channelId, text, uid);
+      this.channelService.addMessageToChannel(channelId, text, this.uid);
     } else if (dmId) {
-      this.dmService.addMessageToDm(dmId, text, uid);
+      this.dmService.addMessageToDm(dmId, text, this.uid);
     }
   }
 }
