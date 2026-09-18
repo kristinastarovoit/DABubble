@@ -20,17 +20,18 @@
       <img src="app-icons/channels_purple.svg" alt="Channels Icon"
         class="sidebar__section-icon sidebar__section-icon--hover" />
       <span class="sidebar__section-title">Channels</span>
+      <img src="app-icons/plus.svg" alt="Add Channel" (click)="openChannelCreate($event)">
     </div>
 
     @if (isChannelsOpen) {
     <ul class="sidebar__list">
-      @for (channel of channelService.channels(); track channel.id) {
+      <!-- @for (channel of channelService.channels(); track channel.id) {
       <li class="sidebar__item" [class.sidebar__item--active]="channel.id === activeChannelId"
         (click)="selectChannel(channel)">
         <span class="sidebar__item-icon">#</span>
         <span class="sidebar__item-name">{{ channel.name }}</span>
       </li>
-      }
+      } -->
       <li class="sidebar__item sidebar__item--add" (click)="openChannelCreate()">
         <img src="app-icons/add.svg" alt="Add Icon" class="sidebar__item-icon sidebar__item-icon--default" />
         <img src="app-icons/add_purple.svg" alt="Add Icon" class="sidebar__item-icon sidebar__item-icon--hover" />
@@ -69,3 +70,4 @@
     </ul>
   </div>
 </aside>
+<app-create-channel #createChannel></app-create-channel>
