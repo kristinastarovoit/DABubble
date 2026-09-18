@@ -1,0 +1,198 @@
+@use '../../../../styles/variables' as *;
+
+.channel-settings {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  background: transparent;
+  box-sizing: border-box;
+  font-family: 'Nunito';
+
+  &[open] {
+    display: flex;
+  }
+
+  &::backdrop {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  &__card {
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background-color: $white;
+    border-radius: 24px;
+    padding: 32px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $black;
+  }
+
+  &__hash {
+    font-weight: 700;
+  }
+
+  &__close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: $pastel-purple-bg;
+    }
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  &__card {
+    border: 1px solid $border-purple;
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__card-label {
+    font-size: 1.1rem;
+    font-weight: 700;
+    // color: $black;
+  }
+
+  &__edit-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: $midtone-purple-three;
+    // padding: 0;
+
+    &:hover {
+      font-weight: 700;
+    }
+  }
+
+  &__value {
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &--description {
+      line-height: 1.5;
+    }
+  }
+
+  &__edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid $border-purple;
+    border-radius: 32px;
+    padding: 10px 18px;
+
+    // &:focus-within {
+    //   border-color: $color-primary;
+    // }
+  }
+
+  &__prefix {
+    color: $black;
+    flex-shrink: 0;
+  }
+
+  &__input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    font-family: inherit;
+    background: transparent;
+  }
+
+  &__error {
+    font-size: 0.8rem;
+    color: $error-red;
+  }
+
+  &__edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  &__divider {
+    height: 2px;
+    background-color: rgba(173, 176, 217, 0.8);
+    margin: 8px 0;
+  }
+
+  &__creator {
+    font-size: 15px;
+    font-weight: 600;
+    color: $black;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  &__leave-btn {
+    background-color: $dark-purple-one;
+    color: $white;
+    border: none;
+    border-radius: 32px;
+    padding: 14px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: $light-purple-two;
+    }
+  }
+}

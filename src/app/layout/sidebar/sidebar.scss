@@ -88,9 +88,9 @@
     cursor: pointer;
     border-radius: 8px;
 
-    // &:hover {
-    //   color: $light-purple-two;
-    // }
+    &:hover {
+      color: $light-purple-two;
+    }
   }
 
   &__chevron {
@@ -122,6 +122,26 @@
     }
   }
 
+  &__add-channel-icon {
+    display: block;
+
+    &--hover {
+      display: none;
+    }
+  }
+
+  &__section-header:hover &__add-channel-icon {
+    &--default {
+      display: none;
+    }
+
+    &--hover {
+      display: block;
+      background-color: $pastel-purple-bg;
+      border-radius: 50%;
+    }
+  }
+
   &__section-title {
     font-weight: 600;
     color: $black;
@@ -146,7 +166,7 @@
     padding: 8px 12px 8px 32px;
     border-radius: 24px;
     cursor: pointer;
-    color: $dark-grey;
+    color: $black;
 
     &:hover {
 

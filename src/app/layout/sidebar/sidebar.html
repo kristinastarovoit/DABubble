@@ -38,6 +38,8 @@
         class="sidebar__section-icon sidebar__section-icon--hover"
       />
       <span class="sidebar__section-title">Channels</span>
+      <img src="app-icons/plus.svg" alt="Add Channel" class="sidebar__add-channel-icon sidebar__add-channel-icon--default" (click)="openChannelCreate($event)">
+      <img src="app-icons/plus_purple.svg" alt="Add Channel" class="sidebar__add-channel-icon sidebar__add-channel-icon--hover" (click)="openChannelCreate($event)">
     </div>
 
     @if (isChannelsOpen) {
@@ -122,3 +124,4 @@
     }
   </div>
 </aside>
+<app-create-channel #createChannel></app-create-channel>

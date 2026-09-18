@@ -1,0 +1,92 @@
+<dialog #dialogRef class="channel-settings" (click)="onBackdropClick($event)">
+    <div class="channel-settings__card">
+        <div class="channel-settings__header">
+            <h2 class="channel-settings__title">
+                <span class="channel-settings__hash">#</span>
+                {{ channelName }}
+            </h2>
+            <button class="channel-settings__close-btn" (click)="close()">
+                <img src="app-icons/close.svg" alt="Schließen" />
+            </button>
+        </div>
+
+        <div class="channel-settings__card">
+            <div class="channel-settings__card-header">
+                <span class="channel-settings__card-label">Channel-Name</span>
+                <button
+                    class="channel-settings__edit-btn"
+                    [disabled]="isEditingName && !editedName.trim()"
+                    (click)="isEditingName ? saveName() : startEditingName()"
+                >
+                    {{ isEditingName ? 'Save' : 'Edit' }}
+                </button>
+            </div>
+
+            @if (!isEditingName) {
+            <div class="channel-settings__value">
+                <span class="channel-settings__hash">#</span>
+                {{ name }}
+            </div>
+            }
+
+            @if (isEditingName) {
+            <div class="channel-settings__input-wrapper">
+                <span class="channel-settings__prefix">#</span>
+                <input
+                    type="text"
+                    class="channel-settings__input"
+                    [(ngModel)]="editedName"
+                    name="editedName"
+                    maxlength="50"
+                    (keydown.enter)="saveName()"
+                />
+            </div>
+            }
+            @if (nameErrorMessage) {
+            <span class="channel-settings__error">{{ nameErrorMessage }}</span>
+            }
+        </div>
+
+        <div class="channel-settings__card">
+            <div class="channel-settings__card-header">
+                <span class="channel-settings__card-label">Description</span>
+                <button
+                    class="channel-settings__edit-btn"
+                    (click)="isEditingDescription ? saveDescription() : startEditingDescription()"
+                >
+                    {{ isEditingDescription ? 'Save' : 'Edit' }}
+                </button>
+            </div>
+
+            @if (!isEditingDescription) {
+            <p class="channel-settings__value channel-settings__value--description">
+                {{ description || 'No description available.' }}
+            </p>
+            }
+
+            @if (isEditingDescription) {
+            <div class="channel-settings__input-wrapper">
+                <input
+                    type="text"
+                    class="channel-settings__input"
+                    [(ngModel)]="editedDescription"
+                    name="editedDescription"
+                    maxlength="200"
+                    (keydown.enter)="saveDescription()"
+                />
+            </div>
+            }
+
+            <div class="channel-settings__divider"></div>
+
+            <span class="channel-settings__card-label">Created by</span>
+            <span class="channel-settings__creator">{{ createdByName }}</span>
+        </div>
+
+        <div class="channel-settings__actions">
+            <button class="channel-settings__leave-btn" (click)="leaveChannel()">
+                Leave Channel
+            </button>
+        </div>
+    </div>
+</dialog>

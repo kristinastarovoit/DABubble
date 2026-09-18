@@ -13,11 +13,12 @@
         </div>
     </div>
 
+    @if (isUserMenuOpen) {
     <div
         class="header__backdrop"
-        *ngIf="isUserMenuOpen"
         (click)="closeUserMenu()"
     ></div>
+    }
 
     <div class="header__user" [class.header__user--menu-open]="isUserMenuOpen" (click)="toggleUserMenu()">
         <!-- <span class="header__user-name">{{ currentUser.name }}</span> -->
@@ -28,9 +29,11 @@
         <img src="app-icons/arrow_down.svg" alt="" class="header__user-chevron header__user-chevron--default" />
         <img src="app-icons/arrow_down_purple.svg" alt="" class="header__user-chevron header__user-chevron--hover" />
 
-        <div class="header__user-menu" *ngIf="isUserMenuOpen">
+        @if (isUserMenuOpen) {
+        <div class="header__user-menu">
             <button (click)="goToProfile()">Profile</button>
             <button (click)="logout()">Logout</button>
         </div>
+        }
     </div>
 </header>
