@@ -1,0 +1,44 @@
+<dialog #dialogRef class="channel-create" (click)="onBackdropClick($event)">
+    <div class="channel-create__card">
+        <div class="channel-create__header">
+            <h2 class="channel-create__title">Create Channel</h2>
+            <button class="channel-create__close-btn" (click)="cancel()">
+                <img src="app-icons/close.svg" alt="Close" />
+            </button>
+        </div>
+
+        <p class="channel-create__description">
+            Channels are for your team to communicate. Ideally, they should be topic-based: #marketing, for example.
+        </p>
+
+        <form class="channel-create__form" (ngSubmit)="submit()">
+            <div class="channel-create__field">
+                <label class="channel-create__label" for="channel-name">Channel-Name</label>
+                <div class="channel-create__input-wrapper">
+                    <span class="channel-create__prefix">#</span>
+                    <input id="channel-name" type="text" class="channel-create__input"
+                        placeholder="e.g. cooperation projects" [(ngModel)]="name" name="name" maxlength="50" />
+                </div>
+                @if (errorMessage) {
+                <span class="channel-create__error">{{ errorMessage }}</span>
+                }
+            </div>
+
+            <div class="channel-create__field">
+                <label class="channel-create__label" for="channel-description">
+                    Description <span class="channel-create__label-optional">(optional)</span>
+                </label>
+                <div class="channel-create__input-wrapper">
+                    <input id="channel-description" type="text" class="channel-create__input"
+                        placeholder="Your description" [(ngModel)]="description" name="description" maxlength="200" />
+                </div>
+            </div>
+
+            <div class="channel-create__actions">
+                <button type="submit" class="channel-create__submit-btn" [disabled]="!name.trim()">
+                    Create
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>

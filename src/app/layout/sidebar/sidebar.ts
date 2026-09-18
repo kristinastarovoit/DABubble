@@ -1,14 +1,15 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Channel } from '../../shared/interfaces/channel';
 import { User } from '../../shared/interfaces/user';
 import { UserModel } from '../../shared/model/user.model';
 import { ChannelService } from '../../shared/services/channel-service';
 import { DmService } from '../../shared/services/dm-service';
+import { CreateChannel } from './create-channel/create-channel';
 import { Dm } from '../../shared/interfaces/dm';
 
 @Component({
-  imports: [CommonModule],
+  imports: [CommonModule, CreateChannel],
   selector: 'app-sidebar',
   styleUrl: './sidebar.scss',
   templateUrl: './sidebar.html',
@@ -21,6 +22,11 @@ export class Sidebar {
   /** Provides direct-message data and selection state. */
   dmService = inject(DmService);
 
+  /** Reference to the create-channel dialog. */
+  @ViewChild('createChannel') private createChannel!: CreateChannel;
+
+  /** Available direct-message contacts. */
+  @Input() directMessages: User[] = [];
   /** Identifier of the active channel. */
   @Input() activeChannelId: string | null = null;
   /** Identifier of the active direct message. */
@@ -74,7 +80,9 @@ export class Sidebar {
   }
 
   /** Requests creation of a channel. */
-  openChannelCreate(): void {
+  openChannelCreate(event?: Event): void {
+    event?.stopPropagation();
+    this.createChannel.open();
     this.channelCreateRequested.emit();
   }
 

@@ -1,0 +1,159 @@
+@use '../../../../styles/variables' as *;
+
+.channel-create {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  background: transparent;
+  box-sizing: border-box;
+  font-family: 'Nunito';
+
+  &[open] {
+    display: flex;
+  }
+
+  &::backdrop {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  &__card {
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background-color: $white;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+    box-sizing: border-box;
+  }
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding-bottom: 16px;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $black;
+  }
+
+  &__close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+
+    &:hover {
+      background-color: $pastel-purple-bg;
+    }
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  &__description {
+    font-size: 1.1rem;
+    padding-bottom: 20px;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__label {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: $black;
+    padding-bottom: 8px;
+  }
+
+  &__label-optional {
+    font-weight: 400;
+    color: $black;
+  }
+
+  &__input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid $border-purple;
+    border-radius: 32px;
+    padding: 12px 20px;
+
+    // &:focus-within {
+    //   border-color: $black;
+    // }
+  }
+
+  &__prefix {
+    font-size: 1rem;
+    color: $black;
+    flex-shrink: 0;
+  }
+
+  &__input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    font-family: inherit;
+    background: transparent;
+
+    &::placeholder {
+      color: $dark-grey;
+    }
+  }
+
+  &__error {
+    font-size: 0.8rem;
+    color: $error-red;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+
+  &__submit-btn {
+    background-color: $dark-purple-one;
+    color: $white;
+    border: none;
+    border-radius: 32px;
+    padding: 14px 32px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+
+    // &:hover:not(:disabled) {
+    //   background-color: $color-primary-dark;
+    // }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+}
