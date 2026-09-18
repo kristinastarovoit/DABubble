@@ -2,10 +2,11 @@ import { Component, EventEmitter, Input, Output, ViewChild, inject } from '@angu
 import { CommonModule } from '@angular/common';
 import { Channel } from '../../shared/interfaces/channel';
 import { User } from '../../shared/interfaces/user';
+import { UserModel } from '../../shared/model/user.model';
 import { ChannelService } from '../../shared/services/channel-service';
 import { DmService } from '../../shared/services/dm-service';
 import { CreateChannel } from './create-channel/create-channel';
-
+import { Dm } from '../../shared/interfaces/dm';
 
 @Component({
   imports: [CommonModule, CreateChannel],
@@ -33,8 +34,6 @@ export class Sidebar {
 
   /** Emitted when a channel is selected. */
   @Output() channelSelected = new EventEmitter<Channel>();
-  /** Emitted when a direct-message contact is selected. */
-  @Output() directMessageSelected = new EventEmitter<User>();
   /** Emitted when channel creation is requested. */
   @Output() channelCreateRequested = new EventEmitter<void>();
   /** Emitted when workspace editing is requested. */
@@ -63,11 +62,21 @@ export class Sidebar {
     this.channelSelected.emit(channel);
   }
 
-  /** Selects a direct-message contact. */
-  selectDirectMessage(contact: User): void {
-    this.dmService.selectDm(contact.id);
+  /** Selects a direct-message conversation, creating it on first contact. */
+  async selectDirectMessage(partner: {
+    user: UserModel;
+    isSelf: boolean;
+    dm: Dm | null;
+  }): Promise<void> {
+    const currentUserId = this.dmService.currentUserId();
+    if (!currentUserId) return;
+
     this.channelService.activeChannelId.set(undefined);
-    this.directMessageSelected.emit(contact);
+    if (partner.dm) {
+      this.dmService.selectDm(partner.dm.id);
+    } else {
+      await this.dmService.addDm([currentUserId, partner.user.uid]);
+    }
   }
 
   /** Requests creation of a channel. */
