@@ -1,4 +1,4 @@
-import { Service, inject } from '@angular/core';
+import { Service, inject, signal } from '@angular/core';
 import {
   Auth,
   createUserWithEmailAndPassword,
@@ -10,13 +10,24 @@ import {
   signInAnonymously,
   GoogleAuthProvider,
   signInWithPopup,
+  onAuthStateChanged,
 } from 'firebase/auth';
 
 import { FIREBASE_AUTH } from '../../app.config';
 
 @Service()
+/** Provides Firebase authentication actions and reactive auth state. */
 export class AuthService {
   private auth = inject(FIREBASE_AUTH);
+
+  /** UID of the currently authenticated user, or `undefined` when logged out. */
+  currentUserId = signal<string | undefined>(undefined);
+
+  constructor() {
+    onAuthStateChanged(this.auth, (user) => {
+      this.currentUserId.set(user?.uid);
+    });
+  }
 
   login(email: string, password: string) {
     return signInWithEmailAndPassword(this.auth, email, password);
@@ -50,5 +61,4 @@ export class AuthService {
     const provider = new GoogleAuthProvider();
     return signInWithPopup(this.auth, provider);
   }
-
 }

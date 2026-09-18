@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Input, Output, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Channel } from '../../shared/interfaces/channel';
-import { User } from '../../shared/interfaces/user';
 import { UserModel } from '../../shared/model/user.model';
 import { ChannelService } from '../../shared/services/channel-service';
 import { DmService } from '../../shared/services/dm-service';
+import { AuthService } from '../../shared/services/auth';
 import { CreateChannel } from './create-channel/create-channel';
 import { Dm } from '../../shared/interfaces/dm';
 
@@ -22,15 +22,14 @@ export class Sidebar {
   /** Provides direct-message data and selection state. */
   dmService = inject(DmService);
 
+  /** Provides reactive authentication state. */
+  private authService = inject(AuthService);
+
   /** Reference to the create-channel dialog. */
   @ViewChild('createChannel') private createChannel!: CreateChannel;
 
-  /** Available direct-message contacts. */
-  @Input() directMessages: User[] = [];
   /** Identifier of the active channel. */
   @Input() activeChannelId: string | null = null;
-  /** Identifier of the active direct message. */
-  @Input() activeDmId: string | null = null;
 
   /** Emitted when a channel is selected. */
   @Output() channelSelected = new EventEmitter<Channel>();
@@ -68,7 +67,7 @@ export class Sidebar {
     isSelf: boolean;
     dm: Dm | null;
   }): Promise<void> {
-    const currentUserId = this.dmService.currentUserId();
+    const currentUserId = this.authService.currentUserId();
     if (!currentUserId) return;
 
     this.channelService.activeChannelId.set(undefined);

@@ -1,7 +1,7 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { User } from '../../shared/interfaces/user';
 import { AuthService } from '../../shared/services/auth';
+import { UserService } from '../../shared/services/users';
 import { Router } from '@angular/router';
 
 @Component({
@@ -12,10 +12,13 @@ import { Router } from '@angular/router';
 })
 export class Header {
   private authService = inject(AuthService);
+  private userService = inject(UserService);
   private router = inject(Router);
 
-  /** The currently signed-in user. */
-  currentUser!: User;
+  /** The profile of the currently signed-in user, or `undefined` while loading or logged out. */
+  currentUser = computed(() =>
+    this.userService.users().find((user) => user.uid === this.authService.currentUserId()),
+  );
 
   /** Current value of the global search field. */
   searchQuery = '';

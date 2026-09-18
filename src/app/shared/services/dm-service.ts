@@ -1,5 +1,5 @@
-import { Service, computed, inject, signal } from '@angular/core';
-import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../../app.config';
+import { Service, computed, effect, inject, signal } from '@angular/core';
+import { FIREBASE_FIRESTORE } from '../../app.config';
 import { Dm } from '../interfaces/dm';
 import {
   collection,
@@ -13,29 +13,25 @@ import {
   arrayRemove,
   query,
   where,
-  getDocs,
   getDoc,
   setDoc,
 } from 'firebase/firestore';
 import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
-import { onAuthStateChanged } from 'firebase/auth';
 import { UserService } from './users';
+import { AuthService } from './auth';
 
 @Service()
 /** Provides Firestore operations and reactive direct-message data. */
 export class DmService {
   private db = inject(FIREBASE_FIRESTORE);
-  private auth = inject(FIREBASE_AUTH);
-
   private userService = inject(UserService);
+  private authService = inject(AuthService);
 
   /** The direct-message conversations available to the application. */
   dms = signal<Dm[]>([]);
   /** Identifier of the currently active direct-message conversation, or `undefined` if none is selected. */
   activeDmId = signal<string | undefined>(undefined);
-  /** UID of the currently authenticated user, or `undefined` when logged out. */
-  currentUserId = signal<string | undefined>(undefined);
 
   /** Sets the active direct-message conversation.
    *
@@ -61,37 +57,27 @@ export class DmService {
   }
 
   constructor() {
-    onAuthStateChanged(this.auth, async (user) => {
-      this.currentUserId.set(user?.uid);
-      if (!user) {
+    effect(() => {
+      const userId = this.authService.currentUserId();
+      if (!userId) {
         this.dms.set([]);
         this.activeDmId.set(undefined);
         return;
       }
-      await this.ensureSelfDm(user.uid);
-      const dmsRef = collection(this.db, 'dms');
-      const q = query(dmsRef, where('memberIds', 'array-contains', user.uid));
+      this.ensureSelfDm(userId).then(() => {
+        const dmsRef = collection(this.db, 'dms');
+        const q = query(dmsRef, where('memberIds', 'array-contains', userId));
 
-      onSnapshot(q, (snapshot) => {
-        const dms = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Dm);
-        this.dms.set(dms);
-        if (!this.activeDmId() && dms.length > 0) {
-          this.activeDmId.set(dms[0].id);
-        }
-        console.log(this.dms());
+        onSnapshot(q, (snapshot) => {
+          const dms = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Dm);
+          this.dms.set(dms);
+          if (!this.activeDmId() && dms.length > 0) {
+            this.activeDmId.set(dms[0].id);
+          }
+        });
       });
     });
   }
-
-  // für die components: @Component({...})
-  // export class DmChatComponent {
-  //   private dmService = inject(DmService);
-  //   dmId = input.required<string>();  // aus der Route
-
-  //   messages = computed(() => this.dmService.getMessages(this.dmId()));
-  // }
-
-  // unsubscribe in ngondestroy
 
   /** Subscribes to all messages in a direct-message conversation.
    *
@@ -278,7 +264,7 @@ export class DmService {
    * "Guest", except the signed-in user themself. Sorted alphabetically by name.
    */
   dmPartners = computed(() => {
-    const currentUserId = this.currentUserId();
+    const currentUserId = this.authService.currentUserId();
     const allUsers = this.userService.users();
     const dms = this.dms();
 
