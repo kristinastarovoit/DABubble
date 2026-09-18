@@ -3,7 +3,7 @@
         <div class="channel-settings__header">
             <h2 class="channel-settings__title">
                 <span class="channel-settings__hash">#</span>
-                {{ channelName }}
+                {{ activeChannel()?.name }}
             </h2>
             <button class="channel-settings__close-btn" (click)="close()">
                 <img src="app-icons/close.svg" alt="Schließen" />
@@ -25,7 +25,7 @@
             @if (!isEditingName) {
             <div class="channel-settings__value">
                 <span class="channel-settings__hash">#</span>
-                {{ name }}
+                {{ activeChannel()?.name }}
             </div>
             }
 
@@ -60,7 +60,7 @@
 
             @if (!isEditingDescription) {
             <p class="channel-settings__value channel-settings__value--description">
-                {{ description || 'No description available.' }}
+                {{ activeChannel()?.description ?? 'No description available.' }}
             </p>
             }
 
@@ -80,7 +80,7 @@
             <div class="channel-settings__divider"></div>
 
             <span class="channel-settings__card-label">Created by</span>
-            <span class="channel-settings__creator">{{ createdByName }}</span>
+            <span class="channel-settings__creator">{{ activeChannel()?.createdBy }}</span>
         </div>
 
         <div class="channel-settings__actions">
