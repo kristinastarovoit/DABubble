@@ -1,5 +1,6 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Output, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ChannelService } from '../../../shared/services/channel-service';
 
 @Component({
   imports: [FormsModule],
@@ -8,12 +9,6 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './create-channel.html',
 })
 export class CreateChannel {
-
-  /** Names of channels already in use, used for duplicate validation. */
-  @Input() existingChannelNames: string[] = [];
-
-  /** Emitted when a new channel is created. */
-  @Output() created = new EventEmitter<{ name: string; description: string }>();
   /** Emitted when creation is cancelled. */
   @Output() cancelled = new EventEmitter<void>();
 
@@ -21,10 +16,15 @@ export class CreateChannel {
 
   /** Entered channel name. */
   name = '';
+
   /** Entered channel description. */
   description = '';
+
   /** Validation error message shown to the user. */
   errorMessage = '';
+
+  /** Provides the available channels and channel selection state. */
+  channelService = inject(ChannelService);
 
   /** Opens the dialog as a modal. */
   open(): void {
@@ -38,20 +38,21 @@ export class CreateChannel {
   }
 
   /** Validates and emits the new channel, then closes the dialog. */
-  submit(): void {
+  async submit(): Promise<void> {
     this.errorMessage = '';
     const trimmedName = this.name.trim();
-
     if (!trimmedName) {
-      this.errorMessage = 'Bitte einen Channel-Namen eingeben.';
+      this.errorMessage = 'Please enter a channel name.';
       return;
     }
-    if (this.existingChannelNames.includes(trimmedName)) {
-      this.errorMessage = 'Ein Channel mit diesem Namen existiert bereits.';
+    const created = await this.channelService.addChannel(
+      trimmedName,
+      this.description.trim()
+    );
+    if (!created) {
+      this.errorMessage = 'A channel with this name already exists.';
       return;
     }
-
-    this.created.emit({ name: trimmedName, description: this.description.trim() });
     this.close();
   }
 
