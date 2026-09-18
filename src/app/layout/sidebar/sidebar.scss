@@ -88,9 +88,9 @@
     cursor: pointer;
     border-radius: 8px;
 
-    // &:hover {
-    //   color: $light-purple-two;
-    // }
+    &:hover {
+      color: $light-purple-two;
+    }
   }
 
   &__chevron {
@@ -119,6 +119,26 @@
 
     .sidebar__section-icon--hover {
       display: block;
+    }
+  }
+
+  &__add-channel-icon {
+    display: block;
+
+    &--hover {
+      display: none;
+    }
+  }
+
+  &__section-header:hover &__add-channel-icon {
+    &--default {
+      display: none;
+    }
+
+    &--hover {
+      display: block;
+      background-color: $pastel-purple-bg;
+      border-radius: 50%;
     }
   }
 
