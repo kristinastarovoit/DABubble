@@ -22,12 +22,15 @@
                 </button>
             </div>
 
-            <div *ngIf="!isEditingName" class="channel-settings__value">
+            @if (!isEditingName) {
+            <div class="channel-settings__value">
                 <span class="channel-settings__hash">#</span>
                 {{ name }}
             </div>
+            }
 
-            <div *ngIf="isEditingName" class="channel-settings__input-wrapper">
+            @if (isEditingName) {
+            <div class="channel-settings__input-wrapper">
                 <span class="channel-settings__prefix">#</span>
                 <input
                     type="text"
@@ -38,7 +41,10 @@
                     (keydown.enter)="saveName()"
                 />
             </div>
-            <span class="channel-settings__error" *ngIf="nameErrorMessage">{{ nameErrorMessage }}</span>
+            }
+            @if (nameErrorMessage) {
+            <span class="channel-settings__error">{{ nameErrorMessage }}</span>
+            }
         </div>
 
         <div class="channel-settings__card">
@@ -52,11 +58,14 @@
                 </button>
             </div>
 
-            <p *ngIf="!isEditingDescription" class="channel-settings__value channel-settings__value--description">
+            @if (!isEditingDescription) {
+            <p class="channel-settings__value channel-settings__value--description">
                 {{ description || 'No description available.' }}
             </p>
+            }
 
-            <div *ngIf="isEditingDescription" class="channel-settings__input-wrapper">
+            @if (isEditingDescription) {
+            <div class="channel-settings__input-wrapper">
                 <input
                     type="text"
                     class="channel-settings__input"
@@ -66,6 +75,7 @@
                     (keydown.enter)="saveDescription()"
                 />
             </div>
+            }
 
             <div class="channel-settings__divider"></div>
 

@@ -1,12 +1,11 @@
 import { Component, inject, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { User } from '../../shared/interfaces/user';
 import { AuthService } from '../../shared/services/auth';
 import { Router } from '@angular/router';
 
 @Component({
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   selector: 'app-header',
   styleUrl: './header.scss',
   templateUrl: './header.html',

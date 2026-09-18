@@ -19,7 +19,9 @@
                     <input id="channel-name" type="text" class="channel-create__input"
                         placeholder="e.g. cooperation projects" [(ngModel)]="name" name="name" maxlength="50" />
                 </div>
-                <span class="channel-create__error" *ngIf="errorMessage">{{ errorMessage }}</span>
+                @if (errorMessage) {
+                <span class="channel-create__error">{{ errorMessage }}</span>
+                }
             </div>
 
             <div class="channel-create__field">

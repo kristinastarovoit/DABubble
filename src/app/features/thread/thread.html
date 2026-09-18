@@ -2,14 +2,17 @@
   <div class="thread__header">
     <div class="thread__title">
       <span class="thread__title-text">Thread</span>
-      <span class="thread__channel-name" *ngIf="channelName"># {{ channelName }}</span>
+      @if (channelName) {
+      <span class="thread__channel-name"># {{ channelName }}</span>
+      }
     </div>
     <button class="thread__close-btn" (click)="close()">
       <img src="app-icons/close.svg" alt="Close" />
     </button>
   </div>
 
-  <div class="thread__content" *ngIf="parentMessage">
+  @if (parentMessage) {
+  <div class="thread__content">
     <div class="thread__message">
       <img class="thread__avatar" src="app-icons/avatar-placeholder.svg" alt="">
 
@@ -23,14 +26,16 @@
     </div>
 
   </div>
+  }
 
-  <div class="thread__content" *ngIf="replies.length > 0">
+  @if (replies.length > 0) {
+  <div class="thread__content">
     <div class="thread__divider">
       <span>{{ replies.length }} {{ replies.length === 1 ? 'Reply' : 'Replies' }}</span>
     </div>
 
+    @for (reply of replies; track reply.id) {
     <div
-      *ngFor="let reply of replies"
       class="thread__message"
       [class.thread__message--own]="reply.senderId === currentUserId"
     >
@@ -49,11 +54,15 @@
         ></app-reaction-bar>
       </div>
     </div>
+    }
   </div>
+  }
 
-  <div class="thread__content" *ngIf="!parentMessage">
+  @if (!parentMessage) {
+  <div class="thread__content">
     <span>Thread eingeblendet zur Bearbeitung.</span>
   </div>
+  }
 
   <app-message-input
     [placeholder]="'Reply...'"
