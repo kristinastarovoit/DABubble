@@ -56,20 +56,25 @@ export class ChannelService {
      * @returns A promise that resolves once the channel has been created,
      * or immediately if creation was skipped.
      */
-    async addChannel(name: string, description: string): Promise<void> {
+    async addChannel(name: string, description: string): Promise<boolean> {
         const user = this.auth.currentUser?.uid;
+
+        if (!user) return false;
+
         const channelsRef = collection(this.db, 'channels');
         const q = query(channelsRef, where('name', '==', name));
         const snapshot = await getDocs(q);
-        if (!user) { return }
-        if (!snapshot.empty) { return }
-        const channelRef = await addDoc(collection(this.db, "channels"), {
-            name: name,
-            description: description,
+
+        if (!snapshot.empty) return false;
+
+        await addDoc(channelsRef, {
+            name,
+            description,
             createdBy: user,
-            memberIds: [user]
+            memberIds: [user],
         });
-        console.log("Channel written with ID: ", channelRef.id);
+
+        return true;
     }
 
 
