@@ -89,11 +89,6 @@ export class EditChannel {
     this.nameUpdated.emit(trimmed);
   }
 
-  /** Leaves edit mode for the name without saving. */
-  cancelEditingName(): void {
-    this.isEditingName = false;
-  }
-
   /** Enters edit mode for the channel description. */
   startEditingDescription(): void {
     this.editedDescription = this.description;
@@ -105,11 +100,6 @@ export class EditChannel {
     this.description = this.editedDescription.trim();
     this.isEditingDescription = false;
     this.descriptionUpdated.emit(this.description);
-  }
-
-  /** Leaves edit mode for the description without saving. */
-  cancelEditingDescription(): void {
-    this.isEditingDescription = false;
   }
 
   /** Emits the leave event and closes the dialog. */

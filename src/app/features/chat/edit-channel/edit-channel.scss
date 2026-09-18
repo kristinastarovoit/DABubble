@@ -1,16 +1,7 @@
 @use '../../../../styles/variables' as *;
 
-
-.channel-settings-overlay {
-//   position: fixed;
-//   inset: 0;
-//   background-color: rgba(0, 0, 0, 0.3);
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-//   z-index: 100;
-
- position: fixed;
+.channel-settings {
+  position: fixed;
   inset: 0;
   display: none;
   align-items: center;
@@ -24,20 +15,29 @@
   background: transparent;
   box-sizing: border-box;
   font-family: 'Nunito';
-  
-}
 
-.channel-settings {
-  background-color: $white;
-  border-radius: 24px;
-  padding: 32px;
-  width: 100%;
-  max-width: 800px;
-//   box-shadow: $shadow-elevated;
-//   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  &[open] {
+    display: flex;
+  }
+
+  &::backdrop {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  &__card {
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background-color: $white;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
 
   &__header {
     display: flex;
@@ -165,41 +165,6 @@
     justify-content: flex-end;
     gap: 8px;
   }
-
-//   &__cancel-btn {
-//     background: none;
-//     border: 1px solid $black;
-//     border-radius: 32px;
-//     padding: 10px 20px;
-//     font-size: 14px;
-//     font-weight: 600;
-//     color: $black;
-//     cursor: pointer;
-
-    // &:hover {
-    //   background-color: $color-background-light;
-    // }
-//   }
-
-//   &__save-btn {
-//     background-color: $dark-purple-one;
-//     color: $white;
-//     border: none;
-//     border-radius: 32px;
-//     padding: 10px 20px;
-//     font-size: 14px;
-//     font-weight: 600;
-//     cursor: pointer;
-
-//     // &:hover:not(:disabled) {
-//     //   background-color: $color-primary-dark;
-//     // }
-
-//     &:disabled {
-//       opacity: 0.4;
-//       cursor: not-allowed;
-//     }
-//   }
 
   &__divider {
     height: 1px;
