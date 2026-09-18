@@ -9,27 +9,42 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './edit-channel.html',
 })
 export class EditChannel {
+  /** Current channel name. */
   @Input() channelName = '';
+  /** Current channel description. */
   @Input() description = '';
+  /** Display name of the channel creator. */
   @Input() createdByName = '';
+  /** Names of channels already in use, used for duplicate validation. */
   @Input() existingChannelNames: string[] = [];
 
+  /** Emitted when the channel name is saved. */
   @Output() nameUpdated = new EventEmitter<string>();
+  /** Emitted when the channel description is saved. */
   @Output() descriptionUpdated = new EventEmitter<string>();
+  /** Emitted when the user leaves the channel. */
   @Output() left = new EventEmitter<void>();
+  /** Emitted when the dialog is closed. */
   @Output() closed = new EventEmitter<void>();
 
   @ViewChild('dialogRef') private dialogRef!: ElementRef<HTMLDialogElement>;
 
+  /** Whether the name field is in edit mode. */
   isEditingName = false;
+  /** Whether the description field is in edit mode. */
   isEditingDescription = false;
 
+  /** Current channel name shown in the view. */
   name = '';
+  /** Draft value while editing the name. */
   editedName = '';
+  /** Validation error message for the name field. */
   nameErrorMessage = '';
 
+  /** Draft value while editing the description. */
   editedDescription = '';
 
+  /** Initializes the view name from the input. */
   ngOnInit(): void {
     this.name = this.channelName;
   }
@@ -47,12 +62,14 @@ export class EditChannel {
     this.closed.emit();
   }
 
+  /** Enters edit mode for the channel name. */
   startEditingName(): void {
     this.editedName = this.name;
     this.nameErrorMessage = '';
     this.isEditingName = true;
   }
 
+  /** Validates and saves the edited channel name. */
   saveName(): void {
     this.nameErrorMessage = '';
     const trimmed = this.editedName.trim();
@@ -72,25 +89,30 @@ export class EditChannel {
     this.nameUpdated.emit(trimmed);
   }
 
+  /** Leaves edit mode for the name without saving. */
   cancelEditingName(): void {
     this.isEditingName = false;
   }
 
+  /** Enters edit mode for the channel description. */
   startEditingDescription(): void {
     this.editedDescription = this.description;
     this.isEditingDescription = true;
   }
 
+  /** Saves the edited channel description. */
   saveDescription(): void {
     this.description = this.editedDescription.trim();
     this.isEditingDescription = false;
     this.descriptionUpdated.emit(this.description);
   }
 
+  /** Leaves edit mode for the description without saving. */
   cancelEditingDescription(): void {
     this.isEditingDescription = false;
   }
 
+  /** Emits the leave event and closes the dialog. */
   leaveChannel(): void {
     this.left.emit();
     this.close();

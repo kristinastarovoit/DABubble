@@ -10,15 +10,21 @@ import { FormsModule } from '@angular/forms';
 })
 export class CreateChannel {
 
+  /** Names of channels already in use, used for duplicate validation. */
   @Input() existingChannelNames: string[] = [];
 
+  /** Emitted when a new channel is created. */
   @Output() created = new EventEmitter<{ name: string; description: string }>();
+  /** Emitted when creation is cancelled. */
   @Output() cancelled = new EventEmitter<void>();
 
   @ViewChild('dialogRef') private dialogRef!: ElementRef<HTMLDialogElement>;
 
+  /** Entered channel name. */
   name = '';
+  /** Entered channel description. */
   description = '';
+  /** Validation error message shown to the user. */
   errorMessage = '';
 
   /** Opens the dialog as a modal. */
@@ -32,6 +38,7 @@ export class CreateChannel {
     this.resetForm();
   }
 
+  /** Validates and emits the new channel, then closes the dialog. */
   submit(): void {
     this.errorMessage = '';
     const trimmedName = this.name.trim();
@@ -49,6 +56,7 @@ export class CreateChannel {
     this.close();
   }
 
+  /** Cancels creation and closes the dialog. */
   cancel(): void {
     this.cancelled.emit();
     this.close();
@@ -61,6 +69,7 @@ export class CreateChannel {
     }
   }
 
+  /** Clears all form fields and the error message. */
   private resetForm(): void {
     this.name = '';
     this.description = '';

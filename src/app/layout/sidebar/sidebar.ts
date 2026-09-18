@@ -21,6 +21,7 @@ export class Sidebar {
   /** Provides direct-message data and selection state. */
   dmService = inject(DmService);
 
+  /** Reference to the create-channel dialog. */
   @ViewChild('createChannel') private createChannel!: CreateChannel;
 
   /** Available direct-message contacts. */

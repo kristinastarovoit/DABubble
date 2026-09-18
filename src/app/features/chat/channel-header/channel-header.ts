@@ -20,6 +20,7 @@ export class ChannelHeader {
   /** Emitted when channel details are requested. */
   @Output() channelDetailsRequested = new EventEmitter<void>();
 
+  /** Reference to the channel-settings dialog. */
   @ViewChild('editChannel') private editChannel!: EditChannel;
 
   /** Requests the channel details view. */
