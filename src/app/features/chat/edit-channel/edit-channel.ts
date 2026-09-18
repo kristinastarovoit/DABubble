@@ -28,11 +28,13 @@ export class EditChannel {
 
   /** Whether the name field is in edit mode. */
   isEditingName = false;
+  
   /** Whether the description field is in edit mode. */
   isEditingDescription = false;
 
   /** Draft value while editing the name. */
   editedName = '';
+  
   /** Validation error message for the name field. */
   nameErrorMessage = '';
 
@@ -75,22 +77,29 @@ export class EditChannel {
     const channel = this.activeChannel();
     if (!channel) return;
 
-    this.nameErrorMessage = '';
     const trimmed = this.editedName.trim();
-    const otherNames = this.existingChannelNames.filter(n => n !== channel.name);
-
-    if (!trimmed) {
-      this.nameErrorMessage = 'The Channel name must not be empty';
-      return;
-    }
-    if (otherNames.includes(trimmed)) {
-      this.nameErrorMessage = 'A Channel with this name already exists.';
-      return;
-    }
+    if (!this.isValidName(trimmed, channel.name)) return;
 
     await this.channelService.editChannelName(trimmed, channel.id);
     this.isEditingName = false;
     this.nameUpdated.emit(trimmed);
+  }
+
+  /** Validates the edited channel name. */
+  private isValidName(name: string, currentName: string): boolean {
+    this.nameErrorMessage = '';
+    if (!name) {
+      this.nameErrorMessage = 'The Channel name must not be empty';
+      return false;
+    }
+    const nameAlreadyExists = this.existingChannelNames
+      .filter(existingName => existingName !== currentName)
+      .includes(name);
+    if (nameAlreadyExists) {
+      this.nameErrorMessage = 'A Channel with this name already exists.';
+      return false;
+    }
+    return true;
   }
 
   /** Enters edit mode for the channel description. */
