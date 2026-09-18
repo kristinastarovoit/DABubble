@@ -1,5 +1,6 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, inject, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ChannelService } from '../../../shared/services/channel-service';
 
 @Component({
   imports: [FormsModule],
@@ -8,21 +9,18 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './edit-channel.html',
 })
 export class EditChannel {
-  /** Current channel name. */
-  @Input() channelName = '';
-  /** Current channel description. */
-  @Input() description = '';
-  /** Display name of the channel creator. */
-  @Input() createdByName = '';
   /** Names of channels already in use, used for duplicate validation. */
   @Input() existingChannelNames: string[] = [];
 
   /** Emitted when the channel name is saved. */
   @Output() nameUpdated = new EventEmitter<string>();
+
   /** Emitted when the channel description is saved. */
   @Output() descriptionUpdated = new EventEmitter<string>();
+
   /** Emitted when the user leaves the channel. */
   @Output() left = new EventEmitter<void>();
+
   /** Emitted when the dialog is closed. */
   @Output() closed = new EventEmitter<void>();
 
@@ -33,8 +31,6 @@ export class EditChannel {
   /** Whether the description field is in edit mode. */
   isEditingDescription = false;
 
-  /** Current channel name shown in the view. */
-  name = '';
   /** Draft value while editing the name. */
   editedName = '';
   /** Validation error message for the name field. */
@@ -43,10 +39,16 @@ export class EditChannel {
   /** Draft value while editing the description. */
   editedDescription = '';
 
-  /** Initializes the view name from the input. */
-  ngOnInit(): void {
-    this.name = this.channelName;
-  }
+  /** Provides the available channels and channel selection state. */
+  channelService = inject(ChannelService);
+
+/** The currently active channel. */
+  activeChannel = computed(() =>
+    this.channelService.channels().find(channel => channel.id === this.channelId())
+  );
+
+/** The ID of the currently active channel. */
+  channelId = computed(() => this.channelService.activeChannelId());
 
   /** Opens the dialog as a modal. */
   open(): void {
@@ -63,47 +65,57 @@ export class EditChannel {
 
   /** Enters edit mode for the channel name. */
   startEditingName(): void {
-    this.editedName = this.name;
+    this.editedName = this.activeChannel()?.name ?? '';
     this.nameErrorMessage = '';
     this.isEditingName = true;
   }
 
   /** Validates and saves the edited channel name. */
-  saveName(): void {
+  async saveName(): Promise<void> {
+    const channel = this.activeChannel();
+    if (!channel) return;
+
     this.nameErrorMessage = '';
     const trimmed = this.editedName.trim();
-    const otherNames = this.existingChannelNames.filter(n => n !== this.name);
+    const otherNames = this.existingChannelNames.filter(n => n !== channel.name);
 
     if (!trimmed) {
-      this.nameErrorMessage = 'Der Channel-Name darf nicht leer sein.';
+      this.nameErrorMessage = 'The Channel name must not be empty';
       return;
     }
     if (otherNames.includes(trimmed)) {
-      this.nameErrorMessage = 'Ein Channel mit diesem Namen existiert bereits.';
+      this.nameErrorMessage = 'A Channel with this name already exists.';
       return;
     }
 
-    this.name = trimmed;
+    await this.channelService.editChannelName(trimmed, channel.id);
     this.isEditingName = false;
     this.nameUpdated.emit(trimmed);
   }
 
   /** Enters edit mode for the channel description. */
   startEditingDescription(): void {
-    this.editedDescription = this.description;
+    this.editedDescription = this.activeChannel()?.description ?? '';
     this.isEditingDescription = true;
   }
 
   /** Saves the edited channel description. */
-  saveDescription(): void {
-    this.description = this.editedDescription.trim();
+  async saveDescription(): Promise<void> {
+    const channel = this.activeChannel();
+    if (!channel) return;
+    const description = this.editedDescription.trim();
+    await this.channelService.editChannelDescription(
+      description,
+      channel.id
+    );
     this.isEditingDescription = false;
-    this.descriptionUpdated.emit(this.description);
   }
 
-  /** Emits the leave event and closes the dialog. */
+  /** Leaves the currently active channel. */
   leaveChannel(): void {
-    this.left.emit();
+    const channelId = this.channelId();
+    if (!channelId) return; 
+    this.channelService.leaveChannel(channelId);
     this.close();
   }
 
