@@ -1,12 +1,13 @@
-import { Component, EventEmitter, Input, Output, inject, computed, signal, effect } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, computed, signal, effect, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Channel } from '../../../shared/interfaces/channel';
 import { Message } from '../../../shared/interfaces/message';
 import { ChannelService } from '../../../shared/services/channel-service';
 import { FIREBASE_AUTH } from '../../../app.config';
+import { EditChannel } from '../edit-channel/edit-channel';
 
 @Component({
-  imports: [CommonModule],
+  imports: [CommonModule, EditChannel],
   selector: 'app-channel-header',
   styleUrl: './channel-header.scss',
   templateUrl: './channel-header.html',
@@ -19,8 +20,11 @@ export class ChannelHeader {
   /** Emitted when channel details are requested. */
   @Output() channelDetailsRequested = new EventEmitter<void>();
 
+  @ViewChild('editChannel') private editChannel!: EditChannel;
+
   /** Requests the channel details view. */
   openChannelDetails(): void {
+    this.editChannel.open();
     this.channelDetailsRequested.emit();
   }
 
