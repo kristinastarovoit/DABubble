@@ -1,0 +1,13 @@
+<div class="channel-header">
+    <div class="channel-header__title">
+        <div class="sidebar__avatar-wrapper">
+            <img [src]="currentDmPartner()?.avatar || 'app-icons/avatar-placeholder.svg'" alt=""
+                class="sidebar__avatar" />
+            <span class="sidebar__status"
+                [class.sidebar__status--online]="currentDmPartner()?.status === 'online'"></span>
+        </div>
+        <span class="channel-header__name">
+            {{ currentDmPartner()?.name }}
+        </span>
+    </div>
+</div>
