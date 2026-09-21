@@ -125,6 +125,7 @@
   max-width: 420px;
   width: 100%;
   overflow: visible;
+  
 
   &::backdrop {
     background-color: rgba(0, 0, 0, 0.3);
@@ -175,15 +176,20 @@
     align-items: center;
     gap: 12px;
     padding: 10px 8px;
-    border-radius: 12px;
+    border-radius: 30px;
     cursor: default;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: $pastel-purple-bg;
+      }
 
     &--add {
       cursor: pointer;
 
-      &:hover {
-        background-color: $pastel-purple-bg;
-      }
+      // &:hover {
+      //   background-color: $pastel-purple-bg;
+      // }
     }
   }
 
@@ -204,8 +210,8 @@
     justify-content: center;
 
     img {
-      width: 20px;
-      height: 20px;
+      width: 32px;
+      height: 32px;
     }
   }
 
