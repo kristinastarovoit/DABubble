@@ -49,7 +49,7 @@
 
     <div class="message-list__content">
       <div class="message-list__meta">
-        <span class="message-list__author">{{ message.senderId }}</span>
+        <span class="message-list__author">{{ getSenderName(message.senderId) }}</span>
         <span class="message-list__time">{{ message.createdAt.toDate() | date: 'shortTime' }}</span>
       </div>
 

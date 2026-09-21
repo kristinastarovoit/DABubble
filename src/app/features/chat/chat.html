@@ -9,7 +9,7 @@
   /* (threadOpened)="openThread($event)" */ />
 
   <app-message-input (send)="onSend($event)" 
-  [placeholder]="'Message to #' + (activeChannel()?.name ?? '')" 
+  [placeholder]="channelId() ? 'Message to #' + (activeChannel()?.name ?? '') : 'Message to #' + (activeDmPartner()?.name ?? '')" 
     /* (messageSent)="sendMessage($event)" */ 
     /* (messageSent)="this.channelService.addMessageToChannel($event)" */ />
   } @else {
