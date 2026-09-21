@@ -13,4 +13,10 @@ import { Sidebar } from '../../../layout/sidebar/sidebar';
 export class Dashboard {
   sidebarOpen = signal(true);
   threadOpen = signal(true);
+
+   isSidebarOpen = true;
+
+  onSidebarToggled(isOpen: boolean): void {
+    this.isSidebarOpen = isOpen;
+  }
 }

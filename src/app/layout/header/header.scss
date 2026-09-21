@@ -41,7 +41,8 @@
   &__search {
     position: relative;
     flex: 1;
-    width: 989px;
+    min-width: 0;
+    max-width: 989px;
 
     &-input {
       width: 100%;
@@ -168,4 +169,6 @@
 .wrapper {
   display: flex;
   align-items: center;
+  flex: 1;
+  min-width: 0;
 }
