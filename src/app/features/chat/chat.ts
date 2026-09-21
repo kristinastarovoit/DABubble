@@ -152,8 +152,11 @@ export class Chat {
         await this.channelService.addReactionToChannelMessage(channelId, message.id, emoji, uid);
       }
     } else if (dmId) {
-      // TODO: DmService braucht noch addReactionToDm/removeReactionFromDm analog zu ChannelService,
-      // aktuell nur für Channel-Nachrichten implementiert
+      if (alreadyReacted) {
+        await this.dmService.removeReactionFromDmMessage(dmId, message.id, emoji, uid);
+      } else {
+        await this.dmService.addReactionToDmMessage(dmId, message.id, emoji, uid);
+      }
     }
   }
 }
