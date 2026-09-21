@@ -1,17 +1,14 @@
 <section class="chat">
-  <p>DEBUG channelId: {{ channelId() }} | dmId: {{ dmId() }}</p>
   @if (channelId() || dmId()) {
-  <app-channel-header 
-  /* (memberIconClicked)="openMemberList()" */
-  ></app-channel-header>
+  @if (channelId()) {
+  <app-channel-header /* (memberIconClicked)="openMemberList()" */></app-channel-header>}
+  @else if (dmId()) {<app-dm-header [currentDmPartner]="activeDmPartner()"></app-dm-header>}
 
-  <app-message-list [messages]="messages()" 
-  /* (threadOpened)="openThread($event)" */ />
+  <app-message-list [messages]="messages()" /* (threadOpened)="openThread($event)" */ />
 
-  <app-message-input (send)="onSend($event)" 
-  [placeholder]="channelId() ? 'Message to #' + (activeChannel()?.name ?? '') : 'Message to #' + (activeDmPartner()?.name ?? '')" 
-    /* (messageSent)="sendMessage($event)" */ 
-    /* (messageSent)="this.channelService.addMessageToChannel($event)" */ />
+  <app-message-input (send)="onSend($event)"
+    [placeholder]="channelId() ? 'Message to #' + (activeChannel()?.name ?? '') : 'Message to #' + (activeDmPartner()?.name ?? '')"
+    /* (messageSent)="sendMessage($event)" */ /* (messageSent)="this.channelService.addMessageToChannel($event)" */ />
   } @else {
   <app-landing-page></app-landing-page>
   }

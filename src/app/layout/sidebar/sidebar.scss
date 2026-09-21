@@ -213,6 +213,7 @@
   &__avatar-wrapper {
     position: relative;
     flex-shrink: 0;
+    display: flex;
   }
 
   &__avatar {

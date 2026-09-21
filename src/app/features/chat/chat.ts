@@ -10,9 +10,10 @@ import { FIREBASE_AUTH } from '../../app.config';
 import { LandingPage } from '../landing-page/landing-page';
 import { UserService } from '../../shared/services/users';
 import { AuthService } from '../../shared/services/auth';
+import { DmHeader } from './dm-header/dm-header';
 
 @Component({
-  imports: [CommonModule, ChannelHeader, MessageInput, MessageList, LandingPage],
+  imports: [CommonModule, ChannelHeader, MessageInput, MessageList, LandingPage, DmHeader],
   selector: 'app-chat',
   styleUrl: './chat.scss',
   templateUrl: './chat.html',

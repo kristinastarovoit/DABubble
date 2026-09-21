@@ -127,7 +127,6 @@ export class DmService {
       memberIds: memberIds,
       lastMessageAt: serverTimestamp(),
     });
-    console.log('DM written with ID: ', docRef.id);
     return docRef.id;
   }
 
@@ -268,7 +267,6 @@ export class DmService {
     const currentUserId = this.authService.currentUserId();
     const allUsers = this.userService.users();
     const dms = this.dms();
-    console.log('dms.length:', dms.length, dms);
 
     return allUsers
       .filter((user) => user.name !== 'Guest' || user.uid === currentUserId)
