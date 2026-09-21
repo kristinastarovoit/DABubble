@@ -1,3 +1,4 @@
+@if (isSidebarOpen()) {
 <aside class="sidebar">
   <div class="sidebar__header">
     <div class="sidebar__title">
@@ -5,123 +6,100 @@
       <span class="sidebar__title-text">Devspace</span>
     </div>
     <button class="sidebar__edit-btn" (click)="openWorkspaceEdit()">
-      <img
-        src="app-icons/edit.svg"
-        alt="Edit"
-        class="sidebar__edit-icon sidebar__edit-icon--default"
-      />
-      <img
-        src="app-icons/edit-purple.svg"
-        alt="Edit"
-        class="sidebar__edit-icon sidebar__edit-icon--hover"
-      />
+      <img src="app-icons/edit.svg" alt="Edit" class="sidebar__edit-icon sidebar__edit-icon--default" />
+      <img src="app-icons/edit-purple.svg" alt="Edit" class="sidebar__edit-icon sidebar__edit-icon--hover" />
     </button>
   </div>
 
   <!-- Channels -->
   <div class="sidebar__section">
     <div class="sidebar__section-header" (click)="toggleChannels()">
-      <img
-        src="app-icons/arrow_down.svg"
-        alt=""
-        class="sidebar__chevron"
-        [class.sidebar__chevron--collapsed]="!isChannelsOpen"
-      />
-      <img
-        src="app-icons/channels.svg"
-        alt="Channels Icon"
-        class="sidebar__section-icon sidebar__section-icon--default"
-      />
-      <img
-        src="app-icons/channels_purple.svg"
-        alt="Channels Icon"
-        class="sidebar__section-icon sidebar__section-icon--hover"
-      />
+      <img src="app-icons/arrow_down.svg" alt="" class="sidebar__chevron"
+        [class.sidebar__chevron--collapsed]="!isChannelsOpen" />
+      <img src="app-icons/channels.svg" alt="Channels Icon"
+        class="sidebar__section-icon sidebar__section-icon--default" />
+      <img src="app-icons/channels_purple.svg" alt="Channels Icon"
+        class="sidebar__section-icon sidebar__section-icon--hover" />
       <span class="sidebar__section-title">Channels</span>
-      <img src="app-icons/plus.svg" alt="Add Channel" class="sidebar__add-channel-icon sidebar__add-channel-icon--default" (click)="openChannelCreate($event)">
-      <img src="app-icons/plus_purple.svg" alt="Add Channel" class="sidebar__add-channel-icon sidebar__add-channel-icon--hover" (click)="openChannelCreate($event)">
+      <img src="app-icons/plus.svg" alt="Add Channel"
+        class="sidebar__add-channel-icon sidebar__add-channel-icon--default" (click)="openChannelCreate($event)">
+      <img src="app-icons/plus_purple.svg" alt="Add Channel"
+        class="sidebar__add-channel-icon sidebar__add-channel-icon--hover" (click)="openChannelCreate($event)">
     </div>
 
     @if (isChannelsOpen) {
-      <ul class="sidebar__list">
-        @for (channel of channelService.channels(); track channel.id) {
-          <li
-            class="sidebar__item"
-            [class.sidebar__item--active]="channel.id === activeChannelId"
-            (click)="selectChannel(channel)"
-          >
-            <span class="sidebar__item-icon">#</span>
-            <span class="sidebar__item-name">{{ channel.name }}</span>
-          </li>
-        }
-        <li class="sidebar__item sidebar__item--add" (click)="openChannelCreate()">
-          <img
-            src="app-icons/add.svg"
-            alt="Add Icon"
-            class="sidebar__item-icon sidebar__item-icon--default"
-          />
-          <img
-            src="app-icons/add_purple.svg"
-            alt="Add Icon"
-            class="sidebar__item-icon sidebar__item-icon--hover"
-          />
-          <span class="sidebar__item-name">Add Channel</span>
-        </li>
-      </ul>
+    <ul class="sidebar__list">
+      @for (channel of channelService.channels(); track channel.id) {
+      <li class="sidebar__item" [class.sidebar__item--active]="channel.id === activeChannelId"
+        (click)="selectChannel(channel)">
+        <span class="sidebar__item-icon">#</span>
+        <span class="sidebar__item-name">{{ channel.name }}</span>
+      </li>
+      }
+      <li class="sidebar__item sidebar__item--add" (click)="openChannelCreate()">
+        <img src="app-icons/add.svg" alt="Add Icon" class="sidebar__item-icon sidebar__item-icon--default" />
+        <img src="app-icons/add_purple.svg" alt="Add Icon" class="sidebar__item-icon sidebar__item-icon--hover" />
+        <span class="sidebar__item-name">Add Channel</span>
+      </li>
+    </ul>
     }
   </div>
 
   <!-- Direktnachrichten -->
   <div class="sidebar__section">
     <div class="sidebar__section-header" (click)="toggleDirectMessages()">
-      <img
-        src="app-icons/arrow_down.svg"
-        alt=""
-        class="sidebar__chevron"
-        [class.sidebar__chevron--collapsed]="!isDirectMessagesOpen"
-      />
-      <img
-        src="app-icons/account.svg"
-        alt="Account Icon"
-        class="sidebar__section-icon sidebar__section-icon--default"
-      />
-      <img
-        src="app-icons/account_purple.svg"
-        alt="Account Icon"
-        class="sidebar__section-icon sidebar__section-icon--hover"
-      />
+      <img src="app-icons/arrow_down.svg" alt="" class="sidebar__chevron"
+        [class.sidebar__chevron--collapsed]="!isDirectMessagesOpen" />
+      <img src="app-icons/account.svg" alt="Account Icon"
+        class="sidebar__section-icon sidebar__section-icon--default" />
+      <img src="app-icons/account_purple.svg" alt="Account Icon"
+        class="sidebar__section-icon sidebar__section-icon--hover" />
       <span class="sidebar__section-title">Direct Messages</span>
     </div>
 
     @if (isDirectMessagesOpen) {
-      <ul class="sidebar__list">
-        @for (partner of dmService.dmPartners(); track partner.user.uid) {
-          <li
-            class="sidebar__item"
-            [class.sidebar__item--active]="partner.dm?.id === dmService.activeDmId()"
-            (click)="selectDirectMessage(partner)"
-          >
-            <div class="sidebar__avatar-wrapper">
-              <img
-                [src]="partner.user.avatar || 'app-icons/avatar-placeholder.svg'"
-                alt=""
-                class="sidebar__avatar"
-              />
-              <span
-                class="sidebar__status"
-                [class.sidebar__status--online]="partner.user.status === 'online'"
-              ></span>
-            </div>
-            <span class="sidebar__item-name">
-              {{ partner.user.name }}
-              @if (partner.isSelf) {
-                <span>(You)</span>
-              }
-            </span>
-          </li>
-        }
-      </ul>
+    <ul class="sidebar__list">
+      @for (partner of dmService.dmPartners(); track partner.user.uid) {
+      <li class="sidebar__item" [class.sidebar__item--active]="partner.dm?.id === dmService.activeDmId()"
+        (click)="selectDirectMessage(partner)">
+        <div class="sidebar__avatar-wrapper">
+          <img [src]="partner.user.avatar || 'app-icons/avatar-placeholder.svg'" alt="" class="sidebar__avatar" />
+          <span class="sidebar__status" [class.sidebar__status--online]="partner.user.status === 'online'"></span>
+        </div>
+        <span class="sidebar__item-name">
+          {{ partner.user.name }}
+          @if (partner.isSelf) {
+          <span>(You)</span>
+          }
+        </span>
+      </li>
+      }
+    </ul>
     }
   </div>
 </aside>
+}
+
+<button
+  class="sidebar-toggle"
+  [class.sidebar-toggle--open]="isSidebarOpen()"
+  (click)="toggleSidebar()"
+>
+  <img
+    src="app-icons/open.svg"
+    alt=""
+    class="sidebar-toggle__icon sidebar-toggle__icon--default"
+    [class.sidebar-toggle__icon--rotated]="isSidebarOpen()"
+  />
+  <img
+    src="app-icons/open_purple.svg"
+    alt=""
+    class="sidebar-toggle__icon sidebar-toggle__icon--hover"
+    [class.sidebar-toggle__icon--rotated]="isSidebarOpen()"
+  />
+  <span class="sidebar-toggle__label">
+    {{ isSidebarOpen() ? 'Close Workspace Menu' : 'Open Workspace Menu' }}
+  </span>
+</button>
+
 <app-create-channel #createChannel></app-create-channel>

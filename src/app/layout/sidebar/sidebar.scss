@@ -43,7 +43,7 @@
     padding: 8px;
     border-radius: 50%;
     transition: background-color 0.2s ease;
-    
+
 
     &:hover {
       background-color: $pastel-purple-bg;
@@ -54,7 +54,7 @@
     width: 40px;
     height: 40px;
     display: block;
-    
+
     img {
       width: 40px;
       height: 40px;
@@ -235,5 +235,68 @@
     // &--online {
     //   background-color: $color-online;
     // }
+  }
+}
+
+.sidebar-toggle {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 250px;
+  background-color: $white;
+  border: 1px solid $pastel-purple-bg;
+  border-left: none;
+  border-radius: 0 20px 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 0;
+  cursor: pointer;
+  z-index: 20;
+  transition: left 0.2s ease;
+
+  &--open {
+    left: 0px; 
+  }
+
+  &__icon {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+
+    &--rotated {
+      transform: rotate(180deg);
+    }
+
+    &--hover {
+      display: none;
+    }
+  }
+
+  &:hover {
+    .sidebar-toggle__icon--default {
+      display: none;
+    }
+
+    .sidebar-toggle__icon--hover {
+      display: block;
+    }
+  }
+
+  &__label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $black;
+    white-space: nowrap;
+  }
+
+  &:hover &__label {
+    color: $midtone-purple-three;
   }
 }
