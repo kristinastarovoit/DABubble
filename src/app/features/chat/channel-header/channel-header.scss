@@ -299,7 +299,7 @@
 
   &__error {
     color: $error-red;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
 
   &__submit-btn {
@@ -316,9 +316,12 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
-
-    &:hover:not(:disabled) {
+    &:not(:disabled) {
       background-color: $midtone-purple-three;
     }
+
+    // &:hover:not(:disabled) {
+    //   background-color: $midtone-purple-three;
+    // }
   }
 }

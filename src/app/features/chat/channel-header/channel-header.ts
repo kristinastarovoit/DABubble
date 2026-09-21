@@ -111,11 +111,17 @@ export class ChannelHeader {
     const query = this.addMemberQuery.trim();
     this.showMemberSuggestions.set(Boolean(query));
 
-    if (!query) return;
-
-    if (!this.memberSuggestions.length) {
+    if (!query) {
+      this.addMemberError = '';
       return;
     }
+
+    if (!this.memberSuggestions.length) {
+      this.addMemberError = 'No matching members found.';
+      return;
+    }
+
+    this.addMemberError = '';
 
     const rect = this.memberSearchInput.nativeElement.getBoundingClientRect();
     this.suggestionsPosition = {
