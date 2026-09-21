@@ -1,4 +1,14 @@
-import { Component, EventEmitter, Input, Output, inject, input, computed, signal, effect } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  inject,
+  input,
+  computed,
+  signal,
+  effect,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChannelHeader } from './channel-header/channel-header';
 import { MessageList } from './message-list/message-list';
@@ -16,7 +26,6 @@ import { LandingPage } from '../landing-page/landing-page';
   templateUrl: './chat.html',
 })
 export class Chat {
-
   /** Emitted when a message thread is requested. */
   // @Output() threadRequested = new EventEmitter<Message>();
 
@@ -54,11 +63,11 @@ export class Chat {
   /** Unsubscribes from the active message listener when the conversation changes. */
   private currentUnsubscribe: (() => void) | undefined;
 
-  uid = this.auth.currentUser?.uid;
+  uid = computed(() => this.auth.currentUser?.uid);
 
   /** The channel matching the currently selected channel ID. */
   activeChannel = computed(() =>
-    this.channelService.channels().find(channel => channel.id === this.channelId())
+    this.channelService.channels().find((channel) => channel.id === this.channelId()),
   );
 
   /** Creates a reactive listener for the currently selected conversation. */
@@ -70,15 +79,13 @@ export class Chat {
       const dmId = this.dmId();
 
       if (channelId) {
-        const { unsubscribe } = this.channelService.getMessages(
-          channelId,
-          messages => this.messages.set(messages)
+        const { unsubscribe } = this.channelService.getMessages(channelId, (messages) =>
+          this.messages.set(messages),
         );
         this.currentUnsubscribe = unsubscribe;
       } else if (dmId) {
-        const { unsubscribe } = this.dmService.getMessages(
-          dmId,
-          messages => this.messages.set(messages)
+        const { unsubscribe } = this.dmService.getMessages(dmId, (messages) =>
+          this.messages.set(messages),
         );
         this.currentUnsubscribe = unsubscribe;
       }
@@ -92,15 +99,44 @@ export class Chat {
 
   /** Sends a message to the active channel or direct-message conversation. */
   onSend(text: string) {
-    if (!this.uid) { return; }
+    const uid = this.uid();
+    if (!uid) {
+      return;
+    }
 
     const channelId = this.channelId();
     const dmId = this.dmId();
 
     if (channelId) {
-      this.channelService.addMessageToChannel(channelId, text, this.uid);
+      this.channelService.addMessageToChannel(channelId, text, uid);
     } else if (dmId) {
-      this.dmService.addMessageToDm(dmId, text, this.uid);
+      this.dmService.addMessageToDm(dmId, text, uid);
+    }
+  }
+
+  /** Toggles a reaction on a message in the active channel or direct-message conversation. */
+  async onReactionToggled({ message, emoji }: { message: Message; emoji: string }): Promise<void> {
+    const uid = this.uid();
+    if (!uid || !message.id) return;
+
+    const alreadyReacted = message.reactions?.[emoji]?.includes(uid) ?? false;
+    const channelId = this.channelId();
+    const dmId = this.dmId();
+
+    if (channelId) {
+      if (alreadyReacted) {
+        await this.channelService.removeReactionFromChannelMessage(
+          channelId,
+          message.id,
+          emoji,
+          uid,
+        );
+      } else {
+        await this.channelService.addReactionToChannelMessage(channelId, message.id, emoji, uid);
+      }
+    } else if (dmId) {
+      // TODO: DmService braucht noch addReactionToDm/removeReactionFromDm analog zu ChannelService,
+      // aktuell nur für Channel-Nachrichten implementiert
     }
   }
 }

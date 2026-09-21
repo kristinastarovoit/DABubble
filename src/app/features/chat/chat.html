@@ -1,17 +1,21 @@
 <section class="chat">
   @if (channelId() || dmId()) {
-  <app-channel-header 
-  /* (memberIconClicked)="openMemberList()" */
-  ></app-channel-header>
+    <app-channel-header /* (memberIconClicked)="openMemberList()" */></app-channel-header>
 
-  <app-message-list [messages]="messages()" 
-  /* (threadOpened)="openThread($event)" */ />
+    <app-message-list
+      [messages]="messages()"
+      [currentUserId]="uid() ?? ''"
+      (reactionToggled)="onReactionToggled($event)"
+      /* (threadOpened)="openThread($event)" */
+    />
 
-  <app-message-input (send)="onSend($event)" 
-  [placeholder]="'Message to #' + (activeChannel()?.name ?? '')" 
-    /* (messageSent)="sendMessage($event)" */ 
-    /* (messageSent)="this.channelService.addMessageToChannel($event)" */ />
+    <app-message-input
+      (send)="onSend($event)"
+      [placeholder]="'Message to #' + (activeChannel()?.name ?? '')"
+      /* (messageSent)="sendMessage($event)" */
+      /* (messageSent)="this.channelService.addMessageToChannel($event)" */
+    />
   } @else {
-  <app-landing-page></app-landing-page>
+    <app-landing-page></app-landing-page>
   }
 </section>

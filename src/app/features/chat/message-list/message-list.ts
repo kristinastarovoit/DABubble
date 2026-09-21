@@ -1,7 +1,18 @@
-import { Component, EventEmitter, Input, Output, computed, input, output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  computed,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ReactionBar } from '../reaction-bar/reaction-bar';
 import { Message, MessageReaction } from '../../../shared/interfaces/message';
+import { toMessageReactions } from '../../../shared/utilities/reactions.utils';
+import { ReactionPicker } from '../reaction-picker/reaction-picker';
 
 /** Groups messages under a calendar date. */
 interface MessageGroup {
@@ -10,7 +21,7 @@ interface MessageGroup {
 }
 
 @Component({
-  imports: [CommonModule, ReactionBar, DatePipe],
+  imports: [CommonModule, ReactionBar, DatePipe, ReactionPicker],
   selector: 'app-message-list',
   styleUrl: './message-list.scss',
   templateUrl: './message-list.html',
@@ -103,4 +114,10 @@ export class MessageList {
   onReactionToggled(message: Message, emoji: string): void {
     this.reactionToggled.emit({ message, emoji });
   }
+
+  protected messageReactions(message: Message): MessageReaction[] {
+    return toMessageReactions(message.reactions, this.currentUserId());
+  }
+
+  hoveredMessageId = signal<string | null>(null);
 }

@@ -5,8 +5,22 @@
   flex-direction: column;
   flex: 1;
   height: 100%;
+  min-height: 0;
   width: 100%;
   background-color: $white;
   border-radius: 30px;
   font-family: 'Nunito';
+  overflow: hidden;
+
+  app-channel-header,
+  app-message-input {
+    flex-shrink: 0;
+  }
+
+  app-message-list {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    overflow: hidden;
+  }
 }
