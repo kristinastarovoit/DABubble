@@ -112,3 +112,164 @@
     }
   }
 }
+
+.members-dialog {
+  border: none;
+  border-radius: 24px;
+  padding: 0;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  max-width: 420px;
+  width: 100%;
+
+  &::backdrop {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  &__content {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__title {
+    font-size: 22px;
+    font-weight: 700;
+    color: $black;
+    margin: 0;
+  }
+
+  &__close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+
+    &:hover {
+      background-color: $pastel-purple-bg;
+    }
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 8px;
+    border-radius: 12px;
+    cursor: default;
+
+    &--add {
+      cursor: pointer;
+
+      &:hover {
+        background-color: $pastel-purple-bg;
+      }
+    }
+  }
+
+  &__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  &__add-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: $pastel-purple-bg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__name {
+    font-size: 15px;
+    color: $black;
+  }
+
+  &__you {
+    color: $midtone-purple-three;
+  }
+
+  &__status {
+    margin-left: auto;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ccc;
+
+    &--online {
+      background-color: #92c83e;
+    }
+  }
+
+  &__channel-ref {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: $midtone-purple-three;
+  }
+
+  &__input {
+    border: 1px solid #ddd;
+    border-radius: 32px;
+    padding: 14px 20px;
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+
+    &:focus {
+      border-color: $midtone-purple-three;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  &__submit-btn {
+    background-color: #444;
+    color: $white;
+    border: none;
+    border-radius: 32px;
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &:hover:not(:disabled) {
+      background-color: $midtone-purple-three;
+    }
+  }
+}
