@@ -122,12 +122,12 @@ export class DmService {
    *
    * @param memberIds The user IDs participating in the conversation.
    */
-  async addDm(memberIds: string[]): Promise<void> {
+  async addDm(memberIds: string[]): Promise<string> {
     const docRef = await addDoc(collection(this.db, 'dms'), {
       memberIds: memberIds,
       lastMessageAt: serverTimestamp(),
     });
-    console.log('DM written with ID: ', docRef.id);
+    return docRef.id;
   }
 
   /** Adds a message to a direct-message conversation and updates its timestamp.
@@ -148,7 +148,7 @@ export class DmService {
     await updateDoc(dmRef, {
       lastMessageAt: serverTimestamp(),
     });
-    console.log('Message written with ID: ', dmRef.id);
+    console.log('DM written with ID: ', dmRef.id);
   }
 
   /** Adds a reply to a direct message and increments its thread count.

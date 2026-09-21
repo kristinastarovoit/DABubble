@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MessageChannelList } from './message-channel-list';
+import { DmHeader } from './dm-header';
 
-describe('MessageChannelList', () => {
-  let component: MessageChannelList;
-  let fixture: ComponentFixture<MessageChannelList>;
+describe('DmHeader', () => {
+  let component: DmHeader;
+  let fixture: ComponentFixture<DmHeader>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MessageChannelList],
+      imports: [DmHeader],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MessageChannelList);
+    fixture = TestBed.createComponent(DmHeader);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

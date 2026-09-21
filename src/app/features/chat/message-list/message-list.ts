@@ -13,6 +13,11 @@ import { ReactionBar } from '../reaction-bar/reaction-bar';
 import { Message, MessageReaction } from '../../../shared/interfaces/message';
 import { toMessageReactions } from '../../../shared/utilities/reactions.utils';
 import { ReactionPicker } from '../reaction-picker/reaction-picker';
+import { Component, EventEmitter, Input, Output, computed, input, output, inject } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { ReactionBar } from '../reaction-bar/reaction-bar';
+import { Message, MessageReaction } from '../../../shared/interfaces/message';
+import { UserService } from '../../../shared/services/users';
 
 /** Groups messages under a calendar date. */
 interface MessageGroup {
@@ -71,6 +76,8 @@ export class MessageList {
   //   this.reactionToggled.emit({ message, emoji });
   // }
 
+  private userService = inject(UserService);
+
   /** Messages displayed in the list. */
   messages = input<Message[]>([]);
 
@@ -88,6 +95,7 @@ export class MessageList {
     const groups = new Map<string, MessageGroup>();
 
     for (const message of this.messages()) {
+      if (!message.createdAt) { continue; }
       const date = message.createdAt.toDate();
       const key = date.toISOString().slice(0, 10);
       let group = groups.get(key);
@@ -120,4 +128,7 @@ export class MessageList {
   }
 
   hoveredMessageId = signal<string | null>(null);
+  getSenderName(senderId: string): string {
+    return this.userService.users().find(user => user.uid === senderId)?.name ?? senderId;
+  }
 }
