@@ -1,0 +1,109 @@
+.reaction-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 25px 25px 0 25px;
+  border: 1px solid #adb0d9;
+  background: #fff;
+}
+
+.reaction-picker__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #f3f0ff;
+
+    svg path {
+      fill: #535af1;
+    }
+  }
+}
+
+.reaction-picker__edit-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.reaction-picker__edit-tooltip {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 100%;
+  left: 50%;
+  background: #fff;
+  color: #1a1a1a;
+  padding: 10px 20px;
+  border-radius: 0 30px 30px 30px;
+  box-shadow: 0 6px 14px 0 rgba(0, 0, 0, 0.2);
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: 'Nunito';
+  white-space: nowrap;
+  z-index: 10;
+  cursor: pointer;
+
+  &__title {
+    border-radius: 100px;
+    padding: 10px 20px;
+  }
+
+  &:hover .reaction-picker__edit-tooltip__title {
+    color: #535af1;
+    background-color: #eceefe;
+  }
+}
+
+.reaction-picker__emoji-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.reaction-picker__emoji-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.reaction-picker__emoji-panel {
+  position: absolute;
+  top: 100%;
+  right: 50%;
+  left: auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  width: 160px;
+  padding: 12px;
+  background: #fff;
+  border-radius: 30px 0 30px 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 20;
+}
+
+.reaction-picker__emoji-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+
+  &:hover {
+    background: #f3f0ff;
+  }
+}

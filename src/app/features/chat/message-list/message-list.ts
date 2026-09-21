@@ -1,3 +1,18 @@
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  computed,
+  input,
+  output,
+  signal,
+} from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { ReactionBar } from '../reaction-bar/reaction-bar';
+import { Message, MessageReaction } from '../../../shared/interfaces/message';
+import { toMessageReactions } from '../../../shared/utilities/reactions.utils';
+import { ReactionPicker } from '../reaction-picker/reaction-picker';
 import { Component, EventEmitter, Input, Output, computed, input, output, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ReactionBar } from '../reaction-bar/reaction-bar';
@@ -11,7 +26,7 @@ interface MessageGroup {
 }
 
 @Component({
-  imports: [CommonModule, ReactionBar, DatePipe],
+  imports: [CommonModule, ReactionBar, DatePipe, ReactionPicker],
   selector: 'app-message-list',
   styleUrl: './message-list.scss',
   templateUrl: './message-list.html',
@@ -108,6 +123,11 @@ export class MessageList {
     this.reactionToggled.emit({ message, emoji });
   }
 
+  protected messageReactions(message: Message): MessageReaction[] {
+    return toMessageReactions(message.reactions, this.currentUserId());
+  }
+
+  hoveredMessageId = signal<string | null>(null);
   getSenderName(senderId: string): string {
     return this.userService.users().find(user => user.uid === senderId)?.name ?? senderId;
   }

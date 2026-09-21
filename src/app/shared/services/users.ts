@@ -50,4 +50,9 @@ export class UserService {
     const snapshot = await getDoc(doc(this.firestore, 'users', uid));
     return snapshot.exists() ? (snapshot.data() as UserModel) : undefined;
   }
+
+  /** Returns the display name for a user ID from the currently loaded users, or a fallback. */
+  getUserName(uid: string): string {
+    return this.users().find((user) => user.uid === uid)?.name ?? 'Unbekannt';
+  }
 }
