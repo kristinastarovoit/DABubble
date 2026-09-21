@@ -15,6 +15,7 @@ import {
   where,
   getDoc,
   setDoc,
+  deleteField,
 } from 'firebase/firestore';
 import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
@@ -233,9 +234,19 @@ export class DmService {
     userId: string,
   ): Promise<void> {
     const messageRef = doc(this.db, 'dms', dmId, 'messages', messageId);
-    await updateDoc(messageRef, {
-      [`reactions.${reaction}`]: arrayRemove(userId),
-    });
+    const snapshot = await getDoc(messageRef);
+    const currentUserIds: string[] = snapshot.data()?.['reactions']?.[reaction] ?? [];
+    const remaining = currentUserIds.filter((id) => id !== userId);
+
+    if (remaining.length === 0) {
+      await updateDoc(messageRef, {
+        [`reactions.${reaction}`]: deleteField(),
+      });
+    } else {
+      await updateDoc(messageRef, {
+        [`reactions.${reaction}`]: arrayRemove(userId),
+      });
+    }
   }
 
   /** Removes a user's reaction from a direct-message thread reply.
