@@ -50,13 +50,15 @@
     <div class="message-list__content">
       <div class="message-list__meta">
         <span class="message-list__author">{{ getSenderName(message.senderId) }}</span>
-        <span class="message-list__time">{{ message.createdAt.toDate() | date: 'shortTime' }}</span>
+        <span class="message-list__time"> @if (message.createdAt) {
+          {{ message.createdAt.toDate() | date: 'shortTime' }}
+          }
+        </span>
       </div>
 
       <div class="message-list__bubble">{{ message.text }}</div>
 
-      <app-reaction-bar 
-      /* [reactions]="message.reactions" */
+      <app-reaction-bar /* [reactions]="message.reactions" */
         (reactionToggled)="onReactionToggled(message, $event)"></app-reaction-bar>
 
       @if (message.threadCount) {

@@ -80,6 +80,7 @@ export class MessageList {
     const groups = new Map<string, MessageGroup>();
 
     for (const message of this.messages()) {
+      if (!message.createdAt) { continue; }
       const date = message.createdAt.toDate();
       const key = date.toISOString().slice(0, 10);
       let group = groups.get(key);
