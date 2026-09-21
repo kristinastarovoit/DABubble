@@ -4,16 +4,13 @@ import {
   Input,
   Output,
   computed,
+  inject,
   input,
   output,
   signal,
 } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
-import { ReactionBar } from '../reaction-bar/reaction-bar';
-import { Message, MessageReaction } from '../../../shared/interfaces/message';
 import { toMessageReactions } from '../../../shared/utilities/reactions.utils';
 import { ReactionPicker } from '../reaction-picker/reaction-picker';
-import { Component, EventEmitter, Input, Output, computed, input, output, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ReactionBar } from '../reaction-bar/reaction-bar';
 import { Message, MessageReaction } from '../../../shared/interfaces/message';
@@ -128,6 +125,7 @@ export class MessageList {
   }
 
   hoveredMessageId = signal<string | null>(null);
+  
   getSenderName(senderId: string): string {
     return this.userService.users().find(user => user.uid === senderId)?.name ?? senderId;
   }

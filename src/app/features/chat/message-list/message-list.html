@@ -15,10 +15,12 @@
 
         <div class="message-list__content">
           <div class="message-list__meta">
-            <span class="message-list__author">{{ message.senderId }}</span>
-            <span class="message-list__time">{{
-              message.createdAt.toDate() | date: 'shortTime'
-            }}</span>
+            <span class="message-list__author">{{ getSenderName(message.senderId) }}</span>
+            <span class="message-list__time">
+              @if (message.createdAt) {
+                {{ message.createdAt.toDate() | date: 'shortTime' }}
+              }
+            </span>
           </div>
 
           <div class="message-list__bubble">{{ message.text }}</div>
@@ -46,41 +48,5 @@
         }
       </div>
     }
-    </div>
-  </ng-container>
-</div> -->
-
-<div class="message-list">
-  @for (group of groupedMessages(); track group.dateLabel) {
-  <div class="message-list__divider">
-    <span>{{ group.dateLabel }}</span>
-  </div>
-
-  @for (message of group.messages; track message.id) {
-  <div class="message-list__item" [class.message-list__item--own]="message.senderId === currentUserId()">
-    <img class="message-list__avatar" src="app-icons/avatar-placeholder.svg" alt="" />
-
-    <div class="message-list__content">
-      <div class="message-list__meta">
-        <span class="message-list__author">{{ getSenderName(message.senderId) }}</span>
-        <span class="message-list__time"> @if (message.createdAt) {
-          {{ message.createdAt.toDate() | date: 'shortTime' }}
-          }
-        </span>
-      </div>
-
-      <div class="message-list__bubble">{{ message.text }}</div>
-
-      <app-reaction-bar /* [reactions]="message.reactions" */
-        (reactionToggled)="onReactionToggled(message, $event)"></app-reaction-bar>
-
-      @if (message.threadCount) {
-      <button class="message-list__thread-link" (click)="threadOpened.emit(message)">
-        {{ message.threadCount }} Antworten
-      </button>
-      }
-    </div>
-  </div>
-  }
   }
 </div>
