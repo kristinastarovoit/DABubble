@@ -1,4 +1,15 @@
-import { Component, EventEmitter, Output, inject, computed, signal, effect, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Output,
+  inject,
+  computed,
+  signal,
+  effect,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Message } from '../../../shared/interfaces/message';
@@ -14,8 +25,6 @@ import { EditChannel } from '../edit-channel/edit-channel';
   templateUrl: './channel-header.html',
 })
 export class ChannelHeader {
-
-
   /** Emitted when channel details are requested. */
   @Output() channelDetailsRequested = new EventEmitter<void>();
 
@@ -52,9 +61,9 @@ export class ChannelHeader {
     if (!query) return [];
 
     const memberIds = this.activeChannel()?.memberIds ?? [];
-    return this.userService.users().filter(
-      user => !memberIds.includes(user.uid) && user.name.toLowerCase().includes(query)
-    );
+    return this.userService
+      .users()
+      .filter((user) => !memberIds.includes(user.uid) && user.name.toLowerCase().includes(query));
   }
 
   /** Requests the channel details view. */
@@ -129,7 +138,6 @@ export class ChannelHeader {
       left: rect.left,
       width: rect.width,
     };
-
   }
 
   /** Selects a user from the live search results. */
@@ -153,9 +161,9 @@ export class ChannelHeader {
       return;
     }
 
-    const matchedUser = this.userService.users().find(
-      user => user.name.toLowerCase() === query.toLowerCase()
-    );
+    const matchedUser = this.userService
+      .users()
+      .find((user) => user.name.toLowerCase() === query.toLowerCase());
 
     if (!matchedUser) {
       this.addMemberError = 'No member with this name was found.';
@@ -191,17 +199,20 @@ export class ChannelHeader {
 
   /** The channel matching the currently selected channel ID. */
   activeChannel = computed(() =>
-    this.channelService.channels().find(channel => channel.id === this.channelId())
+    this.channelService.channels().find((channel) => channel.id === this.channelId()),
   );
 
   /** Full user objects of the current channel's members. */
   channelMembers = computed(() => {
     const memberIds = this.activeChannel()?.memberIds ?? [];
-    return this.userService.users().filter(user => memberIds.includes(user.uid));
+    return this.userService.users().filter((user) => memberIds.includes(user.uid));
   });
 
+  /** Firebase Auth instance. */
+  private auth = inject(FIREBASE_AUTH);
+
   /** UID of the currently logged-in user. */
-  currentUserId = computed(() => inject(FIREBASE_AUTH).currentUser?.uid ?? '');
+  currentUserId = computed(() => this.auth.currentUser?.uid ?? '');
 
   /** Messages belonging to the currently selected channel. */
   messages = signal<Message[]>([]);
@@ -217,9 +228,8 @@ export class ChannelHeader {
       const channelId = this.channelId();
 
       if (channelId) {
-        const { unsubscribe } = this.channelService.getMessages(
-          channelId,
-          messages => this.messages.set(messages)
+        const { unsubscribe } = this.channelService.getMessages(channelId, (messages) =>
+          this.messages.set(messages),
         );
         this.currentUnsubscribe = unsubscribe;
       }
