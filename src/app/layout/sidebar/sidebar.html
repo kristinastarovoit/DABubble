@@ -11,11 +11,12 @@
     </button>
   </div>
 
-  <!-- Channels -->
   <div class="sidebar__section">
     <div class="sidebar__section-header" (click)="toggleChannels()">
       <div class="sidebar__section-label">
-        <img src="app-icons/arrow_down.svg" alt="" class="sidebar__chevron"
+        <img src="app-icons/arrow_down_full.svg" alt="" class="sidebar__chevron"
+        [class.sidebar__chevron--collapsed]="!isChannelsOpen" />
+         <img src="app-icons/arrow_down_full_purple.svg" alt="" class="sidebar__chevron sidebar__chevron--hover"
         [class.sidebar__chevron--collapsed]="!isChannelsOpen" />
       <img src="app-icons/channels.svg" alt="Channels Icon"
         class="sidebar__section-icon sidebar__section-icon--default" />
@@ -49,11 +50,12 @@
     }
   </div>
 
-  <!-- Direktnachrichten -->
   <div class="sidebar__section">
     <div class="sidebar__section-header" (click)="toggleDirectMessages()">
       <div class="sidebar__section-label">
-        <img src="app-icons/arrow_down.svg" alt="" class="sidebar__chevron"
+        <img src="app-icons/arrow_down_full.svg" alt="" class="sidebar__chevron"
+          [class.sidebar__chevron--collapsed]="!isDirectMessagesOpen" />
+          <img src="app-icons/arrow_down_full_purple.svg" alt="" class="sidebar__chevron sidebar__chevron--hover"
           [class.sidebar__chevron--collapsed]="!isDirectMessagesOpen" />
         <img src="app-icons/account.svg" alt="Account Icon"
           class="sidebar__section-icon sidebar__section-icon--default" />
