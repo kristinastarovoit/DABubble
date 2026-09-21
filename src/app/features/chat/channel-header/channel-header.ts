@@ -34,6 +34,20 @@ export class ChannelHeader {
   /** Text entered in the "Name eingeben" field. */
   addMemberQuery = '';
 
+  /** Validation or persistence error shown in the add-members view. */
+  addMemberError = '';
+
+  /** Users matching the current query that are not channel members yet. */
+  get memberSuggestions() {
+    const query = this.addMemberQuery.trim().toLowerCase();
+    if (!query) return [];
+
+    const memberIds = this.activeChannel()?.memberIds ?? [];
+    return this.userService.users().filter(
+      user => !memberIds.includes(user.uid) && user.name.toLowerCase().includes(query)
+    );
+  }
+
   /** Requests the channel details view. */
   openChannelDetails(): void {
     this.editChannel.open();
@@ -43,6 +57,7 @@ export class ChannelHeader {
   /** Opens the dialog showing the current channel members. */
   openMembersList(): void {
     this.showAddMembersView.set(false);
+    this.addMemberError = '';
     this.positionDialog();
     this.membersDialog.nativeElement.showModal();
   }
@@ -50,6 +65,7 @@ export class ChannelHeader {
   /** Opens the dialog directly in "add members" mode. */
   openAddMembers(): void {
     this.showAddMembersView.set(true);
+    this.addMemberError = '';
     this.positionDialog();
     this.membersDialog.nativeElement.showModal();
   }
@@ -68,6 +84,7 @@ export class ChannelHeader {
   closeDialog(): void {
     this.membersDialog.nativeElement.close();
     this.addMemberQuery = '';
+    this.addMemberError = '';
   }
 
   /** Closes the dialog when the backdrop itself is clicked. */
@@ -77,26 +94,49 @@ export class ChannelHeader {
     }
   }
 
-  /** Adds the entered user to the active channel.
-   * TODO: an ChannelService anbinden, sobald eine entsprechende Methode existiert
-   * (z.B. channelService.addMemberToChannel(channelId, uid)).
-   */
-  addMember(): void {
+  /** Selects a user from the live search results. */
+  selectMember(userName: string): void {
+    this.addMemberQuery = userName;
+    this.addMemberError = '';
+  }
+
+  /** Adds the entered user to the active channel. */
+  async addMember(): Promise<void> {
     const query = this.addMemberQuery.trim();
     if (!query) return;
+
+    this.addMemberError = '';
+
+    const channelId = this.channelId();
+    const activeChannel = this.activeChannel();
+    if (!channelId || !activeChannel) {
+      this.addMemberError = 'No active channel selected.';
+      return;
+    }
 
     const matchedUser = this.userService.users().find(
       user => user.name.toLowerCase() === query.toLowerCase()
     );
 
     if (!matchedUser) {
-      // TODO: Fehlermeldung anzeigen, falls kein Nutzer mit dem Namen gefunden wurde
+      this.addMemberError = 'No member with this name was found.';
       return;
     }
 
-    // TODO: matchedUser.uid zur memberIds-Liste des aktiven Channels hinzufügen
+    if (activeChannel.memberIds.includes(matchedUser.uid)) {
+      this.addMemberError = 'This user is already a member of this channel.';
+      return;
+    }
+
+    try {
+      await this.channelService.addMembersToChannel([matchedUser.uid], channelId);
+    } catch {
+      this.addMemberError = 'Member could not be added. Please try again.';
+      return;
+    }
 
     this.addMemberQuery = '';
+    this.addMemberError = '';
     this.showAddMembersView.set(false);
   }
 

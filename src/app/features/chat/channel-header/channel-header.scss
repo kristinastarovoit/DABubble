@@ -114,10 +114,12 @@
 }
 
 .members-dialog {
-  position: fixed; // statt Standard-Zentrierung
+  position: fixed;
   margin: 0;
   border: none;
-  border-radius: 24px;
+  border-top-left-radius: 30px;
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
   padding: 0;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
   max-width: 420px;
@@ -250,9 +252,50 @@
     }
   }
 
+  &__suggestions {
+    list-style: none;
+    margin: -8px 0 0;
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background-color: $white;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  &__suggestion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: $black;
+    cursor: pointer;
+    text-align: left;
+
+    &:hover {
+      background-color: $pastel-purple-bg;
+    }
+  }
+
+  &__suggestion-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
   &__actions {
     display: flex;
     justify-content: flex-end;
+  }
+
+  &__error {
+    color: #d32f2f;
+    font-size: 14px;
   }
 
   &__submit-btn {
