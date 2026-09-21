@@ -133,6 +133,10 @@
     .sidebar__chevron--hover {
       display: block;
       transform: scale(2.6);
+
+      &.sidebar__chevron--collapsed {
+        transform: rotate(-90deg) scale(2.6);
+      }
     }
 
     .sidebar__section-icon--default {
@@ -263,11 +267,11 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    // background-color: $color-offline;
-    // border: 2px solid $color-background;
+    // background-color: $dark-grey;
+    // border: 2px solid $pastel-purple-bg;
 
     // &--online {
-    //   background-color: $color-online;
+    //   background-color: $online-green;
     // }
   }
 }
@@ -278,7 +282,7 @@
   left: 0;
   transform: translateY(-50%);
   width: 40px;
-  height: 250px;
+  height: 270px;
   background-color: $white;
   border: 1px solid $pastel-purple-bg;
   border-left: none;
@@ -327,12 +331,13 @@
     transform: rotate(180deg);
     font-family: 'Nunito';
     font-size: 1.1rem;
-    font-weight: 700;
+
     color: $black;
     white-space: nowrap;
   }
 
   &:hover &__label {
     color: $midtone-purple-three;
+    font-weight: 700;
   }
 }
