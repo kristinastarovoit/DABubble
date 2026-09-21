@@ -5,24 +5,99 @@
     <img src="app-icons/arrow_down.svg" alt="" class="channel-header__chevron" />
   </div>
 
-  <div class="channel-header__meta">
-    <div class="channel-header__avatars">
-      <!-- @for (member of channel?.members | slice:0:3; track member.id) {
-      <img
-        [src]="member.avatarUrl"
-        alt=""
-        class="channel-header__avatar"
-      />
-      } -->
-      <img class="channel-header__avatar" src="app-icons/avatar-placeholder.svg" alt="">
-      <span class="channel-header__count">{{ activeChannel()?.memberIds?.length }}</span>
+  <div class="channel-header__meta" #metaRef>
+    <div class="channel-header__avatars" (click)="openMembersList()">
+      @for (member of channelMembers().slice(0, 3); track member.uid) {
+      <img [src]="member.avatar" alt="" class="channel-header__avatar" />
+      }
+      <span class="channel-header__count">{{ channelMembers().length }}</span>
     </div>
 
-    <button class="channel-header__add-btn" (click)="memberIconClicked.emit()">
-      <img src="app-icons/add-members.svg" alt="Add Members" class="channel-header__add-icon channel-header__add-icon--default" />
-      <img src="app-icons/add_members_purple.svg" alt="Add Members" class="channel-header__add-icon channel-header__add-icon--hover" />
+    <button class="channel-header__add-btn" (click)="openAddMembers()">
+      <img src="app-icons/add-members.svg" alt="Add Members"
+        class="channel-header__add-icon channel-header__add-icon--default" />
+      <img src="app-icons/add_members_purple.svg" alt="Add Members"
+        class="channel-header__add-icon channel-header__add-icon--hover" />
     </button>
   </div>
 </div>
 
 <app-edit-channel #editChannel></app-edit-channel>
+
+<dialog #membersDialog class="members-dialog" (click)="onBackdropClick($event)">
+  @if (!showAddMembersView()) {
+  <div class="members-dialog__content">
+    <div class="members-dialog__header">
+      <h2 class="members-dialog__title">Members</h2>
+      <button class="members-dialog__close-btn" (click)="closeDialog()">
+        <img src="app-icons/close.svg" alt="Close" />
+      </button>
+    </div>
+
+    <ul class="members-dialog__list">
+      @for (member of channelMembers(); track member.uid) {
+      <li class="members-dialog__item">
+        <img [src]="member.avatar" alt="" class="members-dialog__avatar" />
+        <span class="members-dialog__name">
+          {{ member.name }}
+          @if (member.uid === currentUserId()) {
+          <span class="members-dialog__you">(You)</span>
+          }
+        </span>
+        <!-- <span
+              class="members-dialog__status"
+              [class.members-dialog__status--online]="member.status === 'online'"
+            ></span> -->
+      </li>
+      }
+
+      <li class="members-dialog__item members-dialog__item--add" (click)="showAddMembersView.set(true)">
+        <span class="members-dialog__add-icon">
+          <img src="app-icons/add-members.svg" alt="" />
+        </span>
+        <span class="members-dialog__name">Add Members</span>
+      </li>
+    </ul>
+  </div>
+  } @else {
+  <div class="members-dialog__content">
+    <div class="members-dialog__header">
+      <h2 class="members-dialog__title">Add Members</h2>
+      <button class="members-dialog__close-btn" (click)="closeDialog()">
+        <img src="app-icons/close.svg" alt="Close" />
+      </button>
+    </div>
+
+    <div class="members-dialog__channel-ref">
+      <span class="members-dialog__hash">#</span>
+      {{ activeChannel()?.name }}
+    </div>
+
+    <input #memberSearchInput type="text" class="members-dialog__input" placeholder="Enter name"
+      [(ngModel)]="addMemberQuery" (input)="onMemberQueryChange()" />
+
+    @if (addMemberError) {
+    <span class="members-dialog__error">{{ addMemberError }}</span>
+    }
+
+    <div class="members-dialog__actions">
+      <button class="members-dialog__submit-btn" [disabled]="!addMemberQuery.trim()" (click)="addMember()">
+        Add
+      </button>
+    </div>
+  </div>
+  }
+  @if (showMemberSuggestions() && memberSuggestions.length) {
+  <ul class="members-dialog__suggestions" [style.top.px]="suggestionsPosition.top"
+    [style.left.px]="suggestionsPosition.left" [style.width.px]="suggestionsPosition.width">
+    @for (member of memberSuggestions; track member.uid) {
+    <li>
+      <button type="button" class="members-dialog__suggestion" (click)="selectMember(member.name)">
+        <img [src]="member.avatar" [alt]="member.name" class="members-dialog__suggestion-avatar" />
+        <span>{{ member.name }}</span>
+      </button>
+    </li>
+    }
+  </ul>
+  }
+</dialog>
