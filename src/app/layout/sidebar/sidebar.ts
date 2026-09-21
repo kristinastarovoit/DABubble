@@ -67,6 +67,7 @@ export class Sidebar {
     isSelf: boolean;
     dm: Dm | null;
   }): Promise<void> {
+    console.log('clicked', partner);
     const currentUserId = this.authService.currentUserId();
     if (!currentUserId) return;
 
@@ -74,7 +75,8 @@ export class Sidebar {
     if (partner.dm) {
       this.dmService.selectDm(partner.dm.id);
     } else {
-      await this.dmService.addDm([currentUserId, partner.user.uid]);
+      const dmId = await this.dmService.addDm([currentUserId, partner.user.uid]);
+      this.dmService.selectDm(dmId);
     }
   }
 

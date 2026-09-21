@@ -122,12 +122,13 @@ export class DmService {
    *
    * @param memberIds The user IDs participating in the conversation.
    */
-  async addDm(memberIds: string[]): Promise<void> {
+  async addDm(memberIds: string[]): Promise<string> {
     const docRef = await addDoc(collection(this.db, 'dms'), {
       memberIds: memberIds,
       lastMessageAt: serverTimestamp(),
     });
     console.log('DM written with ID: ', docRef.id);
+    return docRef.id;
   }
 
   /** Adds a message to a direct-message conversation and updates its timestamp.
@@ -267,6 +268,7 @@ export class DmService {
     const currentUserId = this.authService.currentUserId();
     const allUsers = this.userService.users();
     const dms = this.dms();
+    console.log('dms.length:', dms.length, dms);
 
     return allUsers
       .filter((user) => user.name !== 'Guest' || user.uid === currentUserId)
