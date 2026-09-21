@@ -80,11 +80,12 @@ export class Chat {
 
   /** The ID of the partner user matching the currently selected dm ID. */
   activeDmPartner = computed(() => {
-    const dm = this.dmService.dms().find(dm => dm.id === this.dmId());
-    const partnerID = dm?.memberIds.find(memberId => memberId !== this.authService.currentUserId());
-    return this.userService.users().find(user => user.uid === partnerID)
-  }
-  )
+    const dm = this.dmService.dms().find((dm) => dm.id === this.dmId());
+    const partnerID = dm?.memberIds.find(
+      (memberId) => memberId !== this.authService.currentUserId(),
+    );
+    return this.userService.users().find((user) => user.uid === partnerID);
+  });
 
   /** Creates a reactive listener for the currently selected conversation. */
   constructor() {
@@ -94,24 +95,14 @@ export class Chat {
       const channelId = this.channelId();
       const dmId = this.dmId();
 
-      if (channelId) {
-        const { unsubscribe } = this.channelService.getMessages(channelId, (messages) =>
-          this.messages.set(messages),
-        );
-        this.currentUnsubscribe = unsubscribe;
-      } else if (dmId) {
+      if (dmId) {
         const { unsubscribe } = this.dmService.getMessages(dmId, (messages) =>
           this.messages.set(messages),
-      if (dmId) {
-        const { unsubscribe } = this.dmService.getMessages(
-          dmId,
-          messages => this.messages.set(messages)
         );
         this.currentUnsubscribe = unsubscribe;
       } else if (channelId) {
-        const { unsubscribe } = this.channelService.getMessages(
-          channelId,
-          messages => this.messages.set(messages)
+        const { unsubscribe } = this.channelService.getMessages(channelId, (messages) =>
+          this.messages.set(messages),
         );
         this.currentUnsubscribe = unsubscribe;
       }
@@ -125,7 +116,7 @@ export class Chat {
 
   /** Sends a message to the active channel or direct-message conversation. */
   onSend(text: string) {
-    const uid = this.uid();
+    const uid = this.authService.currentUserId();
     if (!uid) {
       return;
     }
@@ -133,10 +124,10 @@ export class Chat {
     const channelId = this.channelId();
     const dmId = this.dmId();
 
-    if (channelId) {
-      this.channelService.addMessageToChannel(channelId, text, uid);
-    } else if (dmId) {
+    if (dmId) {
       this.dmService.addMessageToDm(dmId, text, uid);
+    } else if (channelId) {
+      this.channelService.addMessageToChannel(channelId, text, uid);
     }
   }
 
@@ -163,10 +154,6 @@ export class Chat {
     } else if (dmId) {
       // TODO: DmService braucht noch addReactionToDm/removeReactionFromDm analog zu ChannelService,
       // aktuell nur für Channel-Nachrichten implementiert
-    if (dmId) {
-      this.dmService.addMessageToDm(dmId, text, uid);
-    } else if (channelId) {
-      this.channelService.addMessageToChannel(channelId, text, uid);
     }
   }
 }
