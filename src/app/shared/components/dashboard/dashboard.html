@@ -1,7 +1,17 @@
-<app-header />
+<!-- <app-header />
 
 <div class="app-wrapper">
   <app-sidebar />
   <app-chat />
+  <app-thread />
+</div> -->
+
+<app-header />
+
+<div class="app-wrapper">
+  <app-sidebar (sidebarToggled)="onSidebarToggled($event)" />
+  <div class="app-wrapper__main" [class.app-wrapper__main--full-width]="!isSidebarOpen">
+    <app-chat />
+  </div>
   <app-thread />
 </div>

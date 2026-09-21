@@ -1,6 +1,5 @@
 @use '../../../../styles/variables' as *;
 
-
 .app-wrapper {
   width: 100%;
   min-height: calc(100vh - 80px);
@@ -8,5 +7,14 @@
   gap: 1rem;
   padding: 1rem;
   background-color: $pastel-purple-bg;
-  
+
+  &__main {
+    flex: 1;
+    min-width: 0;
+    transition: flex 0.2s ease;
+
+    &--full-width {
+      flex: 1 1 100%;
+    }
+  }
 }

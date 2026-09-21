@@ -10,4 +10,10 @@ import { Sidebar } from '../../../layout/sidebar/sidebar';
   styleUrl: './dashboard.scss',
   templateUrl: './dashboard.html',
 })
-export class Dashboard {}
+export class Dashboard {
+   isSidebarOpen = true;
+
+  onSidebarToggled(isOpen: boolean): void {
+    this.isSidebarOpen = isOpen;
+  }
+}
