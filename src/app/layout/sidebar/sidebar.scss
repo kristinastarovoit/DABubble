@@ -290,8 +290,9 @@
   &__label {
     writing-mode: vertical-rl;
     transform: rotate(180deg);
-    font-size: 0.8rem;
-    font-weight: 600;
+     font-family: 'Nunito';
+    font-size:1.1rem;
+    font-weight: 700;
     color: $black;
     white-space: nowrap;
   }
