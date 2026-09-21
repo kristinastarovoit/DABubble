@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MessageChannelInput } from './message-channel-input';
+import { DmHeader } from './dm-header';
 
-describe('MessageChannelInput', () => {
-  let component: MessageChannelInput;
-  let fixture: ComponentFixture<MessageChannelInput>;
+describe('DmHeader', () => {
+  let component: DmHeader;
+  let fixture: ComponentFixture<DmHeader>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MessageChannelInput],
+      imports: [DmHeader],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MessageChannelInput);
+    fixture = TestBed.createComponent(DmHeader);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

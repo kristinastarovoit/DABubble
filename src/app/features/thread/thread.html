@@ -3,7 +3,7 @@
     <div class="thread__title">
       <span class="thread__title-text">Thread</span>
       @if (channelName) {
-      <span class="thread__channel-name"># {{ channelName }}</span>
+        <span class="thread__channel-name"># {{ channelName }}</span>
       }
     </div>
     <button class="thread__close-btn" (click)="close()">
@@ -12,56 +12,58 @@
   </div>
 
   @if (parentMessage) {
-  <div class="thread__content">
-    <div class="thread__message">
-      <img class="thread__avatar" src="app-icons/avatar-placeholder.svg" alt="">
+    <div class="thread__content">
+      <div class="thread__message">
+        <img class="thread__avatar" src="app-icons/avatar-placeholder.svg" alt="" />
 
-      <div class="thread__message-content">
-        <div class="thread__meta">
-          <span class="thread__author">{{ parentMessage.senderId }}</span>
-          <span class="thread__time">{{ parentMessage.createdAt?.toDate() | date: 'shortTime' }}</span>
+        <div class="thread__message-content">
+          <div class="thread__meta">
+            <span class="thread__author">{{ parentMessage.senderId }}</span>
+            <span class="thread__time">{{
+              parentMessage.createdAt?.toDate() | date: 'shortTime'
+            }}</span>
+          </div>
+          <div class="thread__bubble">{{ parentMessage.text }}</div>
         </div>
-        <div class="thread__bubble">{{ parentMessage.text }}</div>
       </div>
     </div>
-
-  </div>
   }
 
   @if (replies.length > 0) {
-  <div class="thread__content">
-    <div class="thread__divider">
-      <span>{{ replies.length }} {{ replies.length === 1 ? 'Reply' : 'Replies' }}</span>
-    </div>
-
-    @for (reply of replies; track reply.id) {
-    <div
-      class="thread__message"
-      [class.thread__message--own]="reply.senderId === currentUserId"
-    >
-      <img class="thread__avatar" src="app-icons/avatar-placeholder.svg" alt="">
-
-      <div class="thread__message-content">
-        <div class="thread__meta">
-          <span class="thread__author">{{ reply.senderId }}</span>
-          <span class="thread__time">{{ reply.createdAt?.toDate() | date: 'shortTime' }}</span>
-        </div>
-        <div class="thread__bubble">{{ reply.text }}</div>
-
-        <app-reaction-bar
-          [reactions]="messageReactions(reply)"
-          (reactionToggled)="onReactionToggled(reply, $event)"
-        ></app-reaction-bar>
+    <div class="thread__content">
+      <div class="thread__divider">
+        <span>{{ replies.length }} {{ replies.length === 1 ? 'Reply' : 'Replies' }}</span>
       </div>
+
+      @for (reply of replies; track reply.id) {
+        <div
+          class="thread__message"
+          [class.thread__message--own]="reply.senderId === currentUserId"
+        >
+          <img class="thread__avatar" src="app-icons/avatar-placeholder.svg" alt="" />
+
+          <div class="thread__message-content">
+            <div class="thread__meta">
+              <span class="thread__author">{{ reply.senderId }}</span>
+              <span class="thread__time">{{ reply.createdAt?.toDate() | date: 'shortTime' }}</span>
+            </div>
+            <div class="thread__bubble">{{ reply.text }}</div>
+
+            <app-reaction-bar
+              [currentUserId]="currentUserId"
+              [reactions]="messageReactions(reply)"
+              (reactionToggled)="onReactionToggled(reply, $event)"
+            ></app-reaction-bar>
+          </div>
+        </div>
+      }
     </div>
-    }
-  </div>
   }
 
   @if (!parentMessage) {
-  <div class="thread__content">
-    <span>Thread eingeblendet zur Bearbeitung.</span>
-  </div>
+    <div class="thread__content">
+      <span>Thread eingeblendet zur Bearbeitung.</span>
+    </div>
   }
 
   <app-message-input

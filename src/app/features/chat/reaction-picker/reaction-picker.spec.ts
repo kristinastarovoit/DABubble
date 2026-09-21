@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MessageChannelList } from './message-channel-list';
+import { ReactionPicker } from './reaction-picker';
 
-describe('MessageChannelList', () => {
-  let component: MessageChannelList;
-  let fixture: ComponentFixture<MessageChannelList>;
+describe('ReactionPicker', () => {
+  let component: ReactionPicker;
+  let fixture: ComponentFixture<ReactionPicker>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MessageChannelList],
+      imports: [ReactionPicker],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MessageChannelList);
+    fixture = TestBed.createComponent(ReactionPicker);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

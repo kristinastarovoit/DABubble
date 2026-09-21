@@ -1,7 +1,20 @@
-import { Component, EventEmitter, Input, Output, computed, input, output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  computed,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
+import { toMessageReactions } from '../../../shared/utilities/reactions.utils';
+import { ReactionPicker } from '../reaction-picker/reaction-picker';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ReactionBar } from '../reaction-bar/reaction-bar';
 import { Message, MessageReaction } from '../../../shared/interfaces/message';
+import { UserService } from '../../../shared/services/users';
 
 /** Groups messages under a calendar date. */
 interface MessageGroup {
@@ -10,7 +23,7 @@ interface MessageGroup {
 }
 
 @Component({
-  imports: [CommonModule, ReactionBar, DatePipe],
+  imports: [CommonModule, ReactionBar, DatePipe, ReactionPicker],
   selector: 'app-message-list',
   styleUrl: './message-list.scss',
   templateUrl: './message-list.html',
@@ -60,6 +73,8 @@ export class MessageList {
   //   this.reactionToggled.emit({ message, emoji });
   // }
 
+  private userService = inject(UserService);
+
   /** Messages displayed in the list. */
   messages = input<Message[]>([]);
 
@@ -77,6 +92,7 @@ export class MessageList {
     const groups = new Map<string, MessageGroup>();
 
     for (const message of this.messages()) {
+      if (!message.createdAt) { continue; }
       const date = message.createdAt.toDate();
       const key = date.toISOString().slice(0, 10);
       let group = groups.get(key);
@@ -102,5 +118,15 @@ export class MessageList {
   /** Emits a changed reaction for a message. */
   onReactionToggled(message: Message, emoji: string): void {
     this.reactionToggled.emit({ message, emoji });
+  }
+
+  protected messageReactions(message: Message): MessageReaction[] {
+    return toMessageReactions(message.reactions, this.currentUserId());
+  }
+
+  hoveredMessageId = signal<string | null>(null);
+  
+  getSenderName(senderId: string): string {
+    return this.userService.users().find(user => user.uid === senderId)?.name ?? senderId;
   }
 }
