@@ -3,7 +3,7 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  width: 350px;
+  max-width: 350px;
   flex-shrink: 0;
   border-radius: 30px;
   padding: 0px 30px;
@@ -43,7 +43,6 @@
     padding: 8px;
     border-radius: 50%;
     transition: background-color 0.2s ease;
-    
 
     &:hover {
       background-color: $pastel-purple-bg;
@@ -54,7 +53,7 @@
     width: 40px;
     height: 40px;
     display: block;
-    
+
     img {
       width: 40px;
       height: 40px;
@@ -145,8 +144,8 @@
   &__section-title {
     font-weight: 600;
     color: $black;
-     &:hover {
-      color:$midtone-purple-three; 
+    &:hover {
+      color: $midtone-purple-three;
     }
   }
 
@@ -169,8 +168,7 @@
     color: $black;
 
     &:hover {
-
-      color:$midtone-purple-three; 
+      color: $midtone-purple-three;
     }
 
     // &--active {

@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 30px;
+  padding: 25px 45px 10px;
   background-color: $pastel-purple-bg;
   box-sizing: border-box;
   font-family: 'Nunito';
@@ -41,7 +41,7 @@
   &__search {
     position: relative;
     flex: 1;
-    width: 600px;
+    width: 989px;
 
     &-input {
       width: 100%;

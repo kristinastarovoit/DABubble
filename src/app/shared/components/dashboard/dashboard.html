@@ -1,6 +1,10 @@
 <app-header />
 
-<div class="app-wrapper">
+<div
+  class="app-wrapper"
+  [class.sidebar-hidden]="!sidebarOpen()"
+  [class.thread-hidden]="!threadOpen()"
+>
   <app-sidebar />
   <app-chat />
   <app-thread />
