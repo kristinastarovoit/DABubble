@@ -148,7 +148,7 @@ export class DmService {
     await updateDoc(dmRef, {
       lastMessageAt: serverTimestamp(),
     });
-    console.log('Message written with ID: ', dmRef.id);
+    console.log('DM written with ID: ', dmRef.id);
   }
 
   /** Adds a reply to a direct message and increments its thread count.
