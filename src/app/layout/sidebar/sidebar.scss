@@ -83,7 +83,7 @@
   &__section-header {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
     padding: 8px 4px;
     cursor: pointer;
     border-radius: 8px;
@@ -91,6 +91,13 @@
     &:hover {
       color: $light-purple-two;
     }
+  }
+
+  &__section-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
   }
 
   &__chevron {
@@ -112,13 +119,28 @@
     }
   }
 
-  &__section-header:hover {
+  &__section-label:hover {
     .sidebar__section-icon--default {
       display: none;
     }
 
     .sidebar__section-icon--hover {
       display: block;
+    }
+  }
+
+  &__add-channel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+
+    &:hover {
+      background-color: $pastel-purple-bg;
     }
   }
 
@@ -130,15 +152,13 @@
     }
   }
 
-  &__section-header:hover &__add-channel-icon {
+  &__add-channel:hover &__add-channel-icon {
     &--default {
       display: none;
     }
 
     &--hover {
       display: block;
-      background-color: $pastel-purple-bg;
-      border-radius: 50%;
     }
   }
 
@@ -258,6 +278,7 @@
   cursor: pointer;
   z-index: 20;
   transition: left 0.2s ease;
+   box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.06);
 
   &--open {
     left: 0px; 
