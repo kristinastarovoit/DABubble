@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, inject, computed, signal, effect, ViewChild, ElementRef } from '@angular/core';
+import { Component, EventEmitter, Output, inject, computed, signal, effect, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Message } from '../../../shared/interfaces/message';
@@ -15,11 +15,15 @@ import { EditChannel } from '../edit-channel/edit-channel';
 })
 export class ChannelHeader {
 
+
   /** Emitted when channel details are requested. */
   @Output() channelDetailsRequested = new EventEmitter<void>();
 
   /** Reference to the channel-settings dialog. */
   @ViewChild('editChannel') private editChannel!: EditChannel;
+
+  /** Reference to the container holding avatars + add-button, used to position the dialog. */
+  @ViewChild('metaRef') private metaRef!: ElementRef<HTMLDivElement>;
 
   /** Reference to the members / add-members dialog. */
   @ViewChild('membersDialog') private membersDialog!: ElementRef<HTMLDialogElement>;
@@ -39,13 +43,25 @@ export class ChannelHeader {
   /** Opens the dialog showing the current channel members. */
   openMembersList(): void {
     this.showAddMembersView.set(false);
+    this.positionDialog();
     this.membersDialog.nativeElement.showModal();
   }
 
   /** Opens the dialog directly in "add members" mode. */
   openAddMembers(): void {
     this.showAddMembersView.set(true);
+    this.positionDialog();
     this.membersDialog.nativeElement.showModal();
+  }
+
+  /** Positions the dialog directly below the meta container (avatars + add-button row). */
+  private positionDialog(): void {
+    const rect = this.metaRef.nativeElement.getBoundingClientRect();
+    const dialog = this.membersDialog.nativeElement;
+
+    dialog.style.top = `${rect.bottom + 8}px`;
+    dialog.style.right = `${window.innerWidth - rect.right}px`;
+    dialog.style.left = 'auto';
   }
 
   /** Closes the members dialog. */

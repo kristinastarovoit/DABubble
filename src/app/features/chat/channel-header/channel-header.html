@@ -5,7 +5,7 @@
     <img src="app-icons/arrow_down.svg" alt="" class="channel-header__chevron" />
   </div>
 
-  <div class="channel-header__meta">
+  <div class="channel-header__meta" #metaRef>
     <div class="channel-header__avatars" (click)="openMembersList()">
       @for (member of channelMembers().slice(0, 3); track member.uid) {
         <img [src]="member.avatar" alt="" class="channel-header__avatar" />
