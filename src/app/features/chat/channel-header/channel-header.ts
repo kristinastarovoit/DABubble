@@ -28,6 +28,9 @@ export class ChannelHeader {
   /** Reference to the members / add-members dialog. */
   @ViewChild('membersDialog') private membersDialog!: ElementRef<HTMLDialogElement>;
 
+  /** Reference to the member search input used to anchor the suggestions. */
+  @ViewChild('memberSearchInput') private memberSearchInput!: ElementRef<HTMLInputElement>;
+
   /** Controls which view is shown inside the members dialog. */
   showAddMembersView = signal(false);
 
@@ -36,6 +39,12 @@ export class ChannelHeader {
 
   /** Validation or persistence error shown in the add-members view. */
   addMemberError = '';
+
+  /** Controls visibility of the separate member suggestions dropdown. */
+  showMemberSuggestions = signal(false);
+
+  /** Fixed position and width of the suggestions dropdown. */
+  suggestionsPosition = { top: 0, left: 0, width: 0 };
 
   /** Users matching the current query that are not channel members yet. */
   get memberSuggestions() {
@@ -58,6 +67,7 @@ export class ChannelHeader {
   openMembersList(): void {
     this.showAddMembersView.set(false);
     this.addMemberError = '';
+    this.showMemberSuggestions.set(false);
     this.positionDialog();
     this.membersDialog.nativeElement.showModal();
   }
@@ -66,6 +76,7 @@ export class ChannelHeader {
   openAddMembers(): void {
     this.showAddMembersView.set(true);
     this.addMemberError = '';
+    this.showMemberSuggestions.set(false);
     this.positionDialog();
     this.membersDialog.nativeElement.showModal();
   }
@@ -85,6 +96,7 @@ export class ChannelHeader {
     this.membersDialog.nativeElement.close();
     this.addMemberQuery = '';
     this.addMemberError = '';
+    this.showMemberSuggestions.set(false);
   }
 
   /** Closes the dialog when the backdrop itself is clicked. */
@@ -94,10 +106,31 @@ export class ChannelHeader {
     }
   }
 
+  /** Updates the separate dropdown position while the user types. */
+  onMemberQueryChange(): void {
+    const query = this.addMemberQuery.trim();
+    this.showMemberSuggestions.set(Boolean(query));
+
+    if (!query) return;
+
+    if (!this.memberSuggestions.length) {
+      return;
+    }
+
+    const rect = this.memberSearchInput.nativeElement.getBoundingClientRect();
+    this.suggestionsPosition = {
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+    };
+
+  }
+
   /** Selects a user from the live search results. */
   selectMember(userName: string): void {
     this.addMemberQuery = userName;
     this.addMemberError = '';
+    this.showMemberSuggestions.set(false);
   }
 
   /** Adds the entered user to the active channel. */
@@ -137,6 +170,7 @@ export class ChannelHeader {
 
     this.addMemberQuery = '';
     this.addMemberError = '';
+    this.showMemberSuggestions.set(false);
     this.showAddMembersView.set(false);
   }
 

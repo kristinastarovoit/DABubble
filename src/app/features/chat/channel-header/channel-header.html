@@ -73,20 +73,14 @@
       {{ activeChannel()?.name }}
     </div>
 
-    <input type="text" class="members-dialog__input" placeholder="Enter name" [(ngModel)]="addMemberQuery" />
-
-    @if (addMemberQuery.trim() && memberSuggestions.length) {
-    <ul class="members-dialog__suggestions">
-      @for (member of memberSuggestions; track member.uid) {
-      <li>
-        <button type="button" class="members-dialog__suggestion" (click)="selectMember(member.name)">
-          <img [src]="member.avatar" [alt]="member.name" class="members-dialog__suggestion-avatar" />
-          <span>{{ member.name }}</span>
-        </button>
-      </li>
-      }
-    </ul>
-    }
+    <input
+      #memberSearchInput
+      type="text"
+      class="members-dialog__input"
+      placeholder="Enter name"
+      [(ngModel)]="addMemberQuery"
+      (input)="onMemberQueryChange()"
+    />
 
     @if (addMemberError) {
     <span class="members-dialog__error">{{ addMemberError }}</span>
@@ -98,5 +92,22 @@
       </button>
     </div>
   </div>
+  }
+  @if (showMemberSuggestions() && memberSuggestions.length) {
+  <ul
+    class="members-dialog__suggestions"
+    [style.top.px]="suggestionsPosition.top"
+    [style.left.px]="suggestionsPosition.left"
+    [style.width.px]="suggestionsPosition.width"
+  >
+  @for (member of memberSuggestions; track member.uid) {
+  <li>
+    <button type="button" class="members-dialog__suggestion" (click)="selectMember(member.name)">
+      <img [src]="member.avatar" [alt]="member.name" class="members-dialog__suggestion-avatar" />
+      <span>{{ member.name }}</span>
+    </button>
+  </li>
+  }
+  </ul>
   }
 </dialog>
