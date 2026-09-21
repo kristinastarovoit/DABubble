@@ -2,9 +2,9 @@
   <textarea 
   class="message-input__field" 
   /* [(ngModel)]="text"*/ 
-    (keydown.enter)="onEnter($event)" 
+    (keydown.enter)="onEnter($event)"
     [value]="text()" (input)="text.set($any($event.target).value)"
-    (keydown.enter)="sendMessage()" [placeholder]="placeholder"></textarea>
+    [placeholder]="placeholder"></textarea>
 
   <div class="message-input__actions">
     <button class="message-input__icon-btn" (click)="toggleEmojiPicker()">
