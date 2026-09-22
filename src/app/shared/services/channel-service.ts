@@ -346,6 +346,21 @@ export class ChannelService {
     });
     return { messages, unsubscribe };
   }
+  
+  getMessage(
+    channelId: string,
+    messageId: string,
+    onMessage?: (message: Message | null) => void,
+  ): { message: ReturnType<typeof signal<Message | null>>; unsubscribe: () => void } {
+    const message = signal<Message | null>(null);
+    const messageRef = doc(this.db, 'channels', channelId, 'messages', messageId);
+    const unsubscribe = onSnapshot(messageRef, (snapshot) => {
+      const value = snapshot.exists() ? { id: snapshot.id, ...(snapshot.data() as Message) } : null;
+      message.set(value);
+      onMessage?.(value);
+    });
+    return { message, unsubscribe };
+  }
 
   // unsubscribe in ngondestroy in der component
   /** Subscribes to all thread replies for a channel message.
@@ -357,13 +372,17 @@ export class ChannelService {
   getThreads(
     channelId: string,
     messageId: string,
+    onThreadMessages?: (threadMessages: ThreadMessage[]) => void,
   ): { threadMessage: ReturnType<typeof signal<ThreadMessage[]>>; unsubscribe: () => void } {
     const threadMessage = signal<ThreadMessage[]>([]);
     const threadRef = collection(this.db, 'channels', channelId, 'messages', messageId, 'thread');
     const unsubscribe = onSnapshot(threadRef, (snapshot) => {
-      threadMessage.set(
-        snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as ThreadMessage) })),
-      );
+      const threadMessages = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as ThreadMessage),
+      }));
+      threadMessage.set(threadMessages);
+      onThreadMessages?.(threadMessages);
     });
     return { threadMessage, unsubscribe };
   }

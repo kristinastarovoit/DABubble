@@ -102,6 +102,21 @@ export class DmService {
     return { messages, unsubscribe };
   }
 
+  getMessage(
+    dmId: string,
+    messageId: string,
+    onMessage?: (message: Message | null) => void,
+  ): { message: ReturnType<typeof signal<Message | null>>; unsubscribe: () => void } {
+    const message = signal<Message | null>(null);
+    const messageRef = doc(this.db, 'dms', dmId, 'messages', messageId);
+    const unsubscribe = onSnapshot(messageRef, (snapshot) => {
+      const value = snapshot.exists() ? { id: snapshot.id, ...(snapshot.data() as Message) } : null;
+      message.set(value);
+      onMessage?.(value);
+    });
+    return { message, unsubscribe };
+  }
+
   /** Subscribes to all thread replies for a direct message.
    *
    * @param dmId The ID of the direct-message conversation.
@@ -111,13 +126,17 @@ export class DmService {
   getThreads(
     dmId: string,
     messageId: string,
+    onThreadMessages?: (threadMessages: ThreadMessage[]) => void,
   ): { threadMessage: ReturnType<typeof signal<ThreadMessage[]>>; unsubscribe: () => void } {
     const threadMessage = signal<ThreadMessage[]>([]);
     const threadRef = collection(this.db, 'dms', dmId, 'messages', messageId, 'thread');
     const unsubscribe = onSnapshot(threadRef, (snapshot) => {
-      threadMessage.set(
-        snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as ThreadMessage) })),
-      );
+      const threadMessages = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as ThreadMessage),
+      }));
+      threadMessage.set(threadMessages);
+      onThreadMessages?.(threadMessages);
     });
     return { threadMessage, unsubscribe };
   }

@@ -9,7 +9,7 @@
       [messages]="messages()"
       [currentUserId]="uid() ?? ''"
       (reactionToggled)="onReactionToggled($event)"
-      /* (threadOpened)="openThread($event)" */
+      (threadOpened)="openThread($event)"
     />
 
     <app-message-input

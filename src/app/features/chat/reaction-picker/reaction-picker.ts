@@ -44,6 +44,10 @@ export class ReactionPicker {
   /** Whether the current user is the author of this message (enables the edit menu). */
   isOwnMessage = input(false);
 
+  showThreadIcon = input(true);
+
+  showQuickReactions = input(true);
+
   /** Emitted when the message edit/delete menu should open. */
   moreActionsRequested = output<void>();
 

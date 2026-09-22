@@ -1,73 +1,98 @@
-<aside class="thread" [hidden]="!isVisible">
+<aside class="thread" [hidden]="!isVisible()">
   <div class="thread__header">
     <div class="thread__title">
       <span class="thread__title-text">Thread</span>
-      @if (channelName) {
-        <span class="thread__channel-name"># {{ channelName }}</span>
-      }
     </div>
     <button class="thread__close-btn" (click)="close()">
       <img src="app-icons/close.svg" alt="Close" />
     </button>
   </div>
 
-  @if (parentMessage) {
+  @if (parentMessage(); as parentMessage) {
     <div class="thread__content">
-      <div class="thread__message">
+      <div
+        class="thread__message"
+        (mouseenter)="parentMessageHovered.set(true)"
+        (mouseleave)="parentMessageHovered.set(false)"
+      >
         <img class="thread__avatar" src="app-icons/avatar-placeholder.svg" alt="" />
 
         <div class="thread__message-content">
           <div class="thread__meta">
-            <span class="thread__author">{{ parentMessage.senderId }}</span>
+            <span class="thread__author">{{ getSenderName(parentMessage.senderId) }}</span>
             <span class="thread__time">{{
               parentMessage.createdAt?.toDate() | date: 'shortTime'
             }}</span>
           </div>
           <div class="thread__bubble">{{ parentMessage.text }}</div>
+
+          <app-reaction-bar
+            [currentUserId]="currentUserId()"
+            [reactions]="messageReactions(parentMessage)"
+            (reactionToggled)="onParentReactionToggled($event)"
+          ></app-reaction-bar>
         </div>
+
+        @if (parentMessageHovered()) {
+          <app-reaction-picker
+            class="thread__picker"
+            [isOwnMessage]="parentMessage.senderId === currentUserId()"
+            [showThreadIcon]="false"
+            [showQuickReactions]="false"
+            (reactionSelected)="onParentReactionToggled($event)"
+          ></app-reaction-picker>
+        }
       </div>
     </div>
   }
-
-  @if (replies.length > 0) {
+  @if (replies().length > 0) {
     <div class="thread__content">
       <div class="thread__divider">
-        <span>{{ replies.length }} {{ replies.length === 1 ? 'Reply' : 'Replies' }}</span>
+        <span>{{ replies().length }} {{ replies().length === 1 ? 'Reply' : 'Replies' }}</span>
       </div>
 
-      @for (reply of replies; track reply.id) {
+      @for (reply of replies(); track reply.id) {
         <div
           class="thread__message"
-          [class.thread__message--own]="reply.senderId === currentUserId"
+          [class.thread__message--own]="reply.senderId === currentUserId()"
+          (mouseenter)="hoveredReplyId.set(reply.id ?? null)"
+          (mouseleave)="hoveredReplyId.set(null)"
         >
           <img class="thread__avatar" src="app-icons/avatar-placeholder.svg" alt="" />
 
           <div class="thread__message-content">
             <div class="thread__meta">
-              <span class="thread__author">{{ reply.senderId }}</span>
+              <span class="thread__author">{{ getSenderName(reply.senderId) }}</span>
               <span class="thread__time">{{ reply.createdAt?.toDate() | date: 'shortTime' }}</span>
             </div>
             <div class="thread__bubble">{{ reply.text }}</div>
 
             <app-reaction-bar
-              [currentUserId]="currentUserId"
+              [currentUserId]="currentUserId()"
               [reactions]="messageReactions(reply)"
               (reactionToggled)="onReactionToggled(reply, $event)"
             ></app-reaction-bar>
           </div>
+
+          @if (hoveredReplyId() === reply.id) {
+            <app-reaction-picker
+              class="thread__picker"
+              [isOwnMessage]="reply.senderId === currentUserId()"
+              [showThreadIcon]="false"
+              [showQuickReactions]="false"
+              (reactionSelected)="onReactionToggled(reply, $event)"
+            ></app-reaction-picker>
+          }
         </div>
       }
     </div>
   }
 
-  @if (!parentMessage) {
+  @if (!parentMessage()) {
     <div class="thread__content">
-      <span>Thread eingeblendet zur Bearbeitung.</span>
+      <span>Wähle eine Nachricht aus, um den Thread zu öffnen.</span>
     </div>
   }
 
-  <app-message-input
-    [placeholder]="'Reply...'"
-    /* (messageSent)="sendReply($event)" */
-  ></app-message-input>
+  <app-message-input [placeholder]="'Reply...'" (send)="sendReply($event)"></app-message-input>
 </aside>

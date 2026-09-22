@@ -12,6 +12,10 @@
   box-sizing: border-box;
   font-family: 'Nunito';
 
+  &[hidden] {
+    display: none;
+  }
+
   &__header {
     display: flex;
     align-items: center;
@@ -83,6 +87,7 @@
   }
 
   &__message {
+    position: relative;
     display: flex;
     gap: 16px;
     padding: 8px 12px;
@@ -150,4 +155,16 @@
     white-space: pre-wrap;
     word-break: break-word;
   }
+}
+
+.thread__picker {
+  position: absolute;
+  top: -16px;
+  right: 12px;
+  z-index: 5;
+}
+
+.thread__message--own .thread__picker {
+  right: auto;
+  left: 12px;
 }
