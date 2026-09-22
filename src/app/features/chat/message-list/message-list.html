@@ -7,7 +7,7 @@
   @for (message of group.messages; track message.id) {
   <div class="message-list__item" [class.message-list__item--own]="message.senderId === currentUserId()"
     (mouseenter)="hoveredMessageId.set(message.id ?? null)" (mouseleave)="hoveredMessageId.set(null)">
-    <img class="message-list__avatar" src="app-icons/avatar-placeholder.svg" alt="" />
+    <img class="message-list__avatar" [src]="getSenderAvatar(message.senderId) || 'app-icons/avatar-placeholder.svg'" alt="" />
 
     <div class="message-list__content">
       <div class="message-list__meta">
