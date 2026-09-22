@@ -334,5 +334,27 @@ export class DmService {
       text: text,
     });
   }
+
+  /** Updates the text of a direct-message thread reply, if the signed-in user is its sender.
+   *
+   * @param dmId The ID of the direct-message conversation.
+   * @param messageId The ID of the parent message.
+   * @param threadId The ID of the thread reply to edit.
+   * @param text The new reply text.
+   */
+  async editThreadMessage(dmId: string, messageId: string, threadId: string, text: string) {
+    const user = this.auth.currentUser?.uid;
+    if (!user) { return; }
+
+    const threadRef = doc(this.db, 'dms', dmId, 'messages', messageId, 'thread', threadId);
+    const snapshot = await getDoc(threadRef);
+    const threadMessage = snapshot.data() as ThreadMessage;
+
+    if (threadMessage?.senderId !== user) { return; }
+
+    await updateDoc(threadRef, {
+      text: text,
+    });
+  }
 }
 

@@ -48,6 +48,15 @@ export class Thread {
   /** The reply currently hovered, showing its reaction picker. */
   hoveredReplyId = signal<string | null>(null);
 
+  /** Whether the parent message is currently being edited inline. */
+  editingParentMessage = signal(false);
+
+  /** The ID of the thread reply currently being edited inline. */
+  editingReplyId = signal<string | null>(null);
+
+  /** The current text used while editing a thread message inline. */
+  editText = signal('');
+
   /** Whether the parent message's reaction picker is currently shown. */
   parentMessageHovered = signal(false);
 
@@ -111,6 +120,66 @@ export class Thread {
   /** Closes the thread panel. */
   close(): void {
     this.threadService.close();
+  }
+
+  /** Starts editing the parent message in the active thread. */
+  startEditingParentMessage(): void {
+    const parentMessage = this.parentMessage();
+    if (!parentMessage) return;
+
+    this.editingParentMessage.set(true);
+    this.editingReplyId.set(null);
+    this.editText.set(parentMessage.text);
+  }
+
+  /** Starts editing a thread reply message. */
+  startEditingReply(reply: ThreadMessage): void {
+    if (!reply.id) return;
+
+    this.editingParentMessage.set(false);
+    this.editingReplyId.set(reply.id);
+    this.editText.set(reply.text);
+  }
+
+  /** Saves the current inline edit for either the parent message or a reply. */
+  async saveEditedMessage(): Promise<void> {
+    const thread = this.activeThread();
+    const uid = this.currentUserId();
+    const parentMessage = this.parentMessage();
+    const messageId = thread?.message.id;
+    const text = this.editText().trim();
+
+    if (!thread || !messageId || !uid || !text) {
+      this.editingParentMessage.set(false);
+      this.editingReplyId.set(null);
+      this.editText.set('');
+      return;
+    }
+
+    if (this.editingParentMessage()) {
+      if (thread.channelId) {
+        await this.channelService.editChannelMessage(thread.channelId, messageId, text);
+      } else if (thread.dmId) {
+        await this.dmService.editDmMessage(thread.dmId, messageId, text);
+      }
+      this.editingParentMessage.set(false);
+    } else {
+      const replyId = this.editingReplyId();
+      if (!replyId) {
+        this.editingReplyId.set(null);
+        this.editText.set('');
+        return;
+      }
+
+      if (thread.channelId) {
+        await this.channelService.editThreadMessage(thread.channelId, messageId, replyId, text);
+      } else if (thread.dmId) {
+        await this.dmService.editThreadMessage(thread.dmId, messageId, replyId, text);
+      }
+      this.editingReplyId.set(null);
+    }
+
+    this.editText.set('');
   }
 
   /** Sends a reply to the currently open thread. */
