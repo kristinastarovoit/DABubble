@@ -1,4 +1,5 @@
 @use '../../../../styles/variables' as *;
+@use '../../../../styles/buttons';
 
 .channel-create {
   position: fixed;
@@ -135,25 +136,5 @@
     display: flex;
     justify-content: flex-end;
     margin-top: 8px;
-  }
-
-  &__submit-btn {
-    background-color: $dark-purple-one;
-    color: $white;
-    border: none;
-    border-radius: 32px;
-    padding: 14px 32px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-
-    // &:hover:not(:disabled) {
-    //   background-color: $color-primary-dark;
-    // }
-
-    &:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
   }
 }
