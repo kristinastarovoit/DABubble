@@ -168,3 +168,69 @@
   right: auto;
   left: 12px;
 }
+
+.edit-message-input {
+  &__wrapper {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    background-color: $white;
+    border: 1px solid $border-purple;
+    border-radius: 20px;
+    height: fit-content;
+  }
+
+  &__button-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+
+  &__field {
+    border: none;
+    color: $dark-grey;
+    font-family: inherit;
+    font-size: 1.125rem;
+    width: 100%;
+    resize: none;
+    min-height: 60px;
+    field-sizing: content;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &__footer-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.message-input {
+  &__icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+    height: fit-content;
+
+    &:hover {
+      background-color: $pastel-purple-bg;
+    }
+
+    img {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
