@@ -1,21 +1,33 @@
 <div class="message-input">
-  <textarea 
-  class="message-input__field" 
-  /* [(ngModel)]="text"*/ 
+  <textarea
+    class="message-input__field"
+    /* [(ngModel)]="text"*/
     (keydown.enter)="onEnter($event)"
-    [value]="text()" (input)="text.set($any($event.target).value)"
+    [value]="text()"
+    (input)="text.set($any($event.target).value)"
     [disabled]="disabled"
-    [placeholder]="placeholder"></textarea>
+    [placeholder]="placeholder"
+  ></textarea>
 
   <div class="message-input__actions">
-    <button class="message-input__icon-btn" (click)="toggleEmojiPicker()">
-      <img src="app-icons/emoji.svg" alt="Emoji" />
-    </button>
-    <button class="message-input__icon-btn" 
-    (click)="insertMention()"
-    >
+    <div class="message-input__emoji-wrapper">
+      <button class="message-input__icon-btn" (click)="toggleEmojiPicker()">
+        <img src="app-icons/emoji.svg" alt="Emoji" />
+      </button>
+
+      @if (showEmojiPicker()) {
+        <div class="message-input__emoji-panel">
+          @for (emoji of curatedEmojis; track emoji) {
+            <button type="button" class="message-input__emoji-option" (click)="selectEmoji(emoji)">
+              {{ emoji }}
+            </button>
+          }
+        </div>
+      }
+    </div>
+    <button class="message-input__icon-btn" (click)="insertMention()">
       <img src="app-icons/tagg.svg" alt="Mention" />
-    </button> 
+    </button>
 
     <button class="message-input__send-btn" [disabled]="disabled" (click)="sendMessage()">
       <img src="app-icons/send.svg" alt="Send" />
