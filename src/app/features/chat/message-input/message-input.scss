@@ -21,6 +21,7 @@
     min-height: 24px;
     max-height: 160px;
     padding: 4px 0;
+    background-color: $white;
 
     &::placeholder {
       color: $dark-grey;

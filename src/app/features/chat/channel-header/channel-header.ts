@@ -55,31 +55,49 @@ export class ChannelHeader {
   /**
    * Channels and contacts matching the current recipient query.
    *
+   * A leading `#` restricts the search to channels, a leading `@` restricts it to contacts
+   * (matched by name or email). Without a prefix, both are searched by name.
+   *
    * @returns The matching channels and users, channels first.
    */
   get recipientSuggestions(): Array<
     | { type: 'channel'; id: string; name: string }
     | { type: 'user'; id: string; name: string; avatar: string }
   > {
-    const query = this.recipientQuery.trim().toLowerCase();
-    if (!query) return [];
+    const raw = this.recipientQuery.trim();
+    const mode = raw.startsWith('#') ? 'channel' : raw.startsWith('@') ? 'user' : 'mixed';
+    const query = (mode === 'mixed' ? raw : raw.slice(1)).toLowerCase();
+
+    // Without a prefix, an empty query yields no suggestions; with a prefix, it lists everything.
+    if (mode === 'mixed' && !query) return [];
 
     const currentUserId = this.authService.currentUserId();
-    const channelMatches = this.channelService
-      .channels()
-      .filter((channel) => channel.name.toLowerCase().includes(query))
-      .map((channel) => ({ type: 'channel' as const, id: channel.id, name: channel.name }));
 
-    const userMatches = this.dmService
-      .dmPartners()
-      .filter((partner) => partner.user.uid !== currentUserId)
-      .filter((partner) => partner.user.name.toLowerCase().includes(query))
-      .map((partner) => ({
-        type: 'user' as const,
-        id: partner.user.uid,
-        name: partner.user.name,
-        avatar: partner.user.avatar,
-      }));
+    const channelMatches =
+      mode === 'user'
+        ? []
+        : this.channelService
+            .channels()
+            .filter((channel) => channel.name.toLowerCase().includes(query))
+            .map((channel) => ({ type: 'channel' as const, id: channel.id, name: channel.name }));
+
+    const userMatches =
+      mode === 'channel'
+        ? []
+        : this.dmService
+            .dmPartners()
+            .filter((partner) => partner.user.uid !== currentUserId)
+            .filter(
+              (partner) =>
+                partner.user.name.toLowerCase().includes(query) ||
+                partner.user.email.toLowerCase().includes(query),
+            )
+            .map((partner) => ({
+              type: 'user' as const,
+              id: partner.user.uid,
+              name: partner.user.name,
+              avatar: partner.user.avatar,
+            }));
 
     return [...channelMatches, ...userMatches];
   }

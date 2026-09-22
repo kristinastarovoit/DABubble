@@ -7,7 +7,7 @@
 
     <div class="channel-header__new-message">
       <input #recipientSearchInput type="text" class="channel-header__new-message-input"
-        placeholder="To: #channel or @contact or email address" [(ngModel)]="recipientQuery" (input)="onRecipientQueryChange()" />
+        placeholder="To: #channel, @contact or email address" [(ngModel)]="recipientQuery" (input)="onRecipientQueryChange()" />
 
       @if (showRecipientSuggestions() && recipientSuggestions.length) {
       <ul class="channel-header__new-message-suggestions" [style.top.px]="recipientSuggestionsPosition.top"
