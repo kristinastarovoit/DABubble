@@ -20,8 +20,13 @@
       </div>
 
       @if (editingMessageId() === message.id) {
-      <textarea [value]="editText()" (input)="editText.set($any($event.target).value)"></textarea>
-      <button (click)="editSaved.emit({ message: message, text: editText() }); this.editingMessageId.set(undefined)" >Save</button>
+      <div class="message-input">
+        <textarea [value]="editText()" (input)="editText.set($any($event.target).value)"
+          class="message-input__field"></textarea>
+          <button class="button button--dismiss">Dismiss</button>
+        <button class="button button--submit"
+          (click)="editSaved.emit({ message: message, text: editText() }); this.editingMessageId.set(undefined)">Save</button>
+      </div>
       } @else {
       <div class="message-list__bubble">{{ message.text }}</div>}
 
@@ -38,8 +43,8 @@
 
     @if (hoveredMessageId() === message.id) {
     <app-reaction-picker class="message-list__picker" [isOwnMessage]="message.senderId === currentUserId()"
-      (reactionSelected)="onReactionToggled(message, $event)"
-      (threadRequested)="threadOpened.emit(message)"   (moreActionsRequested)="startEditing(message)"></app-reaction-picker>
+      (reactionSelected)="onReactionToggled(message, $event)" (threadRequested)="threadOpened.emit(message)"
+      (moreActionsRequested)="startEditing(message)"></app-reaction-picker>
     }
   </div>
   }

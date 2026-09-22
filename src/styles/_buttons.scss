@@ -1,0 +1,27 @@
+@use '../styles/variables' as *;
+
+
+.button {
+    border-radius: 32px;
+    padding: 14px 32px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &--submit {
+        background-color: $dark-purple-one;
+        color: $white;
+        border: none;
+
+        &:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    }
+
+    &--dismiss {
+        background-color: $white;
+        color: $dark-purple-one;
+        border: 1px solid $light-purple-two;
+    }
+}
