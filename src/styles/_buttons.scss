@@ -7,6 +7,7 @@
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
+    transition: all 255ms ease-in-out;
 
     &--submit {
         background-color: $dark-purple-one;
@@ -17,11 +18,20 @@
             opacity: 0.4;
             cursor: not-allowed;
         }
+
+        &:hover {
+            background-color: $light-purple-two;
+        }
     }
 
     &--dismiss {
         background-color: $white;
         color: $dark-purple-one;
         border: 1px solid $light-purple-two;
+
+        &:hover {
+            color: $white;
+            background-color: $light-purple-two;
+        }
     }
 }

@@ -22,13 +22,13 @@
       @if (editingMessageId() === message.id) {
       <div class="edit-message-input__wrapper">
         <textarea [value]="editText()" (input)="editText.set($any($event.target).value)"
-          class="edit-message-input__field"></textarea>
+          class="edit-message-input__field" (keydown.enter)="editSaved.emit({ message: message, text: editText() }); this.editingMessageId.set(undefined)"></textarea>
         <div class="edit-message-input__footer-wrapper">
           <button class="message-input__icon-btn">
             <img src="app-icons/emoji.svg" alt="Emoji" />
           </button>
           <div class="edit-message-input__button-wrapper">
-            <button class="button button--dismiss">geht noch nicht</button>
+            <button class="button button--dismiss" (click)="this.editingMessageId.set(undefined)">Dismiss</button>
             <button class="button button--submit"
               (click)="editSaved.emit({ message: message, text: editText() }); this.editingMessageId.set(undefined)">Save</button>
           </div>
