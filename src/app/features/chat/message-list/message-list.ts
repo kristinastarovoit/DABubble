@@ -147,4 +147,9 @@ export class MessageList {
   getSenderName(senderId: string): string {
     return this.userService.users().find(user => user.uid === senderId)?.name ?? senderId;
   }
+
+  /** Returns the display name for the given sender ID. */
+  getSenderAvatar(senderId: string): string {
+    return this.userService.users().find(user => user.uid === senderId)?.avatar ?? senderId;
+  }
 }
