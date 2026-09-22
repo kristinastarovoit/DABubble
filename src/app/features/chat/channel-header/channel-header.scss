@@ -82,6 +82,71 @@
     color: $black;
   }
 
+  &__new-message {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+  }
+
+  &__new-message-input {
+    width: 100%;
+    border: 1px solid $border-purple;
+    border-radius: 32px;
+    padding: 14px 20px;
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: $midtone-purple-three;
+    }
+  }
+
+  &__new-message-suggestions {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 1001;
+    margin: 0;
+    list-style: none;
+    border: 1px solid $border-purple;
+    border-radius: 20px;
+    padding: 4px;
+    background-color: $white;
+    max-height: 240px;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  &__new-message-suggestion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 20px;
+    background: transparent;
+    color: $black;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    font-size: 14px;
+
+    &:hover {
+      background-color: $pastel-purple-bg;
+    }
+  }
+
+  &__new-message-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
   &__add-btn {
     background: none;
     border: none;

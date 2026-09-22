@@ -15,6 +15,9 @@ import { FormsModule } from '@angular/forms';
 import { Message } from '../../../shared/interfaces/message';
 import { ChannelService } from '../../../shared/services/channel-service';
 import { UserService } from '../../../shared/services/users';
+import { DmService } from '../../../shared/services/dm-service';
+import { AuthService } from '../../../shared/services/auth';
+import { NewMessageService } from '../../../shared/services/new-message-service';
 import { FIREBASE_AUTH } from '../../../app.config';
 import { EditChannel } from '../edit-channel/edit-channel';
 
@@ -27,6 +30,80 @@ import { EditChannel } from '../edit-channel/edit-channel';
 export class ChannelHeader {
   /** Emitted when channel details are requested. */
   @Output() channelDetailsRequested = new EventEmitter<void>();
+
+  /** Provides direct-message data, used for the "New Message" recipient search. */
+  private dmService = inject(DmService);
+
+  /** Provides reactive authentication state. */
+  private authService = inject(AuthService);
+
+  /** Tracks whether the "New Message" recipient picker is currently active. */
+  newMessageService = inject(NewMessageService);
+
+  /** Text entered in the "New Message" recipient search field. */
+  recipientQuery = '';
+
+  /** Controls visibility of the recipient suggestions dropdown. */
+  showRecipientSuggestions = signal(false);
+
+  /** Channels and contacts matching the current recipient query. */
+  get recipientSuggestions(): Array<
+    | { type: 'channel'; id: string; name: string }
+    | { type: 'user'; id: string; name: string; avatar: string }
+  > {
+    const query = this.recipientQuery.trim().toLowerCase();
+    if (!query) return [];
+
+    const currentUserId = this.authService.currentUserId();
+    const channelMatches = this.channelService
+      .channels()
+      .filter((channel) => channel.name.toLowerCase().includes(query))
+      .map((channel) => ({ type: 'channel' as const, id: channel.id, name: channel.name }));
+
+    const userMatches = this.dmService
+      .dmPartners()
+      .filter((partner) => partner.user.uid !== currentUserId)
+      .filter((partner) => partner.user.name.toLowerCase().includes(query))
+      .map((partner) => ({
+        type: 'user' as const,
+        id: partner.user.uid,
+        name: partner.user.name,
+        avatar: partner.user.avatar,
+      }));
+
+    return [...channelMatches, ...userMatches];
+  }
+
+  /** Updates the recipient suggestions dropdown while the user types. */
+  onRecipientQueryChange(): void {
+    this.showRecipientSuggestions.set(Boolean(this.recipientQuery.trim()));
+  }
+
+  /** Selects a channel or contact as the recipient and leaves "New Message" mode. */
+  async selectRecipient(
+    suggestion:
+      | { type: 'channel'; id: string; name: string }
+      | { type: 'user'; id: string; name: string; avatar: string },
+  ): Promise<void> {
+    this.recipientQuery = '';
+    this.showRecipientSuggestions.set(false);
+
+    if (suggestion.type === 'channel') {
+      this.channelService.selectChannel(suggestion.id);
+      return;
+    }
+
+    const currentUserId = this.authService.currentUserId();
+    if (!currentUserId) return;
+
+    const partner = this.dmService.dmPartners().find((p) => p.user.uid === suggestion.id);
+    if (partner?.dm) {
+      this.dmService.selectDm(partner.dm.id);
+    } else {
+      const dmId = await this.dmService.addDm([currentUserId, suggestion.id]);
+      this.dmService.selectDm(dmId);
+    }
+  }
 
   /** Reference to the channel-settings dialog. */
   @ViewChild('editChannel') private editChannel!: EditChannel;

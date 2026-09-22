@@ -1,10 +1,11 @@
 <section class="chat">
-  @if (channelId() || dmId()) {
-    @if (channelId()) {
+  @if (channelId() || dmId() || newMessageService.isNewMessageMode()) {
+    @if (channelId() || newMessageService.isNewMessageMode()) {
       <app-channel-header /* (memberIconClicked)="openMemberList()" */></app-channel-header>
     } @else if (dmId()) {
       <app-dm-header [currentDmPartner]="activeDmPartner()"></app-dm-header>
     }
+    @if (channelId() || dmId()) {
     <app-message-list
       [messages]="messages()"
       [currentUserId]="uid() ?? ''"
@@ -22,6 +23,7 @@
       /* (messageSent)="sendMessage($event)" */
       /* (messageSent)="this.channelService.addMessageToChannel($event)" */
     />
+    }
   } @else {
     <app-landing-page></app-landing-page>
   }

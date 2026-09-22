@@ -21,6 +21,7 @@ import { LandingPage } from '../landing-page/landing-page';
 import { UserService } from '../../shared/services/users';
 import { AuthService } from '../../shared/services/auth';
 import { DmHeader } from './dm-header/dm-header';
+import { NewMessageService } from '../../shared/services/new-message-service';
 
 @Component({
   imports: [CommonModule, ChannelHeader, MessageInput, MessageList, LandingPage, DmHeader],
@@ -55,6 +56,9 @@ export class Chat {
   private userService = inject(UserService);
 
   private authService = inject(AuthService);
+
+  /** Tracks whether the "New Message" composer is active. */
+  newMessageService = inject(NewMessageService);
 
   /** Provides the currently authenticated user for sending messages. */
   private auth = inject(FIREBASE_AUTH);
