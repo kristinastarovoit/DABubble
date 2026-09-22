@@ -298,4 +298,21 @@ export class Thread {
   getSenderName(senderId: string): string {
     return this.userService.users().find((user) => user.uid === senderId)?.name ?? senderId;
   }
+
+  /** The channel the open thread belongs to, if it was opened from a channel. */
+  originChannel = computed(() =>
+    this.channelService.channels().find((channel) => channel.id === this.activeThread()?.channelId),
+  );
+
+  /** The DM partner the open thread belongs to, if it was opened from a direct message. */
+  originDmPartner = computed(() => {
+    const dmId = this.activeThread()?.dmId;
+    if (!dmId) return undefined;
+
+    const dm = this.dmService.dms().find((dm) => dm.id === dmId);
+    const partnerId = dm?.memberIds.find(
+      (memberId) => memberId !== this.authService.currentUserId(),
+    );
+    return this.userService.users().find((user) => user.uid === partnerId);
+  });
 }

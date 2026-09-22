@@ -14,7 +14,8 @@ import { UserService } from '../../../shared/services/users';
 import { reactionTooltipName } from '../../../shared/utilities/reactions.utils';
 import { CURATED_EMOJIS } from '../../../shared/utilities/emoji-set';
 
-const MAX_VISIBLE_REACTIONS = 6;
+const DEFAULT_MAX_VISIBLE_REACTIONS = 6;
+
 @Component({
   imports: [CommonModule],
   selector: 'app-reaction-bar',
@@ -33,6 +34,9 @@ export class ReactionBar {
 
   /** Whether this reaction bar belongs to a message sent by the current user. */
   isOwnMessage = input(false);
+
+  /** Number of reaction chips shown before collapsing the rest behind "x weitere". */
+  maxVisible = input(DEFAULT_MAX_VISIBLE_REACTIONS);
 
   /** Emitted when a reaction chip is clicked (toggle). */
   reactionToggled = output<string>();
@@ -59,13 +63,13 @@ export class ReactionBar {
   /** The reactions currently visible, respecting the collapse limit. */
   visibleReactions = computed(() => {
     const all = this.reactions();
-    return this.showAll() ? all : all.slice(0, MAX_VISIBLE_REACTIONS);
+    return this.showAll() ? all : all.slice(0, this.maxVisible());
   });
 
-  /** Number of reactions hidden behind the "x weitere" toggle. */
   hiddenCount = computed(() => {
     const total = this.reactions().length;
-    return total > MAX_VISIBLE_REACTIONS ? total - MAX_VISIBLE_REACTIONS : 0;
+    const max = this.maxVisible();
+    return total > max ? total - max : 0;
   });
 
   /** Expands the reaction list to show all reactions. */

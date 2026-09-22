@@ -288,9 +288,19 @@ export class DmService {
     threadId: string,
   ): Promise<void> {
     const messageRef = doc(this.db, 'dms', dmId, 'messages', messageId, 'thread', threadId);
-    await updateDoc(messageRef, {
-      [`reactions.${reaction}`]: arrayRemove(userId),
-    });
+    const snapshot = await getDoc(messageRef);
+    const currentUserIds: string[] = snapshot.data()?.['reactions']?.[reaction] ?? [];
+    const remaining = currentUserIds.filter((id) => id !== userId);
+
+    if (remaining.length === 0) {
+      await updateDoc(messageRef, {
+        [`reactions.${reaction}`]: deleteField(),
+      });
+    } else {
+      await updateDoc(messageRef, {
+        [`reactions.${reaction}`]: arrayRemove(userId),
+      });
+    }
   }
 
   /** All workspace users eligible for direct messaging, each paired with their existing DM
@@ -325,11 +335,15 @@ export class DmService {
    */
   async editDmMessage(dmId: string, messageId: string, text: string) {
     const user = this.auth.currentUser?.uid;
-    if (!user) { return; }
+    if (!user) {
+      return;
+    }
     const messageRef = doc(this.db, 'dms', dmId, 'messages', messageId);
     const snapshot = await getDoc(messageRef);
     const message = snapshot.data() as Message;
-    if (message?.senderId !== user) { return; }
+    if (message?.senderId !== user) {
+      return;
+    }
     await updateDoc(messageRef, {
       text: text,
     });
@@ -344,17 +358,20 @@ export class DmService {
    */
   async editThreadMessage(dmId: string, messageId: string, threadId: string, text: string) {
     const user = this.auth.currentUser?.uid;
-    if (!user) { return; }
+    if (!user) {
+      return;
+    }
 
     const threadRef = doc(this.db, 'dms', dmId, 'messages', messageId, 'thread', threadId);
     const snapshot = await getDoc(threadRef);
     const threadMessage = snapshot.data() as ThreadMessage;
 
-    if (threadMessage?.senderId !== user) { return; }
+    if (threadMessage?.senderId !== user) {
+      return;
+    }
 
     await updateDoc(threadRef, {
       text: text,
     });
   }
 }
-

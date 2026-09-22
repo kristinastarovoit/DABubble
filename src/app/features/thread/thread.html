@@ -2,14 +2,19 @@
   <div class="thread__header">
     <div class="thread__title">
       <span class="thread__title-text">Thread</span>
+      @if (originChannel(); as channel) {
+        <span class="thread__channel-name"># {{ channel.name }}</span>
+      } @else if (originDmPartner(); as partner) {
+        <span class="thread__channel-name">{{ partner.name }}</span>
+      }
     </div>
     <button class="thread__close-btn" (click)="close()">
       <img src="app-icons/close.svg" alt="Close" />
     </button>
   </div>
 
-  @if (parentMessage(); as parentMessage) {
-    <div class="thread__content">
+  <div class="thread__content">
+    @if (parentMessage(); as parentMessage) {
       <div
         class="thread__message"
         (mouseenter)="parentMessageHovered.set(true)"
@@ -24,16 +29,11 @@
               parentMessage.createdAt?.toDate() | date: 'shortTime'
             }}</span>
           </div>
-
-          @if (editingParentMessage()) {
-            <textarea [value]="editText()" (input)="editText.set($any($event.target).value)"></textarea>
-            <button type="button" (click)="saveEditedMessage()">Save</button>
-          } @else {
-            <div class="thread__bubble">{{ parentMessage.text }}</div>
-          }
+          <div class="thread__bubble">{{ parentMessage.text }}</div>
 
           <app-reaction-bar
             [currentUserId]="currentUserId()"
+            [maxVisible]="3"
             [reactions]="messageReactions(parentMessage)"
             (reactionToggled)="onParentReactionToggled($event)"
           ></app-reaction-bar>
@@ -46,14 +46,14 @@
             [showThreadIcon]="false"
             [showQuickReactions]="false"
             (reactionSelected)="onParentReactionToggled($event)"
-            (moreActionsRequested)="startEditingParentMessage()"
           ></app-reaction-picker>
         }
       </div>
-    </div>
-  }
-  @if (replies().length > 0) {
-    <div class="thread__content">
+    } @else {
+      <span>Wähle eine Nachricht aus, um den Thread zu öffnen.</span>
+    }
+
+    @if (replies().length > 0) {
       <div class="thread__divider">
         <span>{{ replies().length }} {{ replies().length === 1 ? 'Reply' : 'Replies' }}</span>
       </div>
@@ -72,16 +72,11 @@
               <span class="thread__author">{{ getSenderName(reply.senderId) }}</span>
               <span class="thread__time">{{ reply.createdAt?.toDate() | date: 'shortTime' }}</span>
             </div>
-
-            @if (editingReplyId() === reply.id) {
-              <textarea [value]="editText()" (input)="editText.set($any($event.target).value)"></textarea>
-              <button type="button" (click)="saveEditedMessage()">Save</button>
-            } @else {
-              <div class="thread__bubble">{{ reply.text }}</div>
-            }
+            <div class="thread__bubble">{{ reply.text }}</div>
 
             <app-reaction-bar
               [currentUserId]="currentUserId()"
+              [maxVisible]="3"
               [reactions]="messageReactions(reply)"
               (reactionToggled)="onReactionToggled(reply, $event)"
             ></app-reaction-bar>
@@ -94,19 +89,12 @@
               [showThreadIcon]="false"
               [showQuickReactions]="false"
               (reactionSelected)="onReactionToggled(reply, $event)"
-              (moreActionsRequested)="startEditingReply(reply)"
             ></app-reaction-picker>
           }
         </div>
       }
-    </div>
-  }
-
-  @if (!parentMessage()) {
-    <div class="thread__content">
-      <span>Wähle eine Nachricht aus, um den Thread zu öffnen.</span>
-    </div>
-  }
+    }
+  </div>
 
   <app-message-input [placeholder]="'Reply...'" (send)="sendReply($event)"></app-message-input>
 </aside>

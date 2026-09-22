@@ -93,6 +93,14 @@
     padding: 8px 12px;
     border-radius: 12px;
 
+    &:hover {
+      background-color: $pastel-purple-bg;
+
+      .thread__bubble {
+        background-color: $white;
+      }
+    }
+
     &--own {
       flex-direction: row-reverse;
 
@@ -101,12 +109,16 @@
       }
 
       .thread__bubble {
-        background-color: $pastel-purple-bg;
+        background-color: #797ef3;
         color: $white;
       }
 
       .thread__message-content {
         align-items: flex-end;
+      }
+
+      &:hover .thread__bubble {
+        background-color: #797ef3;
       }
     }
   }
@@ -123,7 +135,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    max-width: 60%;
+    max-width: calc(100% - 70px - 16px);
   }
 
   &__meta {

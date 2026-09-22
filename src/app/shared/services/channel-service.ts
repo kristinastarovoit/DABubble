@@ -319,9 +319,19 @@ export class ChannelService {
       'thread',
       threadId,
     );
-    await updateDoc(messageRef, {
-      [`reactions.${reaction}`]: arrayRemove(userId),
-    });
+    const snapshot = await getDoc(messageRef);
+    const currentUserIds: string[] = snapshot.data()?.['reactions']?.[reaction] ?? [];
+    const remaining = currentUserIds.filter((id) => id !== userId);
+
+    if (remaining.length === 0) {
+      await updateDoc(messageRef, {
+        [`reactions.${reaction}`]: deleteField(),
+      });
+    } else {
+      await updateDoc(messageRef, {
+        [`reactions.${reaction}`]: arrayRemove(userId),
+      });
+    }
   }
 
   // unsubscribe in ngondestroy in der component
@@ -346,7 +356,7 @@ export class ChannelService {
     });
     return { messages, unsubscribe };
   }
-  
+
   getMessage(
     channelId: string,
     messageId: string,
@@ -388,19 +398,23 @@ export class ChannelService {
   }
 
   /** Updates the text of a channel message, if the signed-in user is its sender.
- * Does nothing if no user is logged in, or if the user is not the sender.
- *
- * @param channelId The ID of the channel containing the message.
- * @param messageId The ID of the message to edit.
- * @param text The new message text.
- */
+   * Does nothing if no user is logged in, or if the user is not the sender.
+   *
+   * @param channelId The ID of the channel containing the message.
+   * @param messageId The ID of the message to edit.
+   * @param text The new message text.
+   */
   async editChannelMessage(channelId: string, messageId: string, text: string) {
     const user = this.auth.currentUser?.uid;
-    if (!user) { return; }
+    if (!user) {
+      return;
+    }
     const channelRef = doc(this.db, 'channels', channelId, 'messages', messageId);
     const snapshot = await getDoc(channelRef);
     const message = snapshot.data() as Message;
-    if (message?.senderId !== user) { return; }
+    if (message?.senderId !== user) {
+      return;
+    }
     await updateDoc(channelRef, {
       text: text,
     });
@@ -415,13 +429,25 @@ export class ChannelService {
    */
   async editThreadMessage(channelId: string, messageId: string, threadId: string, text: string) {
     const user = this.auth.currentUser?.uid;
-    if (!user) { return; }
+    if (!user) {
+      return;
+    }
 
-    const threadRef = doc(this.db, 'channels', channelId, 'messages', messageId, 'thread', threadId);
+    const threadRef = doc(
+      this.db,
+      'channels',
+      channelId,
+      'messages',
+      messageId,
+      'thread',
+      threadId,
+    );
     const snapshot = await getDoc(threadRef);
     const threadMessage = snapshot.data() as ThreadMessage;
 
-    if (threadMessage?.senderId !== user) { return; }
+    if (threadMessage?.senderId !== user) {
+      return;
+    }
 
     await updateDoc(threadRef, {
       text: text,
