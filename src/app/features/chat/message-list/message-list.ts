@@ -87,13 +87,16 @@ export class MessageList {
   /** Emitted when a message reaction changes. */
   reactionToggled = output<{ message: Message; emoji: string }>();
 
+  /** Emitted after a message has been saved from inline editing. */
   editSaved = output<{ message: Message; text: string }>();
 
+  /** The identifier of the message currently being edited. */
   editingMessageId = signal<string | undefined>(undefined);
 
+  /** The current inline edit text for the active message. */
   editText = signal('');
 
-
+  /** Starts editing the provided message and preloads its content. */
   startEditing(message: Message) {
     this.editingMessageId.set(message.id);
     this.editText.set(message.text);
@@ -132,12 +135,15 @@ export class MessageList {
     this.reactionToggled.emit({ message, emoji });
   }
 
+  /** Resolves the reactions for a message, including the current user's own state. */
   protected messageReactions(message: Message): MessageReaction[] {
     return toMessageReactions(message.reactions, this.currentUserId());
   }
 
+  /** The identifier of the message currently hovered by the pointer. */
   hoveredMessageId = signal<string | null>(null);
 
+  /** Returns the display name for the given sender ID. */
   getSenderName(senderId: string): string {
     return this.userService.users().find(user => user.uid === senderId)?.name ?? senderId;
   }

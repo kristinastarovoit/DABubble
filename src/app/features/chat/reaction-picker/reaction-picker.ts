@@ -12,6 +12,7 @@ const QUICK_REACTIONS = ['✅', '👍'] as const;
   templateUrl: './reaction-picker.html',
 })
 export class ReactionPicker {
+  /** Reference to the host element to detect clicks outside the picker. */
   private elementRef = inject(ElementRef<HTMLElement>);
 
   /** The fixed quick-reaction emojis. */
@@ -41,7 +42,7 @@ export class ReactionPicker {
     this.showFullPicker.set(false);
   }
 
-  /** Whether the current user is the author of this message (enables the edit menu). */
+  /** Whether the current user is the author of this message and can edit it. */
   isOwnMessage = input(false);
 
   /** Emitted when the message edit/delete menu should open. */
