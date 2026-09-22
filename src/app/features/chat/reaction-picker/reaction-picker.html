@@ -1,10 +1,11 @@
 <div class="reaction-picker" [class.reaction-picker--own]="isOwnMessage()">
-  @for (emoji of quickReactions; track emoji) {
-    <button type="button" class="reaction-picker__icon" (click)="reactionSelected.emit(emoji)">
-      {{ emoji }}
-    </button>
+  @if (showQuickReactions()) {
+    @for (emoji of quickReactions; track emoji) {
+      <button type="button" class="reaction-picker__icon" (click)="reactionSelected.emit(emoji)">
+        {{ emoji }}
+      </button>
+    }
   }
-
   <div class="reaction-picker__emoji-wrapper">
     <button type="button" class="reaction-picker__icon" (click)="toggleFullPicker($event)">
       <svg
@@ -36,7 +37,7 @@
     }
   </div>
 
-  @if (!isOwnMessage()) {
+  @if (!isOwnMessage() && showThreadIcon()) {
     <button type="button" class="reaction-picker__icon" (click)="threadRequested.emit()">
       <svg
         width="20"

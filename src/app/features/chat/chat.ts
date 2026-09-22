@@ -22,6 +22,7 @@ import { UserService } from '../../shared/services/users';
 import { AuthService } from '../../shared/services/auth';
 import { DmHeader } from './dm-header/dm-header';
 import { NewMessageService } from '../../shared/services/new-message-service';
+import { ThreadService } from '../../shared/services/thread-service';
 
 @Component({
   imports: [CommonModule, ChannelHeader, MessageInput, MessageList, LandingPage, DmHeader],
@@ -30,16 +31,14 @@ import { NewMessageService } from '../../shared/services/new-message-service';
   templateUrl: './chat.html',
 })
 export class Chat {
-  /** Emitted when a message thread is requested. */
-  // @Output() threadRequested = new EventEmitter<Message>();
+  private threadService = inject(ThreadService);
 
-  /** Emitted when the channel member list is requested. */
-  // @Output() memberListRequested = new EventEmitter<void>();
-
-  /** Opens the thread for a message. */
-  // openThread(message: Message): void {
-  //   this.threadRequested.emit(message);
-  // }
+  openThread(message: Message): void {
+    this.threadService.open(message, {
+      channelId: this.channelId(),
+      dmId: this.dmId(),
+    });
+  }
 
   /** Opens the active channel's member list. */
   // openMemberList(): void {
