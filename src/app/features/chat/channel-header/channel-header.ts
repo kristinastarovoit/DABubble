@@ -15,6 +15,9 @@ import { FormsModule } from '@angular/forms';
 import { Message } from '../../../shared/interfaces/message';
 import { ChannelService } from '../../../shared/services/channel-service';
 import { UserService } from '../../../shared/services/users';
+import { DmService } from '../../../shared/services/dm-service';
+import { AuthService } from '../../../shared/services/auth';
+import { NewMessageService } from '../../../shared/services/new-message-service';
 import { FIREBASE_AUTH } from '../../../app.config';
 import { EditChannel } from '../edit-channel/edit-channel';
 
@@ -27,6 +30,123 @@ import { EditChannel } from '../edit-channel/edit-channel';
 export class ChannelHeader {
   /** Emitted when channel details are requested. */
   @Output() channelDetailsRequested = new EventEmitter<void>();
+
+  /** Provides direct-message data, used for the "New Message" recipient search. */
+  private dmService = inject(DmService);
+
+  /** Provides reactive authentication state. */
+  private authService = inject(AuthService);
+
+  /** Tracks whether the "New Message" recipient picker is currently active. */
+  newMessageService = inject(NewMessageService);
+
+  /** Reference to the "New Message" recipient search input, used to position the suggestions dropdown. */
+  @ViewChild('recipientSearchInput') private recipientSearchInput?: ElementRef<HTMLInputElement>;
+
+  /** Text entered in the "New Message" recipient search field. */
+  recipientQuery = '';
+
+  /** Controls visibility of the recipient suggestions dropdown. */
+  showRecipientSuggestions = signal(false);
+
+  /** Fixed position and size of the recipient suggestions dropdown, kept within the viewport. */
+  recipientSuggestionsPosition = { top: 0, left: 0, width: 0, maxHeight: 240 };
+
+  /**
+   * Channels and contacts matching the current recipient query.
+   *
+   * A leading `#` restricts the search to channels, a leading `@` restricts it to contacts
+   * (matched by name or email). Without a prefix, both are searched by name.
+   *
+   * @returns The matching channels and users, channels first.
+   */
+  get recipientSuggestions(): Array<
+    | { type: 'channel'; id: string; name: string }
+    | { type: 'user'; id: string; name: string; avatar: string }
+  > {
+    const raw = this.recipientQuery.trim();
+    const mode = raw.startsWith('#') ? 'channel' : raw.startsWith('@') ? 'user' : 'mixed';
+    const query = (mode === 'mixed' ? raw : raw.slice(1)).toLowerCase();
+
+    // Without a prefix, an empty query yields no suggestions; with a prefix, it lists everything.
+    if (mode === 'mixed' && !query) return [];
+
+    const currentUserId = this.authService.currentUserId();
+
+    const channelMatches =
+      mode === 'user'
+        ? []
+        : this.channelService
+            .channels()
+            .filter((channel) => channel.name.toLowerCase().includes(query))
+            .map((channel) => ({ type: 'channel' as const, id: channel.id, name: channel.name }));
+
+    const userMatches =
+      mode === 'channel'
+        ? []
+        : this.dmService
+            .dmPartners()
+            .filter((partner) => partner.user.uid !== currentUserId)
+            .filter(
+              (partner) =>
+                partner.user.name.toLowerCase().includes(query) ||
+                partner.user.email.toLowerCase().includes(query),
+            )
+            .map((partner) => ({
+              type: 'user' as const,
+              id: partner.user.uid,
+              name: partner.user.name,
+              avatar: partner.user.avatar,
+            }));
+
+    return [...channelMatches, ...userMatches];
+  }
+
+  /** Updates the recipient suggestions dropdown and its viewport-relative position while the user types. */
+  onRecipientQueryChange(): void {
+    const hasQuery = Boolean(this.recipientQuery.trim());
+    this.showRecipientSuggestions.set(hasQuery);
+    if (!hasQuery || !this.recipientSearchInput) return;
+
+    const rect = this.recipientSearchInput.nativeElement.getBoundingClientRect();
+    const availableHeight = window.innerHeight - rect.bottom - 12;
+    this.recipientSuggestionsPosition = {
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+      maxHeight: Math.max(availableHeight, 100),
+    };
+  }
+
+  /**
+   * Selects a channel or contact as the recipient and leaves "New Message" mode.
+   *
+   * @param suggestion The chosen channel or user suggestion.
+   */
+  async selectRecipient(
+    suggestion:
+      | { type: 'channel'; id: string; name: string }
+      | { type: 'user'; id: string; name: string; avatar: string },
+  ): Promise<void> {
+    this.recipientQuery = '';
+    this.showRecipientSuggestions.set(false);
+
+    if (suggestion.type === 'channel') {
+      this.channelService.selectChannel(suggestion.id);
+      return;
+    }
+
+    const currentUserId = this.authService.currentUserId();
+    if (!currentUserId) return;
+
+    const partner = this.dmService.dmPartners().find((p) => p.user.uid === suggestion.id);
+    if (partner?.dm) {
+      this.dmService.selectDm(partner.dm.id);
+    } else {
+      const dmId = await this.dmService.addDm([currentUserId, suggestion.id]);
+      this.dmService.selectDm(dmId);
+    }
+  }
 
   /** Reference to the channel-settings dialog. */
   @ViewChild('editChannel') private editChannel!: EditChannel;

@@ -1,4 +1,36 @@
-<div class="channel-header">
+<div class="channel-header" [class.channel-header--new-message]="newMessageService.isNewMessageMode()">
+  @if (newMessageService.isNewMessageMode()) {
+  <div class="channel-header__new-message-wrapper">
+    <div class="channel-header__title">
+      <span class="channel-header__name">New Message</span>
+    </div>
+
+    <div class="channel-header__new-message">
+      <input #recipientSearchInput type="text" class="channel-header__new-message-input"
+        placeholder="To: #channel, @contact or email address" [(ngModel)]="recipientQuery" (input)="onRecipientQueryChange()" />
+
+      @if (showRecipientSuggestions() && recipientSuggestions.length) {
+      <ul class="channel-header__new-message-suggestions" [style.top.px]="recipientSuggestionsPosition.top"
+        [style.left.px]="recipientSuggestionsPosition.left" [style.width.px]="recipientSuggestionsPosition.width"
+        [style.max-height.px]="recipientSuggestionsPosition.maxHeight">
+        @for (suggestion of recipientSuggestions; track suggestion.id + suggestion.type) {
+        <li>
+          <button type="button" class="channel-header__new-message-suggestion"
+            (click)="selectRecipient(suggestion)">
+            @if (suggestion.type === 'channel') {
+            <span class="channel-header__hash">#</span>
+            } @else {
+            <img [src]="suggestion.avatar" [alt]="suggestion.name" class="channel-header__new-message-avatar" />
+            }
+            <span>{{ suggestion.name }}</span>
+          </button>
+        </li>
+        }
+      </ul>
+      }
+    </div>
+  </div>
+  } @else {
   <div class="channel-header__title" (click)="openChannelDetails()">
     <span class="channel-header__hash">#</span>
     <span class="channel-header__name">{{ activeChannel()?.name ?? '' }}</span>
@@ -20,6 +52,7 @@
         class="channel-header__add-icon channel-header__add-icon--hover" />
     </button>
   </div>
+  }
 </div>
 
 <app-edit-channel #editChannel></app-edit-channel>

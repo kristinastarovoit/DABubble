@@ -1,6 +1,6 @@
 <section class="chat">
-  @if (channelId() || dmId()) {
-    @if (channelId()) {
+  @if (channelId() || dmId() || newMessageService.isNewMessageMode()) {
+    @if (channelId() || newMessageService.isNewMessageMode()) {
       <app-channel-header /* (memberIconClicked)="openMemberList()" */></app-channel-header>
     } @else if (dmId()) {
       <app-dm-header [currentDmPartner]="activeDmPartner()"></app-dm-header>
@@ -14,10 +14,13 @@
 
     <app-message-input
       (send)="onSend($event)"
+      [disabled]="!channelId() && !dmId()"
       [placeholder]="
         channelId()
           ? 'Message to #' + (activeChannel()?.name ?? '')
-          : 'Message to #' + (activeDmPartner()?.name ?? '')
+          : dmId()
+            ? 'Message to #' + (activeDmPartner()?.name ?? '')
+            : 'Choose a recipient first'
       "
       /* (messageSent)="sendMessage($event)" */
       /* (messageSent)="this.channelService.addMessageToChannel($event)" */

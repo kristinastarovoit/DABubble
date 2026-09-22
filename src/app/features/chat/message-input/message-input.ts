@@ -14,6 +14,9 @@ export class MessageInput {
   /** Placeholder displayed in the message field. */
   @Input() placeholder = 'Write Message';
 
+  /** Whether sending is currently disabled, e.g. while no recipient has been chosen yet. */
+  @Input() disabled = false;
+
   /** Emitted when a non-empty message is submitted. */
   // @Output() messageSent = new EventEmitter<string>();
 
@@ -25,6 +28,8 @@ export class MessageInput {
 
   /** Sends the message when Enter is pressed without Shift. */
   onEnter(event: Event): void {
+    if (this.disabled) return;
+
     const keyboardEvent = event as KeyboardEvent;
     if (!keyboardEvent.shiftKey) {
       keyboardEvent.preventDefault();
@@ -43,6 +48,8 @@ export class MessageInput {
 
   /** Sends the trimmed message text. */
   sendMessage(): void {
+    if (this.disabled) return;
+
     const value = this.text().trim();
     if (!value) { return; }
 

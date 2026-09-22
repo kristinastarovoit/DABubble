@@ -7,6 +7,7 @@ import { DmService } from '../../shared/services/dm-service';
 import { AuthService } from '../../shared/services/auth';
 import { CreateChannel } from './create-channel/create-channel';
 import { Dm } from '../../shared/interfaces/dm';
+import { NewMessageService } from '../../shared/services/new-message-service';
 
 @Component({
   imports: [CommonModule, CreateChannel],
@@ -24,6 +25,9 @@ export class Sidebar {
 
   /** Provides reactive authentication state. */
   private authService = inject(AuthService);
+
+  /** Tracks whether the "New Message" composer is active. */
+  private newMessageService = inject(NewMessageService);
 
   /** Reference to the create-channel dialog. */
   @ViewChild('createChannel') private createChannel!: CreateChannel;
@@ -117,8 +121,13 @@ export class Sidebar {
     this.channelCreateRequested.emit();
   }
 
-  /** Requests editing of the workspace. */
+  /** Toggles the "New Message" composer, clearing any active channel/DM selection. */
   openWorkspaceEdit(): void {
+    this.newMessageService.toggle();
+    if (this.newMessageService.isNewMessageMode()) {
+      this.channelService.activeChannelId.set(undefined);
+      this.dmService.activeDmId.set(undefined);
+    }
     this.workspaceEditRequested.emit();
   }
 }

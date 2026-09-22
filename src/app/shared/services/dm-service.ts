@@ -21,6 +21,7 @@ import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
 import { UserService } from './users';
 import { AuthService } from './auth';
+import { NewMessageService } from './new-message-service';
 
 @Service()
 /** Provides Firestore operations and reactive direct-message data. */
@@ -28,6 +29,7 @@ export class DmService {
   private db = inject(FIREBASE_FIRESTORE);
   private userService = inject(UserService);
   private authService = inject(AuthService);
+  private newMessageService = inject(NewMessageService);
 
   /** The direct-message conversations available to the application. */
   dms = signal<Dm[]>([]);
@@ -40,6 +42,7 @@ export class DmService {
    */
   selectDm(dmId: string): void {
     this.activeDmId.set(dmId);
+    this.newMessageService.close();
   }
 
   /** Ensures a self-DM conversation exists for the given user, creating it if necessary.

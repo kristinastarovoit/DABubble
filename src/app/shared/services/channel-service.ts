@@ -22,12 +22,14 @@ import {
 import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
 import { onAuthStateChanged } from 'firebase/auth';
+import { NewMessageService } from './new-message-service';
 
 @Service()
 /** Provides Firestore operations and reactive channel data for the current user. */
 export class ChannelService {
   private db = inject(FIREBASE_FIRESTORE);
   private auth = inject(FIREBASE_AUTH);
+  private newMessageService = inject(NewMessageService);
 
   /** The channels in which the currently authenticated user is a member. */
   channels = signal<Channel[]>([]);
@@ -35,6 +37,7 @@ export class ChannelService {
 
   selectChannel(channelId: string): void {
     this.activeChannelId.set(channelId);
+    this.newMessageService.close();
   }
 
   constructor() {
