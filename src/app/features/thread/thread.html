@@ -24,7 +24,13 @@
               parentMessage.createdAt?.toDate() | date: 'shortTime'
             }}</span>
           </div>
-          <div class="thread__bubble">{{ parentMessage.text }}</div>
+
+          @if (editingParentMessage()) {
+            <textarea [value]="editText()" (input)="editText.set($any($event.target).value)"></textarea>
+            <button type="button" (click)="saveEditedMessage()">Save</button>
+          } @else {
+            <div class="thread__bubble">{{ parentMessage.text }}</div>
+          }
 
           <app-reaction-bar
             [currentUserId]="currentUserId()"
@@ -40,6 +46,7 @@
             [showThreadIcon]="false"
             [showQuickReactions]="false"
             (reactionSelected)="onParentReactionToggled($event)"
+            (moreActionsRequested)="startEditingParentMessage()"
           ></app-reaction-picker>
         }
       </div>
@@ -65,7 +72,13 @@
               <span class="thread__author">{{ getSenderName(reply.senderId) }}</span>
               <span class="thread__time">{{ reply.createdAt?.toDate() | date: 'shortTime' }}</span>
             </div>
-            <div class="thread__bubble">{{ reply.text }}</div>
+
+            @if (editingReplyId() === reply.id) {
+              <textarea [value]="editText()" (input)="editText.set($any($event.target).value)"></textarea>
+              <button type="button" (click)="saveEditedMessage()">Save</button>
+            } @else {
+              <div class="thread__bubble">{{ reply.text }}</div>
+            }
 
             <app-reaction-bar
               [currentUserId]="currentUserId()"
@@ -81,6 +94,7 @@
               [showThreadIcon]="false"
               [showQuickReactions]="false"
               (reactionSelected)="onReactionToggled(reply, $event)"
+              (moreActionsRequested)="startEditingReply(reply)"
             ></app-reaction-picker>
           }
         </div>
