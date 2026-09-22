@@ -67,6 +67,7 @@
             [showThreadIcon]="false"
             [showQuickReactions]="false"
             (reactionSelected)="onParentReactionToggled($event)"
+            (moreActionsRequested)="startEditingParentMessage()"
           ></app-reaction-picker>
         }
       </div>
@@ -131,6 +132,7 @@
               [showThreadIcon]="false"
               [showQuickReactions]="false"
               (reactionSelected)="onReactionToggled(reply, $event)"
+              (moreActionsRequested)="startEditingReply(reply)"
             ></app-reaction-picker>
           }
         </div>
