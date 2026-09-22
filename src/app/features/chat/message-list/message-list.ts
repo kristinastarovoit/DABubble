@@ -7,7 +7,7 @@ import {
   inject,
   input,
   output,
-  signal,
+  signal
 } from '@angular/core';
 import { toMessageReactions } from '../../../shared/utilities/reactions.utils';
 import { ReactionPicker } from '../reaction-picker/reaction-picker';
@@ -87,6 +87,18 @@ export class MessageList {
   /** Emitted when a message reaction changes. */
   reactionToggled = output<{ message: Message; emoji: string }>();
 
+  editSaved = output<{ message: Message; text: string }>();
+
+  editingMessageId = signal<string | undefined>(undefined);
+
+  editText = signal('');
+
+
+  startEditing(message: Message) {
+    this.editingMessageId.set(message.id);
+    this.editText.set(message.text);
+  }
+
   /** Groups messages by their calendar date. */
   groupedMessages = computed<MessageGroup[]>(() => {
     const groups = new Map<string, MessageGroup>();
@@ -125,7 +137,7 @@ export class MessageList {
   }
 
   hoveredMessageId = signal<string | null>(null);
-  
+
   getSenderName(senderId: string): string {
     return this.userService.users().find(user => user.uid === senderId)?.name ?? senderId;
   }

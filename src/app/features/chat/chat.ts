@@ -77,6 +77,9 @@ export class Chat {
 
   uid = computed(() => this.auth.currentUser?.uid);
 
+  // editingMessage = signal<Message | undefined>(undefined);
+
+
   /** The channel matching the currently selected channel ID. */
   activeChannel = computed(() =>
     this.channelService.channels().find((channel) => channel.id === this.channelId()),
@@ -134,6 +137,21 @@ export class Chat {
       this.dmService.addMessageToDm(dmId, text, uid);
     } else if (channelId) {
       this.channelService.addMessageToChannel(channelId, text, uid);
+    }
+  }
+
+  onEditSaved(event: { message: Message; text: string }) {
+    const uid = this.authService.currentUserId();
+    if (!uid) { return; }
+    if (!event.message.id) { return; }
+
+    const channelId = this.channelId();
+    const dmId = this.dmId();
+
+    if (dmId) {
+      this.dmService.editDmMessage(dmId, event.message.id, event.text);
+    } else if (channelId) {
+      this.channelService.editChannelMessage(channelId, event.message.id, event.text);
     }
   }
 
