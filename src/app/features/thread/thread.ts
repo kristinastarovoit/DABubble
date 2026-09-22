@@ -299,6 +299,11 @@ export class Thread {
     return this.userService.users().find((user) => user.uid === senderId)?.name ?? senderId;
   }
 
+  /** Resolves a sender's display name from their user ID. */
+  getSenderAvatar(senderId: string): string {
+    return this.userService.users().find((user) => user.uid === senderId)?.avatar ?? senderId;
+  }
+
   /** The channel the open thread belongs to, if it was opened from a channel. */
   originChannel = computed(() =>
     this.channelService.channels().find((channel) => channel.id === this.activeThread()?.channelId),

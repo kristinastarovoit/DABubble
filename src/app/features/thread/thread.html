@@ -2,19 +2,14 @@
   <div class="thread__header">
     <div class="thread__title">
       <span class="thread__title-text">Thread</span>
-      @if (originChannel(); as channel) {
-        <span class="thread__channel-name"># {{ channel.name }}</span>
-      } @else if (originDmPartner(); as partner) {
-        <span class="thread__channel-name">{{ partner.name }}</span>
-      }
     </div>
     <button class="thread__close-btn" (click)="close()">
       <img src="app-icons/close.svg" alt="Close" />
     </button>
   </div>
 
-  <div class="thread__content">
-    @if (parentMessage(); as parentMessage) {
+  @if (parentMessage(); as parentMessage) {
+    <div class="thread__content">
       <div
         class="thread__message"
         (mouseenter)="parentMessageHovered.set(true)"
@@ -54,7 +49,6 @@
 
           <app-reaction-bar
             [currentUserId]="currentUserId()"
-            [maxVisible]="3"
             [reactions]="messageReactions(parentMessage)"
             (reactionToggled)="onParentReactionToggled($event)"
           ></app-reaction-bar>
@@ -71,11 +65,10 @@
           ></app-reaction-picker>
         }
       </div>
-    } @else {
-      <span>Wähle eine Nachricht aus, um den Thread zu öffnen.</span>
-    }
-
-    @if (replies().length > 0) {
+    </div>
+  }
+  @if (replies().length > 0) {
+    <div class="thread__content">
       <div class="thread__divider">
         <span>{{ replies().length }} {{ replies().length === 1 ? 'Reply' : 'Replies' }}</span>
       </div>
@@ -87,7 +80,7 @@
           (mouseenter)="hoveredReplyId.set(reply.id ?? null)"
           (mouseleave)="hoveredReplyId.set(null)"
         >
-          <img class="thread__avatar" src="app-icons/avatar-placeholder.svg" alt="" />
+          <img class="thread__avatar" [src]="getSenderAvatar(reply.senderId) || 'app-icons/avatar-placeholder.svg'" alt="" />
 
           <div class="thread__message-content">
             <div class="thread__meta">
@@ -119,7 +112,6 @@
 
             <app-reaction-bar
               [currentUserId]="currentUserId()"
-              [maxVisible]="3"
               [reactions]="messageReactions(reply)"
               (reactionToggled)="onReactionToggled(reply, $event)"
             ></app-reaction-bar>
@@ -137,8 +129,14 @@
           }
         </div>
       }
-    }
-  </div>
+    </div>
+  }
+
+  @if (!parentMessage()) {
+    <div class="thread__content">
+      <span>Wähle eine Nachricht aus, um den Thread zu öffnen.</span>
+    </div>
+  }
 
   <app-message-input [placeholder]="'Reply...'" (send)="sendReply($event)"></app-message-input>
 </aside>
