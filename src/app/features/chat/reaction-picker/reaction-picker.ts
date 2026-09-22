@@ -1,4 +1,4 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CURATED_EMOJIS } from '../../../shared/utilities/emoji-set';
 
@@ -12,6 +12,8 @@ const QUICK_REACTIONS = ['✅', '👍'] as const;
   templateUrl: './reaction-picker.html',
 })
 export class ReactionPicker {
+  private elementRef = inject(ElementRef<HTMLElement>);
+
   /** The fixed quick-reaction emojis. */
   protected readonly quickReactions = QUICK_REACTIONS;
 
@@ -27,9 +29,10 @@ export class ReactionPicker {
   /** Whether the extended emoji panel is currently open. */
   showFullPicker = signal(false);
 
-  /** Opens the extended emoji panel instead of emitting immediately. */
-  openFullPicker(): void {
-    this.showFullPicker.set(true);
+  /** Opens or closes the extended emoji panel. */
+  toggleFullPicker(event: MouseEvent): void {
+    event.stopPropagation();
+    this.showFullPicker.update((open) => !open);
   }
 
   /** Selects an emoji from the extended panel and closes it. */
@@ -44,9 +47,31 @@ export class ReactionPicker {
   /** Emitted when the message edit/delete menu should open. */
   moreActionsRequested = output<void>();
 
-  /** Whether the "edit message" tooltip is currently shown. */
-  showEditTooltip = signal(false);
+  /** Whether the "more actions" menu (Edit message, ...) is currently open. */
+  showMoreMenu = signal(false);
+
+  /** Opens or closes the "more actions" menu. */
+  toggleMoreMenu(event: MouseEvent): void {
+    event.stopPropagation();
+    this.showMoreMenu.update((open) => !open);
+  }
+
+  /** Handles the "Edit message" menu entry and closes the menu. */
+  onEditMessage(): void {
+    this.moreActionsRequested.emit();
+    this.showMoreMenu.set(false);
+  }
 
   /** The curated set of emojis shown in the extended picker panel. */
   protected readonly curatedEmojis = CURATED_EMOJIS;
+
+  /** Closes any open popover when clicking anywhere outside the component. */
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.elementRef.nativeElement.contains(event.target as Node)) {
+      return;
+    }
+    this.showFullPicker.set(false);
+    this.showMoreMenu.set(false);
+  }
 }

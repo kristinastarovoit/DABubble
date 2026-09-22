@@ -1,4 +1,13 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  ElementRef,
+  HostListener,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MessageReaction } from '../../../shared/interfaces/message';
 import { UserService } from '../../../shared/services/users';
@@ -14,6 +23,7 @@ const MAX_VISIBLE_REACTIONS = 6;
 })
 export class ReactionBar {
   private userService = inject(UserService);
+  private elementRef = inject(ElementRef<HTMLElement>);
 
   /** Reactions displayed by the component. */
   reactions = input<MessageReaction[]>([]);
@@ -21,15 +31,19 @@ export class ReactionBar {
   /** ID of the currently logged-in user, used to build the tooltip text. */
   currentUserId = input.required<string>();
 
+  /** Whether this reaction bar belongs to a message sent by the current user. */
+  isOwnMessage = input(false);
+
   /** Emitted when a reaction chip is clicked (toggle). */
   reactionToggled = output<string>();
 
   /** Emoji of the chip currently being hovered, or null if none. */
   hoveredEmoji = signal<string | null>(null);
 
-  /** Toggles the selected emoji reaction. */
+  /** Toggles the selected emoji reaction and collapses the bar back to its default view. */
   toggle(emoji: string): void {
     this.reactionToggled.emit(emoji);
+    this.showAll.set(false);
   }
 
   /** Builds just the name portion of the tooltip (e.g. "Sofia Müller" or "Sofia Müller und Du"). */
@@ -59,6 +73,11 @@ export class ReactionBar {
     this.showAll.set(true);
   }
 
+  /** Collapses the reaction list back to the first MAX_VISIBLE_REACTIONS. */
+  collapseAll(): void {
+    this.showAll.set(false);
+  }
+
   /** The curated set of emojis for adding a new reaction. */
   protected readonly curatedEmojis = CURATED_EMOJIS;
 
@@ -69,5 +88,19 @@ export class ReactionBar {
   selectEmoji(emoji: string): void {
     this.toggle(emoji);
     this.showEmojiPanel.set(false);
+  }
+
+  /** Opens or closes the "add reaction" emoji panel. */
+  toggleEmojiPanel(event: MouseEvent): void {
+    event.stopPropagation();
+    this.showEmojiPanel.update((open) => !open);
+  }
+
+  /** Closes the emoji panel when clicking anywhere outside the component. */
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.showEmojiPanel() && !this.elementRef.nativeElement.contains(event.target as Node)) {
+      this.showEmojiPanel.set(false);
+    }
   }
 }

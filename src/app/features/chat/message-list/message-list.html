@@ -28,6 +28,7 @@
           <app-reaction-bar
             [reactions]="messageReactions(message)"
             [currentUserId]="currentUserId()"
+            [isOwnMessage]="message.senderId === currentUserId()"
             (reactionToggled)="onReactionToggled(message, $event)"
           ></app-reaction-bar>
 

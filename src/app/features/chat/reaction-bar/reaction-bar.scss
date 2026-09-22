@@ -29,6 +29,26 @@
   }
 }
 
+.reaction-bar__more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 2px 16px;
+  border-radius: 20px;
+  border: 1px solid #adb0d9;
+  background: #f5f5f5;
+  font-size: 1rem;
+  font-family: 'Nunito';
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    background: #f3f0ff;
+    border-color: #7b61ff;
+  }
+}
+
 .reaction-bar__wrapper {
   position: relative;
   display: inline-block;
@@ -53,6 +73,12 @@
   justify-content: center;
   text-align: center;
   gap: 4px;
+
+  .reaction-bar--own & {
+    left: auto;
+    right: 50%;
+    border-radius: 30px 30px 0 30px;
+  }
 }
 
 .reaction-bar__tooltip-emoji {
@@ -100,7 +126,7 @@
 
 .reaction-bar__emoji-panel {
   position: absolute;
-  top: 100%;
+  bottom: 100%;
   left: 50%;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -108,9 +134,15 @@
   width: 160px;
   padding: 12px;
   background: #fff;
-  border-radius: 0 30px 30px 30px;
+  border-radius: 30px 30px 30px 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   z-index: 20;
+
+  .reaction-bar--own & {
+    left: auto;
+    right: 50%;
+    border-radius: 30px 30px 0 30px;
+  }
 }
 
 .reaction-bar__emoji-option {

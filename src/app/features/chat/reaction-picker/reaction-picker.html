@@ -1,16 +1,12 @@
-<div class="reaction-picker">
+<div class="reaction-picker" [class.reaction-picker--own]="isOwnMessage()">
   @for (emoji of quickReactions; track emoji) {
     <button type="button" class="reaction-picker__icon" (click)="reactionSelected.emit(emoji)">
       {{ emoji }}
     </button>
   }
 
-  <div
-    class="reaction-picker__emoji-wrapper"
-    (mouseenter)="showFullPicker.set(true)"
-    (mouseleave)="showFullPicker.set(false)"
-  >
-    <button type="button" class="reaction-picker__icon">
+  <div class="reaction-picker__emoji-wrapper">
+    <button type="button" class="reaction-picker__icon" (click)="toggleFullPicker($event)">
       <svg
         width="22"
         height="21"
@@ -58,16 +54,8 @@
   }
 
   @if (isOwnMessage()) {
-    <div
-      class="reaction-picker__edit-wrapper"
-      (mouseenter)="showEditTooltip.set(true)"
-      (mouseleave)="showEditTooltip.set(false)"
-    >
-      @if (showEditTooltip()) {
-        <div class="reaction-picker__edit-tooltip"><div class="reaction-picker__edit-tooltip__title">Edit message</div></div>
-      }
-
-      <button type="button" class="reaction-picker__icon" (click)="moreActionsRequested.emit()">
+    <div class="reaction-picker__edit-wrapper">
+      <button type="button" class="reaction-picker__icon" (click)="toggleMoreMenu($event)">
         <svg
           width="4"
           height="16"
@@ -81,6 +69,14 @@
           />
         </svg>
       </button>
+
+      @if (showMoreMenu()) {
+        <div class="reaction-picker__more-menu">
+          <button type="button" class="reaction-picker__more-menu-item" (click)="onEditMessage()">
+            Edit message
+          </button>
+        </div>
+      }
     </div>
   }
 </div>

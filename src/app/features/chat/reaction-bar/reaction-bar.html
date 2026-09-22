@@ -1,5 +1,5 @@
 @if (reactions().length) {
-  <div class="reaction-bar">
+  <div class="reaction-bar" [class.reaction-bar--own]="isOwnMessage()">
     @for (r of visibleReactions(); track r.emoji) {
       <div
         class="reaction-bar__wrapper"
@@ -26,18 +26,18 @@
       </div>
     }
 
-    @if (hiddenCount() > 0 && !showAll()) {
-      <button type="button" class="reaction-bar__more" (click)="expandAll()">
-        {{ hiddenCount() }} more
-      </button>
+    @if (hiddenCount() > 0) {
+      @if (showAll()) {
+        <button type="button" class="reaction-bar__more" (click)="collapseAll()">show less</button>
+      } @else {
+        <button type="button" class="reaction-bar__more" (click)="expandAll()">
+          {{ hiddenCount() }} more
+        </button>
+      }
     }
 
-    <div
-      class="reaction-bar__emoji-wrapper"
-      (mouseenter)="showEmojiPanel.set(true)"
-      (mouseleave)="showEmojiPanel.set(false)"
-    >
-      <button type="button" class="reaction-bar__add-icon">
+    <div class="reaction-bar__emoji-wrapper">
+      <button type="button" class="reaction-bar__add-icon" (click)="toggleEmojiPanel($event)">
         <svg
           width="22"
           height="21"
