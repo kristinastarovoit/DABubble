@@ -109,6 +109,8 @@ export class Chat {
           this.messages.set(messages),
         );
         this.currentUnsubscribe = unsubscribe;
+      } else {
+        this.messages.set([]);
       }
     });
   }

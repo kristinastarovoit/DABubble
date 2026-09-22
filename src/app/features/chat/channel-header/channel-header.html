@@ -5,11 +5,13 @@
   </div>
 
   <div class="channel-header__new-message">
-    <input type="text" class="channel-header__new-message-input" placeholder="To: contact or channel"
-      [(ngModel)]="recipientQuery" (input)="onRecipientQueryChange()" />
+    <input #recipientSearchInput type="text" class="channel-header__new-message-input"
+      placeholder="To: contact or channel" [(ngModel)]="recipientQuery" (input)="onRecipientQueryChange()" />
 
     @if (showRecipientSuggestions() && recipientSuggestions.length) {
-    <ul class="channel-header__new-message-suggestions">
+    <ul class="channel-header__new-message-suggestions" [style.top.px]="recipientSuggestionsPosition.top"
+      [style.left.px]="recipientSuggestionsPosition.left" [style.width.px]="recipientSuggestionsPosition.width"
+      [style.max-height.px]="recipientSuggestionsPosition.maxHeight">
       @for (suggestion of recipientSuggestions; track suggestion.id + suggestion.type) {
       <li>
         <button type="button" class="channel-header__new-message-suggestion"

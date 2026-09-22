@@ -40,13 +40,23 @@ export class ChannelHeader {
   /** Tracks whether the "New Message" recipient picker is currently active. */
   newMessageService = inject(NewMessageService);
 
+  /** Reference to the "New Message" recipient search input, used to position the suggestions dropdown. */
+  @ViewChild('recipientSearchInput') private recipientSearchInput?: ElementRef<HTMLInputElement>;
+
   /** Text entered in the "New Message" recipient search field. */
   recipientQuery = '';
 
   /** Controls visibility of the recipient suggestions dropdown. */
   showRecipientSuggestions = signal(false);
 
-  /** Channels and contacts matching the current recipient query. */
+  /** Fixed position and size of the recipient suggestions dropdown, kept within the viewport. */
+  recipientSuggestionsPosition = { top: 0, left: 0, width: 0, maxHeight: 240 };
+
+  /**
+   * Channels and contacts matching the current recipient query.
+   *
+   * @returns The matching channels and users, channels first.
+   */
   get recipientSuggestions(): Array<
     | { type: 'channel'; id: string; name: string }
     | { type: 'user'; id: string; name: string; avatar: string }
@@ -74,12 +84,27 @@ export class ChannelHeader {
     return [...channelMatches, ...userMatches];
   }
 
-  /** Updates the recipient suggestions dropdown while the user types. */
+  /** Updates the recipient suggestions dropdown and its viewport-relative position while the user types. */
   onRecipientQueryChange(): void {
-    this.showRecipientSuggestions.set(Boolean(this.recipientQuery.trim()));
+    const hasQuery = Boolean(this.recipientQuery.trim());
+    this.showRecipientSuggestions.set(hasQuery);
+    if (!hasQuery || !this.recipientSearchInput) return;
+
+    const rect = this.recipientSearchInput.nativeElement.getBoundingClientRect();
+    const availableHeight = window.innerHeight - rect.bottom - 12;
+    this.recipientSuggestionsPosition = {
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+      maxHeight: Math.max(availableHeight, 100),
+    };
   }
 
-  /** Selects a channel or contact as the recipient and leaves "New Message" mode. */
+  /**
+   * Selects a channel or contact as the recipient and leaves "New Message" mode.
+   *
+   * @param suggestion The chosen channel or user suggestion.
+   */
   async selectRecipient(
     suggestion:
       | { type: 'channel'; id: string; name: string }

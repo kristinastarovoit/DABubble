@@ -4,6 +4,7 @@
   /* [(ngModel)]="text"*/ 
     (keydown.enter)="onEnter($event)"
     [value]="text()" (input)="text.set($any($event.target).value)"
+    [disabled]="disabled"
     [placeholder]="placeholder"></textarea>
 
   <div class="message-input__actions">
@@ -16,7 +17,7 @@
       <img src="app-icons/tagg.svg" alt="Mention" />
     </button> 
 
-    <button class="message-input__send-btn" /* [disabled]="!text.trim()" */ (click)="sendMessage()">
+    <button class="message-input__send-btn" [disabled]="disabled" (click)="sendMessage()">
       <img src="app-icons/send.svg" alt="Send" />
     </button>
   </div>

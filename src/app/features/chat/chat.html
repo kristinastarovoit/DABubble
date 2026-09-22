@@ -5,7 +5,6 @@
     } @else if (dmId()) {
       <app-dm-header [currentDmPartner]="activeDmPartner()"></app-dm-header>
     }
-    @if (channelId() || dmId()) {
     <app-message-list
       [messages]="messages()"
       [currentUserId]="uid() ?? ''"
@@ -15,15 +14,17 @@
 
     <app-message-input
       (send)="onSend($event)"
+      [disabled]="!channelId() && !dmId()"
       [placeholder]="
         channelId()
           ? 'Message to #' + (activeChannel()?.name ?? '')
-          : 'Message to #' + (activeDmPartner()?.name ?? '')
+          : dmId()
+            ? 'Message to #' + (activeDmPartner()?.name ?? '')
+            : 'Choose a recipient first'
       "
       /* (messageSent)="sendMessage($event)" */
       /* (messageSent)="this.channelService.addMessageToChannel($event)" */
     />
-    }
   } @else {
     <app-landing-page></app-landing-page>
   }
