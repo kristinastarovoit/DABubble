@@ -15,7 +15,7 @@
         (mouseenter)="parentMessageHovered.set(true)"
         (mouseleave)="parentMessageHovered.set(false)"
       >
-        <img class="thread__avatar" src="app-icons/avatar-placeholder.svg" alt="" />
+        <img class="thread__avatar" [src]="getSenderAvatar(parentMessage.senderId) || 'app-icons/avatar-placeholder.svg'" alt="" />
 
         <div class="thread__message-content">
           <div class="thread__meta">
