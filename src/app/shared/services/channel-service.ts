@@ -386,4 +386,23 @@ export class ChannelService {
     });
     return { threadMessage, unsubscribe };
   }
+
+  /** Updates the text of a channel message, if the signed-in user is its sender.
+ * Does nothing if no user is logged in, or if the user is not the sender.
+ *
+ * @param dmId The ID of the direct-message conversation.
+ * @param messageId The ID of the message to edit.
+ * @param text The new message text.
+ */
+  async editChannelMessage(channelId: string, messageId: string, text: string) {
+    const user = this.auth.currentUser?.uid;
+    if (!user) { return; }
+    const channelRef = doc(this.db, 'channels', channelId, 'messages', messageId);
+    const snapshot = await getDoc(channelRef);
+    const message = snapshot.data() as Message;
+    if (message?.senderId !== user) { return; }
+    await updateDoc(channelRef, {
+      text: text,
+    });
+  }
 }

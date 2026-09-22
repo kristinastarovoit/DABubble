@@ -54,6 +54,7 @@ export class Chat {
   /** Provides user data and user listeners. */
   private userService = inject(UserService);
 
+  /** Provides authentication state and current user data for the chat. */
   private authService = inject(AuthService);
 
   /** Tracks whether the "New Message" composer is active. */
@@ -74,7 +75,9 @@ export class Chat {
   /** Unsubscribes from the active message listener when the conversation changes. */
   private currentUnsubscribe: (() => void) | undefined;
 
+  /** The ID of the currently authenticated user, if available. */
   uid = computed(() => this.auth.currentUser?.uid);
+
 
   /** The channel matching the currently selected channel ID. */
   activeChannel = computed(() =>
@@ -133,6 +136,22 @@ export class Chat {
       this.dmService.addMessageToDm(dmId, text, uid);
     } else if (channelId) {
       this.channelService.addMessageToChannel(channelId, text, uid);
+    }
+  }
+
+  /** Saves inline-edited text to the active channel or DM conversation. */
+  onEditSaved(event: { message: Message; text: string }) {
+    const uid = this.authService.currentUserId();
+    if (!uid) { return; }
+    if (!event.message.id) { return; }
+
+    const channelId = this.channelId();
+    const dmId = this.dmId();
+
+    if (dmId) {
+      this.dmService.editDmMessage(dmId, event.message.id, event.text);
+    } else if (channelId) {
+      this.channelService.editChannelMessage(channelId, event.message.id, event.text);
     }
   }
 

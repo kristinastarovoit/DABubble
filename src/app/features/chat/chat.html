@@ -9,6 +9,8 @@
       [messages]="messages()"
       [currentUserId]="uid() ?? ''"
       (reactionToggled)="onReactionToggled($event)"
+      (editSaved)="onEditSaved($event)"
+      /* (threadOpened)="openThread($event)" */
       (threadOpened)="openThread($event)"
     />
 
