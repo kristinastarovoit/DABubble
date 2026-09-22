@@ -20,12 +20,19 @@
       </div>
 
       @if (editingMessageId() === message.id) {
-      <div class="message-input">
+      <div class="edit-message-input__wrapper">
         <textarea [value]="editText()" (input)="editText.set($any($event.target).value)"
-          class="message-input__field"></textarea>
-          <button class="button button--dismiss">Dismiss</button>
-        <button class="button button--submit"
-          (click)="editSaved.emit({ message: message, text: editText() }); this.editingMessageId.set(undefined)">Save</button>
+          class="edit-message-input__field"></textarea>
+        <div class="edit-message-input__footer-wrapper">
+          <button class="message-input__icon-btn">
+            <img src="app-icons/emoji.svg" alt="Emoji" />
+          </button>
+          <div class="edit-message-input__button-wrapper">
+            <button class="button button--dismiss">geht noch nicht</button>
+            <button class="button button--submit"
+              (click)="editSaved.emit({ message: message, text: editText() }); this.editingMessageId.set(undefined)">Save</button>
+          </div>
+        </div>
       </div>
       } @else {
       <div class="message-list__bubble">{{ message.text }}</div>}
