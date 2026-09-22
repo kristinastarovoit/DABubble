@@ -1,5 +1,5 @@
 import { Service, computed, effect, inject, signal } from '@angular/core';
-import { FIREBASE_FIRESTORE } from '../../app.config';
+import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../../app.config';
 import { Dm } from '../interfaces/dm';
 import {
   collection,
@@ -30,6 +30,7 @@ export class DmService {
   private userService = inject(UserService);
   private authService = inject(AuthService);
   private newMessageService = inject(NewMessageService);
+  private auth = inject(FIREBASE_AUTH);
 
   /** The direct-message conversations available to the application. */
   dms = signal<Dm[]>([]);
@@ -295,4 +296,24 @@ export class DmService {
       })
       .sort((a, b) => a.user.name.localeCompare(b.user.name, 'de'));
   });
+
+  /** Updates the text of a direct message, if the signed-in user is its sender.
+   * Does nothing if no user is logged in, or if the user is not the sender.
+   *
+   * @param dmId The ID of the direct-message conversation.
+   * @param messageId The ID of the message to edit.
+   * @param text The new message text.
+   */
+  async editDmMessage(dmId: string, messageId: string, text: string) {
+    const user = this.auth.currentUser?.uid;
+    if (!user) { return; }
+    const messageRef = doc(this.db, 'dms', dmId, 'messages', messageId);
+    const snapshot = await getDoc(messageRef);
+    const message = snapshot.data() as Message;
+    if (message?.senderId !== user) { return; }
+    await updateDoc(messageRef, {
+      text: text,
+    });
+  }
 }
+
