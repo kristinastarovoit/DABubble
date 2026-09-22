@@ -26,8 +26,23 @@
           </div>
 
           @if (editingParentMessage()) {
-            <textarea [value]="editText()" (input)="editText.set($any($event.target).value)"></textarea>
-            <button type="button" (click)="saveEditedMessage()">Save</button>
+            <div class="edit-message-input__wrapper">
+              <textarea
+                [value]="editText()"
+                (input)="editText.set($any($event.target).value)"
+                class="edit-message-input__field"
+                (keydown.enter)="saveEditedMessage()"
+              ></textarea>
+              <div class="edit-message-input__footer-wrapper">
+                <button class="message-input__icon-btn" type="button">
+                  <img src="app-icons/emoji.svg" alt="Emoji" />
+                </button>
+                <div class="edit-message-input__button-wrapper">
+                  <button type="button" class="button button--dismiss" (click)="editingParentMessage.set(false)">Dismiss</button>
+                  <button type="button" class="button button--submit" (click)="saveEditedMessage()">Save</button>
+                </div>
+              </div>
+            </div>
           } @else {
             <div class="thread__bubble">{{ parentMessage.text }}</div>
           }
@@ -74,8 +89,23 @@
             </div>
 
             @if (editingReplyId() === reply.id) {
-              <textarea [value]="editText()" (input)="editText.set($any($event.target).value)"></textarea>
-              <button type="button" (click)="saveEditedMessage()">Save</button>
+              <div class="edit-message-input__wrapper">
+                <textarea
+                  [value]="editText()"
+                  (input)="editText.set($any($event.target).value)"
+                  class="edit-message-input__field"
+                  (keydown.enter)="saveEditedMessage()"
+                ></textarea>
+                <div class="edit-message-input__footer-wrapper">
+                  <button class="message-input__icon-btn" type="button">
+                    <img src="app-icons/emoji.svg" alt="Emoji" />
+                  </button>
+                  <div class="edit-message-input__button-wrapper">
+                    <button type="button" class="button button--dismiss" (click)="editingReplyId.set(null); editText.set('')">Dismiss</button>
+                    <button type="button" class="button button--submit" (click)="saveEditedMessage()">Save</button>
+                  </div>
+                </div>
+              </div>
             } @else {
               <div class="thread__bubble">{{ reply.text }}</div>
             }
