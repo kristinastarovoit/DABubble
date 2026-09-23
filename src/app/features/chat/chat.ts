@@ -78,7 +78,6 @@ export class Chat {
   /** The ID of the currently authenticated user, if available. */
   uid = computed(() => this.auth.currentUser?.uid);
 
-
   /** The channel matching the currently selected channel ID. */
   activeChannel = computed(() =>
     this.channelService.channels().find((channel) => channel.id === this.channelId()),
@@ -95,11 +94,13 @@ export class Chat {
 
   /** Creates a reactive listener for the currently selected conversation. */
   constructor() {
+
     effect(() => {
       this.currentUnsubscribe?.();
 
       const channelId = this.channelId();
       const dmId = this.dmId();
+      console.log('[Chat-Effect]', { channelId, dmId });
 
       if (dmId) {
         const { unsubscribe } = this.dmService.getMessages(dmId, (messages) =>
@@ -142,8 +143,12 @@ export class Chat {
   /** Saves inline-edited text to the active channel or DM conversation. */
   onEditSaved(event: { message: Message; text: string }) {
     const uid = this.authService.currentUserId();
-    if (!uid) { return; }
-    if (!event.message.id) { return; }
+    if (!uid) {
+      return;
+    }
+    if (!event.message.id) {
+      return;
+    }
 
     const channelId = this.channelId();
     const dmId = this.dmId();

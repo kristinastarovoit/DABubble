@@ -40,30 +40,36 @@ export class ChannelService {
     this.newMessageService.close();
   }
 
+  private unsubscribeChannels?: () => void;
+  private initialChannelSelected = false;
+
   constructor() {
     onAuthStateChanged(this.auth, (user) => {
+      this.unsubscribeChannels?.();
+      this.unsubscribeChannels = undefined;
+
       if (!user) {
         this.channels.set([]);
         this.activeChannelId.set(undefined);
+        this.initialChannelSelected = false;
         return;
       }
+
       const channelsRef = collection(this.db, 'channels');
-      // const q = query(channelsRef, where('memberIds', 'array-contains', user.uid));
-      // Anpassen: sobald Userlogin daten vorhanden, und channel erstellbar, channelsref nach onsnapshot mit q ersetzen
-      onSnapshot(channelsRef, (snapshot) => {
-        const channels = snapshot.docs.map(
-          (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            }) as Channel,
-        );
-        this.channels.set(channels);
-        if (!this.activeChannelId() && channels.length > 0) {
-          this.activeChannelId.set(channels[0].id);
-        }
-        console.log(this.channels());
-      });
+      this.unsubscribeChannels = onSnapshot(
+        channelsRef,
+        (snapshot) => {
+          const channels = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Channel);
+          this.channels.set(channels);
+
+          if (!this.initialChannelSelected && channels.length > 0) {
+            const general = channels.find((c) => c.name === 'Allgemeines') ?? channels[0];
+            this.selectChannel(general.id);
+            this.initialChannelSelected = true;
+          }
+        },
+        (err) => console.error('[Channels-Listener]', err.code, err.message),
+      );
     });
   }
 
@@ -88,7 +94,11 @@ export class ChannelService {
    * @param memberIds Additional member IDs to add alongside the creator.
    * @returns The ID of the newly created channel, or `undefined` if creation was skipped.
    */
-  async addChannel(name: string, description: string, memberIds: string[] = []): Promise<string | undefined> {
+  async addChannel(
+    name: string,
+    description: string,
+    memberIds: string[] = [],
+  ): Promise<string | undefined> {
     const user = this.auth.currentUser?.uid;
 
     if (!user) return undefined;

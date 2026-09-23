@@ -62,24 +62,32 @@ export class DmService {
   }
 
   constructor() {
-    effect(() => {
+    effect((onCleanup) => {
       const userId = this.authService.currentUserId();
       if (!userId) {
         this.dms.set([]);
         this.activeDmId.set(undefined);
         return;
       }
-      this.ensureSelfDm(userId).then(() => {
-        const dmsRef = collection(this.db, 'dms');
-        const q = query(dmsRef, where('memberIds', 'array-contains', userId));
 
-        onSnapshot(q, (snapshot) => {
-          const dms = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Dm);
-          this.dms.set(dms);
-          if (!this.activeDmId() && dms.length > 0) {
-            this.activeDmId.set(dms[0].id);
-          }
-        });
+      let unsubscribe: (() => void) | undefined;
+      let cancelled = false;
+
+      this.ensureSelfDm(userId).then(() => {
+        if (cancelled) return;
+        const q = query(collection(this.db, 'dms'), where('memberIds', 'array-contains', userId));
+        unsubscribe = onSnapshot(
+          q,
+          (snapshot) => {
+            this.dms.set(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Dm));
+          },
+          (err) => console.error('[DM-Listener]', err.code, err.message),
+        );
+      });
+
+      onCleanup(() => {
+        cancelled = true;
+        unsubscribe?.();
       });
     });
   }
