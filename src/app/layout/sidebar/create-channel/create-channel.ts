@@ -45,14 +45,16 @@ export class CreateChannel {
       this.errorMessage = 'Please enter a channel name.';
       return;
     }
-    const created = await this.channelService.addChannel(
+    const channelId = await this.channelService.addChannel(
       trimmedName,
       this.description.trim()
     );
-    if (!created) {
+    if (!channelId) {
       this.errorMessage = 'A channel with this name already exists.';
       return;
     }
+    this.channelService.selectChannel(channelId);
+    this.channelService.pendingAddMembersChannelId.set(channelId);
     this.close();
   }
 

@@ -73,29 +73,31 @@ export class ChannelService {
    *
    * @param name The display name of the new channel.
    * @param description The description of the new channel.
-   * @returns A promise that resolves once the channel has been created,
-   * or immediately if creation was skipped.
+   * @returns The ID of the newly created channel, or `undefined` if creation was skipped.
    */
-  async addChannel(name: string, description: string): Promise<boolean> {
+  async addChannel(name: string, description: string): Promise<string | undefined> {
     const user = this.auth.currentUser?.uid;
 
-    if (!user) return false;
+    if (!user) return undefined;
 
     const channelsRef = collection(this.db, 'channels');
     const q = query(channelsRef, where('name', '==', name));
     const snapshot = await getDocs(q);
 
-    if (!snapshot.empty) return false;
+    if (!snapshot.empty) return undefined;
 
-    await addDoc(channelsRef, {
+    const docRef = await addDoc(channelsRef, {
       name,
       description,
       createdBy: user,
       memberIds: [user],
     });
 
-    return true;
+    return docRef.id;
   }
+
+  /** The ID of a freshly created channel for which the "Add Members" dialog should open, if any. */
+  pendingAddMembersChannelId = signal<string | undefined>(undefined);
 
   // noch anpassen, je nachdem welcher channel gerade offen ist / ob einer offen ist
   /** Adds one or more users to a channel without removing existing members.
