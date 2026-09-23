@@ -1,13 +1,36 @@
 <div class="message-input">
-  <textarea
-    class="message-input__field"
-    /* [(ngModel)]="text"*/
-    (keydown.enter)="onEnter($event)"
-    [value]="text()"
-    (input)="text.set($any($event.target).value)"
-    [disabled]="disabled"
-    [placeholder]="placeholder"
-  ></textarea>
+  <div class="message-input__field-wrapper">
+    @if (showMentionDropdown()) {
+      <div class="message-input__mention-panel">
+        @for (option of mentionOptions(); track option.id; let i = $index) {
+          <button
+            type="button"
+            class="message-input__mention-option"
+            [class.message-input__mention-option--active]="i === activeMentionIndex()"
+            (mouseenter)="activeMentionIndex.set(i)"
+            (click)="selectMentionOption(option)"
+          >
+            @if (mentionTrigger() === '@') {
+              <img class="message-input__mention-avatar" [src]="option.avatar" [alt]="option.label" />
+            } @else {
+              <span class="message-input__mention-hash">#</span>
+            }
+            <span>{{ option.label }}</span>
+          </button>
+        }
+      </div>
+    }
+
+    <textarea
+      #textarea
+      class="message-input__field"
+      (keydown)="onKeydown($event)"
+      [value]="text()"
+      (input)="onInput($event)"
+      [disabled]="disabled"
+      [placeholder]="placeholder"
+    ></textarea>
+  </div>
 
   <div class="message-input__actions">
     <div class="message-input__emoji-wrapper">

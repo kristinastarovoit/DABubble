@@ -11,6 +11,10 @@
   flex-shrink: 0;
   font-family: 'Nunito';
 
+  &__field-wrapper {
+    position: relative;
+  }
+
   &__field {
     resize: none;
     border: none;
@@ -22,10 +26,66 @@
     max-height: 160px;
     padding: 4px 0;
     background-color: $white;
+    width: 100%;
 
     &::placeholder {
       color: $dark-grey;
     }
+  }
+
+  &__mention-panel {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 220px;
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 8px;
+    margin-bottom: 8px;
+    background: $white;
+    border-radius: 20px 20px 20px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    z-index: 20;
+  }
+
+  &__mention-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border: none;
+    background: transparent;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: $black;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover,
+    &--active {
+      background: $pastel-purple-bg;
+    }
+  }
+
+  &__mention-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  &__mention-hash {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    font-weight: 700;
+    color: $dark-grey;
   }
 
   &__actions {
