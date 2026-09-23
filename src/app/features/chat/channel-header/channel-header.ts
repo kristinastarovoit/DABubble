@@ -163,7 +163,7 @@ export class ChannelHeader {
   /** Controls which view is shown inside the members dialog. */
   showAddMembersView = signal(false);
 
-  /** Text entered in the "Name eingeben" field. */
+  /** Text entered in the "Enter name" field. */
   addMemberQuery = '';
 
   /** Validation or persistence error shown in the add-members view. */
