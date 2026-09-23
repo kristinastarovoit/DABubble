@@ -132,6 +132,102 @@
     color: $error-red;
   }
 
+  &__options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 20px;
+  }
+
+  &__option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    color: $black;
+    cursor: pointer;
+
+    input[type='radio'] {
+      width: 18px;
+      height: 18px;
+      accent-color: $midtone-purple-three;
+      cursor: pointer;
+    }
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: $pastel-purple-bg;
+    border-radius: 16px;
+    font-size: 0.9rem;
+    color: $black;
+  }
+
+  &__chip-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+
+    img {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  &__suggestions {
+    list-style: none;
+    margin: 0;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    background: $white;
+    border: 1px solid $border-purple;
+    border-radius: 16px;
+  }
+
+  &__suggestion {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 8px;
+    border: none;
+    background: transparent;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: $black;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      background: $pastel-purple-bg;
+    }
+  }
+
+  &__suggestion-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
   &__actions {
     display: flex;
     justify-content: flex-end;

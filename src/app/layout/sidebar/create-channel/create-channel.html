@@ -36,9 +36,78 @@
 
             <div class="channel-create__actions">
                 <button type="submit" class="button button--submit" [disabled]="!name.trim()">
-                    Create
+                    Next
                 </button>
             </div>
         </form>
+    </div>
+</dialog>
+
+<dialog #membersDialogRef class="channel-create" (click)="onMembersBackdropClick($event)">
+    <div class="channel-create__card">
+        <div class="channel-create__header">
+            <h2 class="channel-create__title">Add Members</h2>
+            <button class="channel-create__close-btn" (click)="closeMembersDialog()">
+                <img src="app-icons/close.svg" alt="Close" />
+            </button>
+        </div>
+
+        <div class="channel-create__options">
+            <label class="channel-create__option">
+                <input type="radio" name="memberOption" value="all" [ngModel]="memberOption()"
+                    (ngModelChange)="memberOption.set($any($event))" />
+                <span>Add All Contacts</span>
+            </label>
+            <label class="channel-create__option">
+                <input type="radio" name="memberOption" value="specific" [ngModel]="memberOption()"
+                    (ngModelChange)="memberOption.set($any($event))" />
+                <span>Add specific members</span>
+            </label>
+        </div>
+
+        @if (memberOption() === 'specific') {
+        <div class="channel-create__field">
+            @if (selectedMembers().length) {
+            <div class="channel-create__chips">
+                @for (member of selectedMembers(); track member.uid) {
+                <span class="channel-create__chip">
+                    {{ member.name }}
+                    <button type="button" class="channel-create__chip-remove" (click)="removeMember(member.uid)">
+                        <img src="app-icons/close.svg" alt="Remove" />
+                    </button>
+                </span>
+                }
+            </div>
+            }
+
+            <div class="channel-create__input-wrapper">
+                <input type="text" class="channel-create__input" placeholder="Enter name"
+                    [(ngModel)]="memberQuery" name="memberQuery" />
+            </div>
+
+            @if (memberSuggestions.length) {
+            <ul class="channel-create__suggestions">
+                @for (user of memberSuggestions; track user.uid) {
+                <li>
+                    <button type="button" class="channel-create__suggestion" (click)="selectMember(user)">
+                        <img [src]="user.avatar" [alt]="user.name" class="channel-create__suggestion-avatar" />
+                        <span>{{ user.name }}</span>
+                    </button>
+                </li>
+                }
+            </ul>
+            }
+        </div>
+        }
+
+        @if (membersError) {
+        <span class="channel-create__error">{{ membersError }}</span>
+        }
+
+        <div class="channel-create__actions">
+            <button type="button" class="button button--submit" (click)="createChannel()">
+                Create
+            </button>
+        </div>
     </div>
 </dialog>

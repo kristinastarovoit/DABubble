@@ -354,14 +354,5 @@ export class ChannelHeader {
         this.currentUnsubscribe = unsubscribe;
       }
     });
-
-    // Opens the "Add Members" dialog for a channel that was just created elsewhere (e.g. sidebar).
-    effect(() => {
-      const pendingChannelId = this.channelService.pendingAddMembersChannelId();
-      if (!pendingChannelId || pendingChannelId !== this.channelId()) return;
-
-      this.channelService.pendingAddMembersChannelId.set(undefined);
-      setTimeout(() => this.openAddMembers());
-    });
   }
 }

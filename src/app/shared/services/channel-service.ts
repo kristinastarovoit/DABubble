@@ -67,15 +67,28 @@ export class ChannelService {
     });
   }
 
+  /** Checks whether a channel with the given name already exists.
+   *
+   * @param name The channel name to check.
+   * @returns Whether a channel with this name already exists.
+   */
+  async channelNameExists(name: string): Promise<boolean> {
+    const channelsRef = collection(this.db, 'channels');
+    const q = query(channelsRef, where('name', '==', name));
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  }
+
   /** Creates a channel and adds the current user as its first member.
    * Does nothing if no user is logged in, or if a channel with the
    * same name already exists.
    *
    * @param name The display name of the new channel.
    * @param description The description of the new channel.
+   * @param memberIds Additional member IDs to add alongside the creator.
    * @returns The ID of the newly created channel, or `undefined` if creation was skipped.
    */
-  async addChannel(name: string, description: string): Promise<string | undefined> {
+  async addChannel(name: string, description: string, memberIds: string[] = []): Promise<string | undefined> {
     const user = this.auth.currentUser?.uid;
 
     if (!user) return undefined;
@@ -90,14 +103,11 @@ export class ChannelService {
       name,
       description,
       createdBy: user,
-      memberIds: [user],
+      memberIds: Array.from(new Set([user, ...memberIds])),
     });
 
     return docRef.id;
   }
-
-  /** The ID of a freshly created channel for which the "Add Members" dialog should open, if any. */
-  pendingAddMembersChannelId = signal<string | undefined>(undefined);
 
   // noch anpassen, je nachdem welcher channel gerade offen ist / ob einer offen ist
   /** Adds one or more users to a channel without removing existing members.
