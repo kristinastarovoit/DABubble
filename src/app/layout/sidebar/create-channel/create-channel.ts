@@ -49,6 +49,11 @@ export class CreateChannel {
   /** Validation or persistence error shown in the second step. */
   membersError = '';
 
+  /** Whether enough information has been provided to create the channel. */
+  canCreateChannel = computed(
+    () => this.memberOption() === 'all' || this.selectedMembers().length > 0,
+  );
+
   /** All users eligible as "contacts", excluding the signed-in user. */
   private contactUsers = computed(() =>
     this.dmService
