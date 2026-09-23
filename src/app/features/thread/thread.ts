@@ -10,9 +10,10 @@ import { ChannelService } from '../../shared/services/channel-service';
 import { DmService } from '../../shared/services/dm-service';
 import { AuthService } from '../../shared/services/auth';
 import { UserService } from '../../shared/services/users';
+import { MentionHighlightPipe } from '../../shared/utilities/mention-highlight.pipe';
 
 @Component({
-  imports: [CommonModule, MessageInput, ReactionBar, ReactionPicker],
+  imports: [CommonModule, MessageInput, ReactionBar, ReactionPicker, MentionHighlightPipe],
   selector: 'app-thread',
   styleUrl: './thread.scss',
   templateUrl: './thread.html',

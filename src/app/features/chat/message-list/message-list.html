@@ -35,7 +35,7 @@
         </div>
       </div>
       } @else {
-      <div class="message-list__bubble">{{ message.text }}</div>}
+      <div class="message-list__bubble" [innerHTML]="message.text | mentionHighlight"></div>}
 
       <app-reaction-bar [reactions]="messageReactions(message)" [currentUserId]="currentUserId()"
         [isOwnMessage]="message.senderId === currentUserId()"
