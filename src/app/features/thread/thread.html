@@ -2,20 +2,29 @@
   <div class="thread__header">
     <div class="thread__title">
       <span class="thread__title-text">Thread</span>
+      @if (originChannel(); as channel) {
+        <span class="thread__channel-name"># {{ channel.name }}</span>
+      } @else if (originDmPartner(); as partner) {
+        <span class="thread__channel-name">{{ partner.name }}</span>
+      }
     </div>
     <button class="thread__close-btn" (click)="close()">
       <img src="app-icons/close.svg" alt="Close" />
     </button>
   </div>
-
-  @if (parentMessage(); as parentMessage) {
-    <div class="thread__content">
+  <div class="thread__content">
+    @if (parentMessage(); as parentMessage) {
       <div
         class="thread__message"
+        [class.thread__message--own]="parentMessage.senderId === currentUserId()"
         (mouseenter)="parentMessageHovered.set(true)"
         (mouseleave)="parentMessageHovered.set(false)"
       >
-        <img class="thread__avatar" [src]="getSenderAvatar(parentMessage.senderId) || 'app-icons/avatar-placeholder.svg'" alt="" />
+        <img
+          class="thread__avatar"
+          [src]="getSenderAvatar(parentMessage.senderId) || 'app-icons/avatar-placeholder.svg'"
+          alt=""
+        />
 
         <div class="thread__message-content">
           <div class="thread__meta">
@@ -38,8 +47,16 @@
                   <img src="app-icons/emoji.svg" alt="Emoji" />
                 </button>
                 <div class="edit-message-input__button-wrapper">
-                  <button type="button" class="button button--dismiss" (click)="editingParentMessage.set(false)">Dismiss</button>
-                  <button type="button" class="button button--submit" (click)="saveEditedMessage()">Save</button>
+                  <button
+                    type="button"
+                    class="button button--dismiss"
+                    (click)="editingParentMessage.set(false)"
+                  >
+                    Dismiss
+                  </button>
+                  <button type="button" class="button button--submit" (click)="saveEditedMessage()">
+                    Save
+                  </button>
                 </div>
               </div>
             </div>
@@ -49,6 +66,7 @@
 
           <app-reaction-bar
             [currentUserId]="currentUserId()"
+            [maxVisible]="3"
             [reactions]="messageReactions(parentMessage)"
             (reactionToggled)="onParentReactionToggled($event)"
           ></app-reaction-bar>
@@ -65,10 +83,8 @@
           ></app-reaction-picker>
         }
       </div>
-    </div>
-  }
-  @if (replies().length > 0) {
-    <div class="thread__content">
+    }
+    @if (replies().length > 0) {
       <div class="thread__divider">
         <span>{{ replies().length }} {{ replies().length === 1 ? 'Reply' : 'Replies' }}</span>
       </div>
@@ -80,7 +96,11 @@
           (mouseenter)="hoveredReplyId.set(reply.id ?? null)"
           (mouseleave)="hoveredReplyId.set(null)"
         >
-          <img class="thread__avatar" [src]="getSenderAvatar(reply.senderId) || 'app-icons/avatar-placeholder.svg'" alt="" />
+          <img
+            class="thread__avatar"
+            [src]="getSenderAvatar(reply.senderId) || 'app-icons/avatar-placeholder.svg'"
+            alt=""
+          />
 
           <div class="thread__message-content">
             <div class="thread__meta">
@@ -101,8 +121,20 @@
                     <img src="app-icons/emoji.svg" alt="Emoji" />
                   </button>
                   <div class="edit-message-input__button-wrapper">
-                    <button type="button" class="button button--dismiss" (click)="editingReplyId.set(null); editText.set('')">Dismiss</button>
-                    <button type="button" class="button button--submit" (click)="saveEditedMessage()">Save</button>
+                    <button
+                      type="button"
+                      class="button button--dismiss"
+                      (click)="editingReplyId.set(null); editText.set('')"
+                    >
+                      Dismiss
+                    </button>
+                    <button
+                      type="button"
+                      class="button button--submit"
+                      (click)="saveEditedMessage()"
+                    >
+                      Save
+                    </button>
                   </div>
                 </div>
               </div>
@@ -112,6 +144,7 @@
 
             <app-reaction-bar
               [currentUserId]="currentUserId()"
+              [maxVisible]="3"
               [reactions]="messageReactions(reply)"
               (reactionToggled)="onReactionToggled(reply, $event)"
             ></app-reaction-bar>
@@ -129,8 +162,8 @@
           }
         </div>
       }
-    </div>
-  }
+    }
+  </div>
 
   @if (!parentMessage()) {
     <div class="thread__content">
