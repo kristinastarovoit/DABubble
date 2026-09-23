@@ -44,7 +44,7 @@
               </div>
             </div>
           } @else {
-            <div class="thread__bubble">{{ parentMessage.text }}</div>
+            <div class="thread__bubble" [innerHTML]="parentMessage.text | mentionHighlight"></div>
           }
 
           <app-reaction-bar
@@ -107,7 +107,7 @@
                 </div>
               </div>
             } @else {
-              <div class="thread__bubble">{{ reply.text }}</div>
+              <div class="thread__bubble" [innerHTML]="reply.text | mentionHighlight"></div>
             }
 
             <app-reaction-bar

@@ -67,34 +67,46 @@ export class ChannelService {
     });
   }
 
+  /** Checks whether a channel with the given name already exists.
+   *
+   * @param name The channel name to check.
+   * @returns Whether a channel with this name already exists.
+   */
+  async channelNameExists(name: string): Promise<boolean> {
+    const channelsRef = collection(this.db, 'channels');
+    const q = query(channelsRef, where('name', '==', name));
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  }
+
   /** Creates a channel and adds the current user as its first member.
    * Does nothing if no user is logged in, or if a channel with the
    * same name already exists.
    *
    * @param name The display name of the new channel.
    * @param description The description of the new channel.
-   * @returns A promise that resolves once the channel has been created,
-   * or immediately if creation was skipped.
+   * @param memberIds Additional member IDs to add alongside the creator.
+   * @returns The ID of the newly created channel, or `undefined` if creation was skipped.
    */
-  async addChannel(name: string, description: string): Promise<boolean> {
+  async addChannel(name: string, description: string, memberIds: string[] = []): Promise<string | undefined> {
     const user = this.auth.currentUser?.uid;
 
-    if (!user) return false;
+    if (!user) return undefined;
 
     const channelsRef = collection(this.db, 'channels');
     const q = query(channelsRef, where('name', '==', name));
     const snapshot = await getDocs(q);
 
-    if (!snapshot.empty) return false;
+    if (!snapshot.empty) return undefined;
 
-    await addDoc(channelsRef, {
+    const docRef = await addDoc(channelsRef, {
       name,
       description,
       createdBy: user,
-      memberIds: [user],
+      memberIds: Array.from(new Set([user, ...memberIds])),
     });
 
-    return true;
+    return docRef.id;
   }
 
   // noch anpassen, je nachdem welcher channel gerade offen ist / ob einer offen ist

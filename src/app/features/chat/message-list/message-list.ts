@@ -15,6 +15,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ReactionBar } from '../reaction-bar/reaction-bar';
 import { Message, MessageReaction } from '../../../shared/interfaces/message';
 import { UserService } from '../../../shared/services/users';
+import { MentionHighlightPipe } from '../../../shared/utilities/mention-highlight.pipe';
 
 /** Groups messages under a calendar date. */
 interface MessageGroup {
@@ -23,7 +24,7 @@ interface MessageGroup {
 }
 
 @Component({
-  imports: [CommonModule, ReactionBar, DatePipe, ReactionPicker],
+  imports: [CommonModule, ReactionBar, DatePipe, ReactionPicker, MentionHighlightPipe],
   selector: 'app-message-list',
   styleUrl: './message-list.scss',
   templateUrl: './message-list.html',
