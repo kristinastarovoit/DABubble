@@ -18,6 +18,7 @@ import {
   queryEqual,
   getDoc,
   deleteField,
+  orderBy,
 } from 'firebase/firestore';
 import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
@@ -367,7 +368,7 @@ export class ChannelService {
     onMessages?: (messages: Message[]) => void,
   ): { messages: ReturnType<typeof signal<Message[]>>; unsubscribe: () => void } {
     const messages = signal<Message[]>([]);
-    const messagesRef = collection(this.db, 'channels', channelId, 'messages');
+    const messagesRef = query(collection(this.db, 'channels', channelId, 'messages'), orderBy('createdAt', 'asc'));
     const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
       const channelMessages = snapshot.docs.map((doc) => ({
         id: doc.id,

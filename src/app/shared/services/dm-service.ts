@@ -16,6 +16,7 @@ import {
   getDoc,
   setDoc,
   deleteField,
+  orderBy,
 } from 'firebase/firestore';
 import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
@@ -102,7 +103,10 @@ export class DmService {
     onMessages?: (messages: Message[]) => void,
   ): { messages: ReturnType<typeof signal<Message[]>>; unsubscribe: () => void } {
     const messages = signal<Message[]>([]);
-    const messagesRef = collection(this.db, 'dms', dmId, 'messages');
+    const messagesRef = query(
+      collection(this.db, 'dms', dmId, 'messages'),
+      orderBy('createdAt', 'asc'),
+    );
     const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
       const dmMessages = snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Message) }));
       messages.set(dmMessages);
