@@ -18,6 +18,35 @@
     z-index: 9;
   }
 
+  &__chat-nav {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    order: 1;
+    padding: 0 0 10px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: 'Nunito';
+
+    &-arrow {
+      width: 24px;
+      height: 24px;
+      transform: rotate(90deg);
+    }
+
+    &-icon {
+      width: 40px;
+      height: 40px;
+    }
+
+    &-text {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: $black;
+    }
+  }
+
   &__logo {
     display: flex;
     width: 350px;
@@ -245,12 +274,20 @@
     padding-bottom: 10px;
   }
 
-  :host-context(.mobile-chat-open) .header__search {
-    display: none;
-  }
 }
 
 @media (max-width: 650px) {
+  .header--chat {
+    .header__logo,
+    .header__search {
+      display: none;
+    }
+
+    .header__chat-nav {
+      display: flex;
+    }
+  }
+
   .header__search {
     background-color: $white;
 

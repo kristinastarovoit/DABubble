@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth';
 import { UserService } from '../../shared/services/users';
@@ -19,6 +19,12 @@ export class Header {
   currentUser = computed(() =>
     this.userService.users().find((user) => user.uid === this.authService.currentUserId()),
   );
+
+  /** Mobile only: whether a chat/thread is open, replacing the logo with a back navigation. */
+  chatMode = input(false);
+
+  /** Emitted when the mobile back navigation is clicked. */
+  back = output<void>();
 
   /** Current value of the global search field. */
   searchQuery = '';

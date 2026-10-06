@@ -1,4 +1,4 @@
-<app-header />
+<app-header [chatMode]="mobileChatOpen()" (back)="closeChat()" />
 
 <div class="app-wrapper" [class.app-wrapper--chat-open]="mobileChatOpen()">
   <app-sidebar
@@ -6,9 +6,6 @@
     (conversationOpened)="mobileChatOpen.set(true)"
   />
   <div class="app-wrapper__main" [class.app-wrapper__main--full-width]="!isSidebarOpen">
-    <button type="button" class="app-wrapper__back" (click)="mobileChatOpen.set(false)">
-      &#8592; Devspace
-    </button>
     <app-chat />
   </div>
   <app-thread />

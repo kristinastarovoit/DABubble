@@ -48,10 +48,6 @@
   &.sidebar-hidden.thread-hidden {
     grid-template-columns: 0px minmax(0, 1fr) 0px;
   }
-
-  &__back {
-    display: none;
-  }
 }
 
 @media (max-width: 900px) {
@@ -62,6 +58,7 @@
   }
 
   .app-wrapper {
+    position: relative;
     flex: 1;
     min-height: 0;
     height: auto;
@@ -106,18 +103,6 @@
 
       .app-wrapper__main {
         display: flex;
-      }
-
-      .app-wrapper__back {
-        display: block;
-        align-self: flex-start;
-        padding: 6px 12px;
-        border: none;
-        background: none;
-        font-family: 'Nunito';
-        font-size: 1.1rem;
-        font-weight: 700;
-        cursor: pointer;
       }
     }
   }
