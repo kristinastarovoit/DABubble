@@ -184,12 +184,13 @@
 @media (max-width: 900px) {
   .header {
     flex-wrap: wrap;
-    padding: 12px 16px 8px;
-    row-gap: 10px;
+    padding: 12px 16px 0;
+    row-gap: 0;
 
     &__logo {
       width: auto;
       order: 1;
+      padding-bottom: 10px;
 
       &-icon {
         width: 48px;
@@ -215,7 +216,11 @@
 
     &__search {
       order: 3;
-      flex: 0 0 100%;
+      flex: 0 0 auto;
+      width: calc(100% + 32px);
+      margin: 0 -16px;
+      padding: 10px 16px;
+      box-sizing: border-box;
       max-width: none;
 
       &-input {
@@ -225,6 +230,7 @@
       }
 
       &-icon {
+        right: 34px;
         width: 24px;
         height: 24px;
       }
@@ -235,12 +241,24 @@
     display: contents;
   }
 
+  .header__user {
+    padding-bottom: 10px;
+  }
+
   :host-context(.mobile-chat-open) .header__search {
     display: none;
   }
 }
 
 @media (max-width: 650px) {
+  .header__search {
+    background-color: $white;
+
+    &-input {
+      border: 1px solid $border-purple;
+    }
+  }
+
   .header__logo-text {
     font-size: 1.2rem;
   }

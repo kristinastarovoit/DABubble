@@ -190,3 +190,30 @@
   right: auto;
   left: 12px;
 }
+@media (max-width: 650px) {
+  .thread {
+    &__header,
+    &__content {
+      padding: 12px;
+    }
+
+    &__message {
+      gap: 10px;
+      padding: 6px 4px;
+    }
+
+    &__avatar {
+      width: 40px;
+      height: 40px;
+    }
+
+    &__message-content {
+      max-width: calc(100% - 50px);
+    }
+
+    &__bubble {
+      padding: 10px 14px;
+      font-size: 1rem;
+    }
+  }
+}

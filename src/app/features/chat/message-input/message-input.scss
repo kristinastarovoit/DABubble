@@ -177,3 +177,15 @@
     }
   }
 }
+
+@media (max-width: 650px) {
+  .message-input {
+    margin: 0 12px 12px;
+    padding: 10px 12px;
+
+    &__mention-panel {
+      min-width: 0;
+      max-width: calc(100vw - 48px);
+    }
+  }
+}

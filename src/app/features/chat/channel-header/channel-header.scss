@@ -404,3 +404,31 @@
     // }
   }
 }
+@media (max-width: 650px) {
+  .channel-header {
+    height: auto;
+    min-height: 64px;
+    padding: 10px 12px;
+    gap: 8px;
+
+    &__name {
+      font-size: 1.2rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &__title {
+      min-width: 0;
+      padding: 6px 8px;
+    }
+
+    &__avatars {
+      padding: 4px 8px;
+    }
+
+    &__count {
+      font-size: 1rem;
+    }
+  }
+}

@@ -65,8 +65,9 @@
     flex: 1;
     min-height: 0;
     height: auto;
-    gap: 0;
+    gap: 8px;
     padding: 10px 12px 12px;
+    background: $pastel-purple-bg;
     grid-template-columns: minmax(0, auto) minmax(0, 1fr);
 
     app-thread {
@@ -79,6 +80,14 @@
 
 @media (max-width: 650px) {
   .app-wrapper {
+    background: $white;
+
+    app-sidebar,
+    app-chat {
+      background: $white;
+      box-shadow: none;
+    }
+
     grid-template-columns: minmax(0, 1fr);
 
     app-sidebar {
