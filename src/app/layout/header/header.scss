@@ -175,6 +175,12 @@
   min-width: 0;
 }
 
+@media (max-width: 1200px) {
+  .header__user-name {
+    display: none;
+  }
+}
+
 @media (max-width: 900px) {
   .header {
     flex-wrap: wrap;
