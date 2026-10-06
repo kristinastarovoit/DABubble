@@ -48,7 +48,7 @@ export class Sidebar {
 
   /** Whether the viewport is in the mobile layout, where the sidebar is always shown. */
   isMobile = signal<boolean>(false);
-  private mobileQuery = window.matchMedia('(max-width: 450px)');
+  private mobileQuery = window.matchMedia('(max-width: 650px)');
   private onMobileChange = (e: MediaQueryListEvent) => this.isMobile.set(e.matches);
 
   /** Whether the channels section is expanded. */

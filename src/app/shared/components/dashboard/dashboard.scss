@@ -77,12 +77,13 @@
   }
 }
 
-@media (max-width: 450px) {
+@media (max-width: 650px) {
   .app-wrapper {
     grid-template-columns: minmax(0, 1fr);
 
     app-sidebar {
-      max-width: none;
+      max-width: 500px;
+      justify-self: start;
     }
 
     &__main {
