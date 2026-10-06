@@ -1,5 +1,11 @@
-<header class="header">
+<header class="header" [class.header--chat]="chatMode()">
   <div class="wrapper">
+    <button type="button" class="header__chat-nav" (click)="back.emit()">
+      <img src="app-icons/arrow_down.svg" alt="Back" class="header__chat-nav-arrow" />
+      <img src="app-icons/workspace.svg" alt="" class="header__chat-nav-icon" />
+      <span class="header__chat-nav-text">Devspace</span>
+    </button>
+
     <div class="header__logo">
       <img src="app-icons/logo.svg" alt="DABubble Logo" class="header__logo-icon" />
       <span class="header__logo-text">DABubble</span>

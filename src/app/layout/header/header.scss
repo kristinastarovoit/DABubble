@@ -18,6 +18,35 @@
     z-index: 9;
   }
 
+  &__chat-nav {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    order: 1;
+    padding: 0 0 10px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: 'Nunito';
+
+    &-arrow {
+      width: 24px;
+      height: 24px;
+      transform: rotate(90deg);
+    }
+
+    &-icon {
+      width: 40px;
+      height: 40px;
+    }
+
+    &-text {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: $black;
+    }
+  }
+
   &__logo {
     display: flex;
     width: 350px;
@@ -173,4 +202,101 @@
   align-items: center;
   flex: 1;
   min-width: 0;
+}
+
+@media (max-width: 1200px) {
+  .header__user-name {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .header {
+    flex-wrap: wrap;
+    padding: 12px 16px 0;
+    row-gap: 0;
+
+    &__logo {
+      width: auto;
+      order: 1;
+      padding-bottom: 10px;
+
+      &-icon {
+        width: 48px;
+        height: 48px;
+      }
+    }
+
+    &__user {
+      order: 2;
+      padding: 4px;
+      gap: 8px;
+
+      &-name,
+      &-chevron {
+        display: none !important;
+      }
+
+      &-avatar {
+        width: 48px;
+        height: 48px;
+      }
+    }
+
+    &__search {
+      order: 3;
+      flex: 0 0 auto;
+      width: calc(100% + 32px);
+      margin: 0 -16px;
+      padding: 10px 16px;
+      box-sizing: border-box;
+      max-width: none;
+
+      &-input {
+        height: 48px;
+        padding: 10px 45px 10px 20px;
+        font-size: 1rem;
+      }
+
+      &-icon {
+        right: 34px;
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  .wrapper {
+    display: contents;
+  }
+
+  .header__user {
+    padding-bottom: 10px;
+  }
+
+}
+
+@media (max-width: 650px) {
+  .header--chat {
+    .header__logo,
+    .header__search {
+      display: none;
+    }
+
+    .header__chat-nav {
+      display: flex;
+    }
+  }
+
+  .header__search {
+    background-color: $white;
+
+    &-input {
+      border: 1px solid $border-purple;
+    }
+  }
+
+  .header__logo-text {
+    font-size: 1.2rem;
+  }
 }

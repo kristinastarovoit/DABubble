@@ -1,19 +1,10 @@
-<!-- <app-header />
+<app-header [chatMode]="mobileChatOpen()" (back)="closeChat()" />
 
-<div
-  class="app-wrapper"
-  [class.sidebar-hidden]="!sidebarOpen()"
-  [class.thread-hidden]="!threadOpen()"
->
-  <app-sidebar />
-  <app-chat />
-  <app-thread />
-</div> -->
-
-<app-header />
-
-<div class="app-wrapper">
-  <app-sidebar (sidebarToggled)="onSidebarToggled($event)" />
+<div class="app-wrapper" [class.app-wrapper--chat-open]="mobileChatOpen()">
+  <app-sidebar
+    (sidebarToggled)="onSidebarToggled($event)"
+    (conversationOpened)="mobileChatOpen.set(true)"
+  />
   <div class="app-wrapper__main" [class.app-wrapper__main--full-width]="!isSidebarOpen">
     <app-chat />
   </div>

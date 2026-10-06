@@ -17,6 +17,15 @@
     display: none;
   }
 
+  @media (max-width: 900px) {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    max-width: none;
+    min-height: 0;
+    border-radius: 0;
+  }
+
   &__header {
     display: flex;
     align-items: center;
@@ -180,4 +189,31 @@
 .thread__message--own .thread__picker {
   right: auto;
   left: 12px;
+}
+@media (max-width: 650px) {
+  .thread {
+    &__header,
+    &__content {
+      padding: 12px;
+    }
+
+    &__message {
+      gap: 10px;
+      padding: 6px 4px;
+    }
+
+    &__avatar {
+      width: 40px;
+      height: 40px;
+    }
+
+    &__message-content {
+      max-width: calc(100% - 50px);
+    }
+
+    &__bubble {
+      padding: 10px 14px;
+      font-size: 1rem;
+    }
+  }
 }

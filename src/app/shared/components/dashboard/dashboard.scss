@@ -49,3 +49,61 @@
     grid-template-columns: 0px minmax(0, 1fr) 0px;
   }
 }
+
+@media (max-width: 900px) {
+  :host {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .app-wrapper {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    gap: 8px;
+    padding: 10px 12px 12px;
+    background: $pastel-purple-bg;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+
+    app-thread {
+      display: contents;
+      background: none;
+      box-shadow: none;
+    }
+  }
+}
+
+@media (max-width: 800px) {
+  .app-wrapper {
+    background: $white;
+
+    app-sidebar,
+    app-chat {
+      background: $white;
+      box-shadow: none;
+    }
+
+    grid-template-columns: minmax(0, 1fr);
+
+    app-sidebar {
+      max-width: 100%;
+      justify-self: start;
+    }
+
+    &__main {
+      display: none;
+    }
+
+    &--chat-open {
+      app-sidebar {
+        display: none;
+      }
+
+      .app-wrapper__main {
+        display: flex;
+      }
+    }
+  }
+}
