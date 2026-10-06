@@ -43,6 +43,13 @@ export class Sidebar {
   @Output() workspaceEditRequested = new EventEmitter<void>();
   /** Emitted whenever the sidebar's visibility changes, so the parent (e.g. Dashboard) can adjust its layout. */
   @Output() sidebarToggled = new EventEmitter<boolean>();
+  /** Emitted when a channel, direct message or the new-message composer is opened. */
+  @Output() conversationOpened = new EventEmitter<void>();
+
+  /** Whether the viewport is in the mobile layout, where the sidebar is always shown. */
+  isMobile = signal<boolean>(false);
+  private mobileQuery = window.matchMedia('(max-width: 450px)');
+  private onMobileChange = (e: MediaQueryListEvent) => this.isMobile.set(e.matches);
 
   /** Whether the channels section is expanded. */
   isChannelsOpen = true;
@@ -61,10 +68,16 @@ export class Sidebar {
    * notifies the parent component of the initial state.
    */
   ngOnInit(): void {
+    this.isMobile.set(this.mobileQuery.matches);
+    this.mobileQuery.addEventListener('change', this.onMobileChange);
     const stored = localStorage.getItem(this.SIDEBAR_STATE_KEY);
     const initialState = stored !== null ? stored === 'true' : true;
     this.isSidebarOpen.set(initialState);
     this.sidebarToggled.emit(initialState);
+  }
+
+  ngOnDestroy(): void {
+    this.mobileQuery.removeEventListener('change', this.onMobileChange);
   }
 
   /**
@@ -93,6 +106,7 @@ export class Sidebar {
     this.channelService.selectChannel(channel.id);
     this.dmService.activeDmId.set(undefined);
     this.channelSelected.emit(channel);
+    this.conversationOpened.emit();
   }
 
   /** Selects a direct-message conversation, creating it on first contact. */
@@ -112,6 +126,7 @@ export class Sidebar {
       const dmId = await this.dmService.addDm([currentUserId, partner.user.uid]);
       this.dmService.selectDm(dmId);
     }
+    this.conversationOpened.emit();
   }
 
   /** Requests creation of a channel. */
@@ -127,6 +142,7 @@ export class Sidebar {
     if (this.newMessageService.isNewMessageMode()) {
       this.channelService.activeChannelId.set(undefined);
       this.dmService.activeDmId.set(undefined);
+      this.conversationOpened.emit();
     }
     this.workspaceEditRequested.emit();
   }
