@@ -1,5 +1,5 @@
 import { Service, inject, signal } from '@angular/core';
-import { collection, doc, getDoc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, updateDoc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
 
 import { FIREBASE_FIRESTORE } from '../../app.config';
 import { UserModel } from '../model/user.model';
@@ -54,5 +54,12 @@ export class UserService {
   /** Returns the display name for a user ID from the currently loaded users, or a fallback. */
   getUserName(uid: string): string {
     return this.users().find((user) => user.uid === uid)?.name ?? 'Unbekannt';
+  }
+
+  async editUserName(userId: string, name: string) {
+    const usersRef = doc(this.firestore, 'users', userId);
+    await updateDoc(usersRef, {
+      name: name,
+    });
   }
 }

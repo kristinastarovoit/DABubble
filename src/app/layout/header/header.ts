@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth';
 import { UserService } from '../../shared/services/users';
@@ -30,23 +30,68 @@ export class Header {
   searchQuery = '';
 
   /** Whether the user menu is visible. */
-  isUserMenuOpen = false;
+  isUserMenuOpen = signal(false);
+
+  /** Whether the user-profile-menu is visible. */
+  isUserProfileOpen = signal(false);
+
+  /** Whether the profile card is in edit mode. */
+  isEditingUser = signal(false);
 
   /** Toggles the user menu. */
   toggleUserMenu(): void {
-    this.isUserMenuOpen = !this.isUserMenuOpen;
+    this.isUserMenuOpen.update((isOpen) => !isOpen);
   }
 
   /** Closes the user menu. */
   closeUserMenu(): void {
-    this.isUserMenuOpen = false;
+    this.isUserMenuOpen.set(false);
+  }
+
+  /** Opens the user-profile menu. */
+  openUserProfile() {
+    this.isUserProfileOpen.set(true);
+  }
+
+  /** Closes the user-profile menu. */
+  closeUserProfile() {
+    this.isUserProfileOpen.set(false);
+  }
+
+  /** Opens the user-profile editing-menu. */
+  editUserProfile() {
+    this.isEditingUser.set(true);
+  }
+
+  /** Closes the user-profile editing-menu. */
+  cancelUserProfileEdit() {
+    this.isEditingUser.set(false);
+  }
+
+  /**
+ * Saves a new display name for the signed-in user and leaves edit mode.
+ * Does nothing if nobody is signed in or the trimmed name is empty.
+ * If the name is unchanged, edit mode is closed without writing to Firestore.
+ *
+ * @param newName The raw value from the name input; it is trimmed before use.
+ */
+  async saveNewUserName(newName: string) {
+    const currentUser = this.currentUser();
+    if (!currentUser) return;
+
+    const trimmed = newName.trim();
+    if (trimmed == '') return;
+    if (trimmed === currentUser.name) {
+      this.isEditingUser.set(false);
+      return;
+    }
+    await this.userService.editUserName(currentUser.uid, trimmed);
+    this.isEditingUser.set(false);
   }
 
   /** Handles changes to the global search field. */
-  onSearchInput(): void {}
+  onSearchInput(): void { }
 
-  /** Navigates to the user profile. */
-  goToProfile(): void {}
 
   /** Signs the current user out. */
   async logout(): Promise<void> {
