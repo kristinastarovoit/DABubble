@@ -8,6 +8,9 @@
         </div>
         <span class="channel-header__name">
             {{ currentDmPartner()?.name }}
+            @if (isSelf()) {
+            <span>(You)</span>
+            }
         </span>
     </div>
 </div>

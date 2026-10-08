@@ -10,6 +10,8 @@ import { UserModel } from '../../../shared/model/user.model';
 })
 export class DmHeader {
   currentDmPartner = input<UserModel | undefined>(undefined);
+  /** Whether the displayed DM partner is the currently signed-in user. */
+  isSelf = input(false);
   @ViewChild('profileCard') dialogRef!: ElementRef<HTMLDialogElement>;
 
   /** Opens the user card dialog */

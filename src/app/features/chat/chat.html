@@ -3,7 +3,10 @@
     @if (channelId() || newMessageService.isNewMessageMode()) {
       <app-channel-header /* (memberIconClicked)="openMemberList()" */></app-channel-header>
     } @else if (dmId()) {
-      <app-dm-header [currentDmPartner]="activeDmPartner()"></app-dm-header>
+      <app-dm-header
+        [currentDmPartner]="activeDmPartner()"
+        [isSelf]="activeDmPartnerIsSelf()"
+      ></app-dm-header>
     }
     <app-message-list
       [messages]="messages()"
