@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, ViewChild, ElementRef } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth';
 import { UserService } from '../../shared/services/users';
@@ -35,7 +35,7 @@ export class Header {
   /** Whether the user-profile-menu is visible. */
   isUserProfileOpen = false;
 
-  isEditingUser = false;
+  isEditingUser = signal(false);
 
   /** Toggles the user menu. */
   toggleUserMenu(): void {
@@ -57,12 +57,35 @@ export class Header {
     this.isUserProfileOpen = false;
   }
 
+  /** Opens the user-profile editing-menu. */
   editUserProfile() {
-    this.isEditingUser = true;
+    this.isEditingUser.set(true);
   }
 
+  /** Closes the user-profile editing-menu. */
   cancelUserProfileEdit() {
-    this.isEditingUser = false;
+    this.isEditingUser.set(false);
+  }
+
+  /**
+ * Saves a new display name for the signed-in user and leaves edit mode.
+ * Does nothing if nobody is signed in or the trimmed name is empty.
+ * If the name is unchanged, edit mode is closed without writing to Firestore.
+ *
+ * @param newName The raw value from the name input; it is trimmed before use.
+ */
+  async saveNewUserName(newName: string) {
+    const currentUser = this.currentUser();
+    if (!currentUser) return;
+
+    const trimmed = newName.trim();
+    if (trimmed == '') return;
+    if (trimmed === currentUser.name) {
+      this.isEditingUser.set(false);
+      return;
+    }
+    await this.userService.editUserName(currentUser.uid, trimmed);
+    this.isEditingUser.set(false);
   }
 
   /** Handles changes to the global search field. */

@@ -39,9 +39,9 @@
       <button (click)="logout()">Logout</button>
     </div>
     }
-    @if(isUserProfileOpen){
 
-    @if (isEditingUser) {
+    @if(isUserProfileOpen){
+    @if (isEditingUser()) {
     <div class="header__profile">
       <div class="header__profile-header">
         <p class="header__profile-heading">Edit your Profile</p>
@@ -66,12 +66,12 @@
           <p class="header__profile-mail-heading">Full name</p>
         </div>
         <div class="input-wrapper">
-          <input class="input" type="text" [placeholder]="currentUser()?.name">
+          <input #inputName class="input" type="text" [placeholder]="currentUser()?.name">
         </div>
       </div>
       <div class="header__profile-button-wrapper">
         <button class="button button--dismiss" (click)="cancelUserProfileEdit()">Dismiss</button>
-        <button class="button button--submit">Save</button>
+        <button class="button button--submit" (click)="saveNewUserName(inputName.value)">Save</button>
       </div>
     </div>
     }
