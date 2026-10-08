@@ -4,10 +4,15 @@
 .button {
     border-radius: 32px;
     padding: 14px 32px;
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 1.125rem;
+    font-weight: 700;
     cursor: pointer;
     transition: all 255ms ease-in-out;
+    font-family: Nunito;
+
+    & p {
+        font-family: Nunito;
+    }
 
     &--submit {
         background-color: $dark-purple-one;

@@ -13,8 +13,8 @@
 </div>
 
 
-<dialog #profileCard class="header__profile header__profile--dialog" (click)="onBackdropClick($event)">
-    <div class="header__profile-card" (click)="$event.stopPropagation()">
+<dialog #profileCard autofocus class="header__profile header__profile--dialog" (click)="onBackdropClick($event)">
+    <div class="header__profile-card" tabindex="-1" autofocus (click)="$event.stopPropagation()">
         <div class="header__profile-header">
             <p class="header__profile-heading">Profile</p>
             <button (click)="closeUserCard()" class="header__profile-button header__profile-button--close"><img
