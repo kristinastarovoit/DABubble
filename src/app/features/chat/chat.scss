@@ -28,7 +28,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 16px;
     flex-shrink: 0;
     padding: 0 32px 24px;
   }
@@ -49,14 +49,13 @@
 
   &__empty-dm-name {
     color: $black;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     font-weight: 700;
   }
 
   &__empty-dm-description {
-    margin: 0;
     color: $dark-grey;
-    font-size: 1rem;
+    font-size: 1.2rem;
     line-height: 1.4;
   }
 
@@ -79,14 +78,14 @@
 
   &__empty-channel-identity {
     color: $black;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     font-weight: 700;
   }
 
   &__empty-channel-description {
     margin: 0;
     color: $dark-grey;
-    font-size: 1rem;
+    font-size: 1.2rem;
     line-height: 1.4;
   }
 
