@@ -95,6 +95,26 @@ export class Chat {
     return this.userService.users().find((user) => user.uid === partnerID);
   });
 
+  /** The contact profile and self-DM state used by the empty conversation intro. */
+  activeDmIntroContact = computed(() => {
+    const dm = this.dmService.dms().find((dm) => dm.id === this.dmId());
+    const currentUserId = this.authService.currentUserId();
+    if (!dm || !currentUserId) return undefined;
+
+    const partnerId = dm.memberIds.find((memberId) => memberId !== currentUserId);
+    if (partnerId) {
+      const user = this.userService.users().find((candidate) => candidate.uid === partnerId);
+      return user ? { user, isSelf: false } : undefined;
+    }
+
+    if (dm.memberIds.length === 1 && dm.memberIds[0] === currentUserId) {
+      const user = this.userService.users().find((candidate) => candidate.uid === currentUserId);
+      return user ? { user, isSelf: true } : undefined;
+    }
+
+    return undefined;
+  });
+
   /** Creates a reactive listener for the currently selected conversation. */
   constructor() {
     effect(() => {
