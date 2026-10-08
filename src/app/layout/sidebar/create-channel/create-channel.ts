@@ -5,6 +5,7 @@ import { ChannelService } from '../../../shared/services/channel-service';
 import { DmService } from '../../../shared/services/dm-service';
 import { AuthService } from '../../../shared/services/auth';
 import { UserModel } from '../../../shared/model/user.model';
+import { UserService } from '../../../shared/services/users';
 
 @Component({
   imports: [FormsModule, CommonModule],
@@ -15,7 +16,6 @@ import { UserModel } from '../../../shared/model/user.model';
 export class CreateChannel {
   /** Emitted when creation is cancelled. */
   @Output() cancelled = new EventEmitter<void>();
-
   @ViewChild('dialogRef') private dialogRef!: ElementRef<HTMLDialogElement>;
   @ViewChild('membersDialogRef') private membersDialogRef!: ElementRef<HTMLDialogElement>;
 

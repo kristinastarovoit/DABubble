@@ -86,14 +86,17 @@ export class Chat {
     this.channelService.channels().find((channel) => channel.id === this.channelId()),
   );
 
-  /** The ID of the partner user matching the currently selected dm ID. */
+  /** The user in the active DM, falling back to the current user for a self-DM. */
   activeDmPartner = computed(() => {
     const dm = this.dmService.dms().find((dm) => dm.id === this.dmId());
-    const partnerID = dm?.memberIds.find(
-      (memberId) => memberId !== this.authService.currentUserId(),
-    );
-    return this.userService.users().find((user) => user.uid === partnerID);
+    const currentUserId = this.authService.currentUserId();
+    const partnerId = dm?.memberIds.find((memberId) => memberId !== currentUserId);
+    const userId = partnerId ?? (dm?.memberIds[0] === currentUserId ? currentUserId : undefined);
+    return this.userService.users().find((user) => user.uid === userId);
   });
+
+  /** Whether the active DM is a self-DM, as determined by the intro contact. */
+  activeDmPartnerIsSelf = computed(() => this.activeDmIntroContact()?.isSelf ?? false);
 
   /** The contact profile and self-DM state used by the empty conversation intro. */
   activeDmIntroContact = computed(() => {

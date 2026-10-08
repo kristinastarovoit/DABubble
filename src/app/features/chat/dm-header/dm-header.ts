@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ViewChild, ElementRef } from '@angular/core';
 import { User } from '../../../shared/interfaces/user';
 import { UserModel } from '../../../shared/model/user.model';
 
@@ -9,5 +9,25 @@ import { UserModel } from '../../../shared/model/user.model';
   templateUrl: './dm-header.html',
 })
 export class DmHeader {
-    currentDmPartner = input<UserModel | undefined>(undefined);
+  currentDmPartner = input<UserModel | undefined>(undefined);
+  /** Whether the displayed DM partner is the currently signed-in user. */
+  isSelf = input(false);
+  @ViewChild('profileCard') dialogRef!: ElementRef<HTMLDialogElement>;
+
+  /** Opens the user card dialog */
+  openUserCard() {
+    this.dialogRef.nativeElement.showModal();
+  }
+
+  /** Closes the user card dialog */
+  closeUserCard() {
+    this.dialogRef.nativeElement.close();
+  }
+
+  /** Closes the dialog only when the backdrop itself (not the card) was clicked. */
+  onBackdropClick(event: MouseEvent): void {
+    if (event.target === this.dialogRef.nativeElement) {
+      this.closeUserCard();
+    }
+  }
 }
