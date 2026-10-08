@@ -13,6 +13,44 @@
       (threadOpened)="openThread($event)"
     />
 
+    @if (dmId() && messagesLoaded() && messages().length === 0 && activeDmIntroContact(); as contact) {
+      <section class="chat__empty-dm-intro">
+        <div class="chat__empty-dm-identity">
+          <img
+            class="chat__empty-dm-avatar"
+            [src]="contact.user.avatar || 'app-icons/avatar-placeholder.svg'"
+            alt=""
+          />
+          <span class="chat__empty-dm-name">
+            {{ contact.user.name }}
+            @if (contact.isSelf) {
+              <span>(You)</span>
+            }
+          </span>
+        </div>
+        <p class="chat__empty-dm-description">
+          @if (contact.isSelf) {
+            <strong>This space is just for you.</strong>
+            Take notes, list to-dos, or keep links and files handy. You’re also welcome to use this
+            space to talk things over with yourself.
+          } @else {
+            This conversation is taking place only between
+            <span class="chat__empty-dm-mention">@{{ contact.user.name }}</span> and you.
+          }
+        </p>
+      </section>
+    }
+
+    @if (channelId() && messagesLoaded() && messages().length === 0 && activeChannel()?.createdBy === uid() && activeChannel(); as channel) {
+      <section class="chat__empty-channel-intro">
+        <div class="chat__empty-channel-identity"># {{ channel.name }}</div>
+        <p class="chat__empty-channel-description">
+          You created this channel. This is the beginning of channel
+          <span class="chat__empty-channel-mention">#{{ channel.name }}</span>.
+        </p>
+      </section>
+    }
+
     <app-message-input
       (send)="onSend($event)"
       [disabled]="!channelId() && !dmId()"

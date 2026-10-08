@@ -72,6 +72,9 @@ export class Chat {
   /** Messages displayed for the active channel or direct-message conversation. */
   messages = signal<Message[]>([]);
 
+  /** Whether the active conversation's initial messages have been received. */
+  messagesLoaded = signal(false);
+
   /** Unsubscribes from the active message listener when the conversation changes. */
   private currentUnsubscribe: (() => void) | undefined;
 
@@ -92,28 +95,49 @@ export class Chat {
     return this.userService.users().find((user) => user.uid === partnerID);
   });
 
+  /** The contact profile and self-DM state used by the empty conversation intro. */
+  activeDmIntroContact = computed(() => {
+    const dm = this.dmService.dms().find((dm) => dm.id === this.dmId());
+    const currentUserId = this.authService.currentUserId();
+    if (!dm || !currentUserId) return undefined;
+
+    const partnerId = dm.memberIds.find((memberId) => memberId !== currentUserId);
+    if (partnerId) {
+      const user = this.userService.users().find((candidate) => candidate.uid === partnerId);
+      return user ? { user, isSelf: false } : undefined;
+    }
+
+    if (dm.memberIds.length === 1 && dm.memberIds[0] === currentUserId) {
+      const user = this.userService.users().find((candidate) => candidate.uid === currentUserId);
+      return user ? { user, isSelf: true } : undefined;
+    }
+
+    return undefined;
+  });
+
   /** Creates a reactive listener for the currently selected conversation. */
   constructor() {
-
     effect(() => {
       this.currentUnsubscribe?.();
 
       const channelId = this.channelId();
       const dmId = this.dmId();
       console.log('[Chat-Effect]', { channelId, dmId });
+      this.messages.set([]);
+      this.messagesLoaded.set(false);
 
       if (dmId) {
-        const { unsubscribe } = this.dmService.getMessages(dmId, (messages) =>
-          this.messages.set(messages),
-        );
+        const { unsubscribe } = this.dmService.getMessages(dmId, (messages) => {
+          this.messages.set(messages);
+          this.messagesLoaded.set(true);
+        });
         this.currentUnsubscribe = unsubscribe;
       } else if (channelId) {
-        const { unsubscribe } = this.channelService.getMessages(channelId, (messages) =>
-          this.messages.set(messages),
-        );
+        const { unsubscribe } = this.channelService.getMessages(channelId, (messages) => {
+          this.messages.set(messages);
+          this.messagesLoaded.set(true);
+        });
         this.currentUnsubscribe = unsubscribe;
-      } else {
-        this.messages.set([]);
       }
     });
   }
