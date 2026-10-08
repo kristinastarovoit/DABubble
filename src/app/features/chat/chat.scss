@@ -126,3 +126,12 @@
     }
   }
 }
+
+@media (max-width: 500px) {
+  .chat {
+    &__empty-dm-description,
+    &__empty-channel-description {
+      font-size: 1rem;
+    }
+  }
+}
