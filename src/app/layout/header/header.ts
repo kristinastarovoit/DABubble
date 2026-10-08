@@ -32,6 +32,7 @@ export class Header {
   /** Whether the user menu is visible. */
   isUserMenuOpen = false;
 
+  /** Whether the user-profile-menu is visible. */
   isUserProfileOpen = false;
 
   /** Toggles the user menu. */
@@ -44,10 +45,12 @@ export class Header {
     this.isUserMenuOpen = false;
   }
 
+  /** Opens the user-profile menu. */
   openUserProfile() {
     this.isUserProfileOpen = true;
   }
 
+  /** Closes the user-profile menu. */
   closeUserProfile() {
     this.isUserProfileOpen = false;
   }
@@ -55,15 +58,6 @@ export class Header {
   /** Handles changes to the global search field. */
   onSearchInput(): void { }
 
-  /** Opens the User Profile Dialog. */
-  // openProfileDialog(): void {
-  //   this.dialogRef.nativeElement.show();
-  // }
-
-  // /** Closes the User Profile Dialog. */
-  // closeProfileDialog() {
-  //   this.dialogRef.nativeElement.close();
-  // }
 
   /** Signs the current user out. */
   async logout(): Promise<void> {
