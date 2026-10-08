@@ -13,6 +13,23 @@
       (threadOpened)="openThread($event)"
     />
 
+    @if (dmId() && messagesLoaded() && messages().length === 0 && activeDmPartner(); as partner) {
+      <section class="chat__empty-dm-intro">
+        <div class="chat__empty-dm-identity">
+          <img
+            class="chat__empty-dm-avatar"
+            [src]="partner.avatar || 'app-icons/avatar-placeholder.svg'"
+            alt=""
+          />
+          <span class="chat__empty-dm-name">{{ partner.name }}</span>
+        </div>
+        <p class="chat__empty-dm-description">
+          This conversation is taking place only between
+          <span class="chat__empty-dm-mention">@{{ partner.name }}</span> and you.
+        </p>
+      </section>
+    }
+
     <app-message-input
       (send)="onSend($event)"
       [disabled]="!channelId() && !dmId()"
