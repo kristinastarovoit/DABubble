@@ -41,6 +41,16 @@
       </section>
     }
 
+    @if (channelId() && messagesLoaded() && messages().length === 0 && activeChannel()?.createdBy === uid() && activeChannel(); as channel) {
+      <section class="chat__empty-channel-intro">
+        <div class="chat__empty-channel-identity"># {{ channel.name }}</div>
+        <p class="chat__empty-channel-description">
+          You created this channel. This is the beginning of channel
+          <span class="chat__empty-channel-mention">#{{ channel.name }}</span>.
+        </p>
+      </section>
+    }
+
     <app-message-input
       (send)="onSend($event)"
       [disabled]="!channelId() && !dmId()"
