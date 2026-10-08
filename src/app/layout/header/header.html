@@ -23,7 +23,7 @@
   }
 
   @if (isUserProfileOpen()) {
-  <div class="header__backdrop" (click)="closeUserProfile()"></div>
+  <div class="header__backdrop" (click)="closeUserProfile(); cancelUserProfileEdit()"></div>
   }
 
   <div class="header__user" [class.header__user--menu-open]="isUserMenuOpen()" (click)="toggleUserMenu()">
