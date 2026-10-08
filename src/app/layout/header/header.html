@@ -22,7 +22,7 @@
   <div class="header__backdrop" (click)="closeUserMenu()"></div>
   }
 
-  @if (isUserProfileOpen) {
+  @if (isUserProfileOpen()) {
   <div class="header__backdrop" (click)="closeUserProfile()"></div>
   }
 
@@ -40,7 +40,7 @@
     </div>
     }
 
-    @if(isUserProfileOpen){
+    @if(isUserProfileOpen()){
     @if (isEditingUser()) {
     <div class="header__profile">
       <div class="header__profile-header">
@@ -66,7 +66,7 @@
           <p class="header__profile-mail-heading">Full name</p>
         </div>
         <div class="input-wrapper">
-          <input #inputName class="input" type="text" [placeholder]="currentUser()?.name">
+          <input #inputName class="input" type="text" [value]="currentUser()?.name">
         </div>
       </div>
       <div class="header__profile-button-wrapper">

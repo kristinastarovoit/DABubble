@@ -33,8 +33,9 @@ export class Header {
   isUserMenuOpen = false;
 
   /** Whether the user-profile-menu is visible. */
-  isUserProfileOpen = false;
+  isUserProfileOpen = signal(false);
 
+    /** Whether the profile card is in edit mode. */
   isEditingUser = signal(false);
 
   /** Toggles the user menu. */
@@ -49,12 +50,12 @@ export class Header {
 
   /** Opens the user-profile menu. */
   openUserProfile() {
-    this.isUserProfileOpen = true;
+    this.isUserProfileOpen.set(true);
   }
 
   /** Closes the user-profile menu. */
   closeUserProfile() {
-    this.isUserProfileOpen = false;
+    this.isUserProfileOpen.set(false);
   }
 
   /** Opens the user-profile editing-menu. */
