@@ -1,0 +1,182 @@
+@use 'variables' as *;
+
+.header {
+    &__profile {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        background-color: $white;
+        border-top-left-radius: 30px;
+        border-bottom-left-radius: 30px;
+        border-bottom-right-radius: 30px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+        padding: 40px;
+        z-index: 12;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 38px;
+        width: 500px;
+        min-width: fit-content;
+        max-width: 90vw;
+        cursor: default;
+        color: $black;
+        border: none;
+
+        &-card {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 38px;
+            width: 500px;
+            padding: 40px;
+            background-color: $white;
+            border-radius: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        &--dialog {
+            inset: 0;
+            margin: auto;
+            max-height: 90vh;
+            max-width: 90vw;
+            overflow-y: auto;
+            border-radius: 30px;
+            display: none;
+            padding: 0;
+            min-width: 0;
+            background-color: transparent;
+            box-shadow: none;
+
+            &[open] {
+                display: flex;
+                justify-content: center;
+            }
+
+            &::backdrop {
+                background-color: rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        &-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        &-heading {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        &-avatar {
+            align-self: center;
+            border-radius: 50%;
+            width: 200px;
+        }
+
+        &-button {
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            font-size: 1.125rem;
+            transition: all ease-in-out 255ms;
+
+            &--edit {
+                color: $midtone-purple-three;
+
+                &:hover {
+                    font-weight: 700;
+                }
+            }
+
+            &--close {
+                cursor: pointer;
+                padding: 8px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                &:hover {
+                    background-color: $pastel-purple-bg;
+                }
+            }
+
+            &--message {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 10px;
+                align-self: center;
+            }
+        }
+
+        &-info-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        &-name-wrapper {
+            font-size: 2rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        &-status-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        &-status-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: $online-green;
+        }
+
+        &-mail-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+
+        &-mail-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        &-mail-heading {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        &-mail {
+            padding-left: 50px;
+            color: $link-blue;
+            text-decoration: none;
+
+            &:visited {
+                color: initial;
+            }
+        }
+
+        &-button-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            width: 100%;
+        }
+    }
+}
