@@ -135,6 +135,10 @@
       .header__user-chevron--hover {
         display: block;
       }
+
+      .header__profile {
+        color: initial;
+      }
     }
 
     &-name {
@@ -196,7 +200,7 @@
     }
   }
 
-  &__profile-dialog {
+  &__profile {
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
@@ -207,9 +211,98 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
     padding: 40px;
     z-index: 12;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 38px;
+    width: 500px;
+    min-width: fit-content;
+    cursor: default;
+    color: $black;
+
+    &-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    &-heading {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    &-avatar {
+      align-self: center;
+      border-radius: 50%;
+      width: 200px;
+    }
+
+    &-button {
+      cursor: pointer;
+      border: none;
+      background-color: transparent;
+      font-size: 1.125rem;
+      color: $midtone-purple-three;
+    }
+
+    &-info-wrapper {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    &-name-wrapper {
+      font-size: 2rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    &-status-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    &-status-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: $online-green;
+    }
+
+    &-mail-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    &-mail-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    &-mail-heading {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    &-mail {
+      padding-left: 50px;
+      color: $link-blue;
+    }
   }
 
 }
+
+
+
 
 .wrapper {
   display: flex;
