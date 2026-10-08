@@ -35,6 +35,8 @@ export class Header {
   /** Whether the user-profile-menu is visible. */
   isUserProfileOpen = false;
 
+  isEditingUser = false;
+
   /** Toggles the user menu. */
   toggleUserMenu(): void {
     this.isUserMenuOpen = !this.isUserMenuOpen;
@@ -53,6 +55,14 @@ export class Header {
   /** Closes the user-profile menu. */
   closeUserProfile() {
     this.isUserProfileOpen = false;
+  }
+
+  editUserProfile() {
+    this.isEditingUser = true;
+  }
+
+  cancelUserProfileEdit() {
+    this.isEditingUser = false;
   }
 
   /** Handles changes to the global search field. */
