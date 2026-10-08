@@ -5,7 +5,7 @@
   flex-direction: column;
   max-width: 350px;
 
-  @media (max-width: 650px) {
+  @media (max-width: 800px) {
     max-width: none;
   }
   flex-shrink: 0;
@@ -283,6 +283,46 @@
   }
 }
 
+@media (min-width: 551px) and (max-width: 800px) {
+  .sidebar {
+    &__section-title,
+    &__item {
+      font-size: 1.05rem;
+    }
+
+    &__chevron {
+      width: 11px;
+      height: 11px;
+    }
+
+    &__section-icon,
+    &__item-icon {
+      width: 22px;
+    }
+
+    &__section-icon,
+    &__add-channel-icon {
+      height: 22px;
+    }
+
+    &__item {
+      gap: 14px;
+      padding-top: 9px;
+      padding-bottom: 9px;
+    }
+
+    &__avatar {
+      width: 36px;
+      height: 36px;
+    }
+
+    &__status {
+      width: 11px;
+      height: 11px;
+    }
+  }
+}
+
 .sidebar-toggle {
   position: fixed;
   top: 50%;
@@ -305,7 +345,7 @@
   transition: left 0.2s ease;
   box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.06);
 
-  @media (max-width: 650px) {
+  @media (max-width: 800px) {
     display: none;
   }
 
