@@ -46,9 +46,9 @@ export class Sidebar {
   /** Emitted when a channel, direct message or the new-message composer is opened. */
   @Output() conversationOpened = new EventEmitter<void>();
 
-  /** Whether the viewport uses the full-width layout, where the sidebar is always shown. */
+  /** Whether the viewport is in the mobile layout, where the sidebar is always shown. */
   isMobile = signal<boolean>(false);
-  private mobileQuery = window.matchMedia('(max-width: 800px)');
+  private mobileQuery = window.matchMedia('(max-width: 650px)');
   private onMobileChange = (e: MediaQueryListEvent) => this.isMobile.set(e.matches);
 
   /** Whether the channels section is expanded. */
