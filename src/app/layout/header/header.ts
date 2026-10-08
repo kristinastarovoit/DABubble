@@ -30,22 +30,22 @@ export class Header {
   searchQuery = '';
 
   /** Whether the user menu is visible. */
-  isUserMenuOpen = false;
+  isUserMenuOpen = signal(false);
 
   /** Whether the user-profile-menu is visible. */
   isUserProfileOpen = signal(false);
 
-    /** Whether the profile card is in edit mode. */
+  /** Whether the profile card is in edit mode. */
   isEditingUser = signal(false);
 
   /** Toggles the user menu. */
   toggleUserMenu(): void {
-    this.isUserMenuOpen = !this.isUserMenuOpen;
+    this.isUserMenuOpen.update((isOpen) => !isOpen);
   }
 
   /** Closes the user menu. */
   closeUserMenu(): void {
-    this.isUserMenuOpen = false;
+    this.isUserMenuOpen.set(false);
   }
 
   /** Opens the user-profile menu. */

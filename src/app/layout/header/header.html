@@ -18,7 +18,7 @@
     </div>
   </div>
 
-  @if (isUserMenuOpen) {
+  @if (isUserMenuOpen()) {
   <div class="header__backdrop" (click)="closeUserMenu()"></div>
   }
 
@@ -26,14 +26,14 @@
   <div class="header__backdrop" (click)="closeUserProfile()"></div>
   }
 
-  <div class="header__user" [class.header__user--menu-open]="isUserMenuOpen" (click)="toggleUserMenu()">
+  <div class="header__user" [class.header__user--menu-open]="isUserMenuOpen()" (click)="toggleUserMenu()">
     <span class="header__user-name">{{ currentUser()?.name }}</span>
 
     <img [src]="currentUser()?.avatar || 'app-icons/avatar-placeholder.svg'" alt="" class="header__user-avatar" />
     <img src="app-icons/arrow_down.svg" alt="" class="header__user-chevron header__user-chevron--default" />
     <img src="app-icons/arrow_down_purple.svg" alt="" class="header__user-chevron header__user-chevron--hover" />
 
-    @if (isUserMenuOpen) {
+    @if (isUserMenuOpen()) {
     <div class="header__user-menu">
       <button (click)="openUserProfile()">Profile</button>
       <button (click)="logout()">Logout</button>
@@ -42,7 +42,7 @@
 
     @if(isUserProfileOpen()){
     @if (isEditingUser()) {
-    <div class="header__profile">
+    <div class="header__profile" (click)="$event.stopPropagation()">
       <div class="header__profile-header">
         <p class="header__profile-heading">Edit your Profile</p>
         <button (click)="cancelUserProfileEdit()" class="header__profile-button"><img
@@ -66,7 +66,7 @@
           <p class="header__profile-mail-heading">Full name</p>
         </div>
         <div class="input-wrapper">
-          <input #inputName class="input" type="text" [value]="currentUser()?.name">
+          <input #inputName class="input" type="text" [value]="currentUser()?.name" (keydown.enter)="saveNewUserName(inputName.value)">
         </div>
       </div>
       <div class="header__profile-button-wrapper">
@@ -76,7 +76,7 @@
     </div>
     }
     @else {
-    <div class="header__profile">
+    <div class="header__profile" (click)="$event.stopPropagation()">
       <div class="header__profile-header">
         <p class="header__profile-heading">Profile</p>
         <button (click)="closeUserProfile()" class="header__profile-button"><img src="app-icons/close.svg"></button>
