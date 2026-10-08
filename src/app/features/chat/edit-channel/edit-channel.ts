@@ -1,6 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, inject, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChannelService } from '../../../shared/services/channel-service';
+import { UserService } from '../../../shared/services/users';
 
 @Component({
   imports: [FormsModule],
@@ -9,6 +10,8 @@ import { ChannelService } from '../../../shared/services/channel-service';
   templateUrl: './edit-channel.html',
 })
 export class EditChannel {
+  private userService = inject(UserService);
+
   /** Names of channels already in use, used for duplicate validation. */
   @Input() existingChannelNames: string[] = [];
 
@@ -28,13 +31,13 @@ export class EditChannel {
 
   /** Whether the name field is in edit mode. */
   isEditingName = false;
-  
+
   /** Whether the description field is in edit mode. */
   isEditingDescription = false;
 
   /** Draft value while editing the name. */
   editedName = '';
-  
+
   /** Validation error message for the name field. */
   nameErrorMessage = '';
 
@@ -44,12 +47,12 @@ export class EditChannel {
   /** Provides the available channels and channel selection state. */
   channelService = inject(ChannelService);
 
-/** The currently active channel. */
+  /** The currently active channel. */
   activeChannel = computed(() =>
     this.channelService.channels().find(channel => channel.id === this.channelId())
   );
 
-/** The ID of the currently active channel. */
+  /** The ID of the currently active channel. */
   channelId = computed(() => this.channelService.activeChannelId());
 
   /** Opens the dialog as a modal. */
@@ -123,7 +126,7 @@ export class EditChannel {
   /** Leaves the currently active channel. */
   leaveChannel(): void {
     const channelId = this.channelId();
-    if (!channelId) return; 
+    if (!channelId) return;
     this.channelService.leaveChannel(channelId);
     this.close();
   }
@@ -133,5 +136,10 @@ export class EditChannel {
     if (event.target === this.dialogRef.nativeElement) {
       this.close();
     }
+  }
+
+  /** Returns the display name for the given creator ID. */
+  getCreatorName(creatorId: string): string {
+    return this.userService.users().find(user => user.uid === creatorId)?.name ?? creatorId;
   }
 }

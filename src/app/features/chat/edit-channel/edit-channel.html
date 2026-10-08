@@ -13,11 +13,8 @@
         <div class="channel-settings__card">
             <div class="channel-settings__card-header">
                 <span class="channel-settings__card-label">Channel-Name</span>
-                <button
-                    class="channel-settings__edit-btn"
-                    [disabled]="isEditingName && !editedName.trim()"
-                    (click)="isEditingName ? saveName() : startEditingName()"
-                >
+                <button class="channel-settings__edit-btn" [disabled]="isEditingName && !editedName.trim()"
+                    (click)="isEditingName ? saveName() : startEditingName()">
                     {{ isEditingName ? 'Save' : 'Edit' }}
                 </button>
             </div>
@@ -32,14 +29,8 @@
             @if (isEditingName) {
             <div class="channel-settings__input-wrapper">
                 <span class="channel-settings__prefix">#</span>
-                <input
-                    type="text"
-                    class="channel-settings__input"
-                    [(ngModel)]="editedName"
-                    name="editedName"
-                    maxlength="50"
-                    (keydown.enter)="saveName()"
-                />
+                <input type="text" class="channel-settings__input" [(ngModel)]="editedName" name="editedName"
+                    maxlength="50" (keydown.enter)="saveName()" />
             </div>
             }
             @if (nameErrorMessage) {
@@ -50,10 +41,8 @@
         <div class="channel-settings__card">
             <div class="channel-settings__card-header">
                 <span class="channel-settings__card-label">Description</span>
-                <button
-                    class="channel-settings__edit-btn"
-                    (click)="isEditingDescription ? saveDescription() : startEditingDescription()"
-                >
+                <button class="channel-settings__edit-btn"
+                    (click)="isEditingDescription ? saveDescription() : startEditingDescription()">
                     {{ isEditingDescription ? 'Save' : 'Edit' }}
                 </button>
             </div>
@@ -66,23 +55,16 @@
 
             @if (isEditingDescription) {
             <div class="channel-settings__input-wrapper">
-                <input
-                    type="text"
-                    class="channel-settings__input"
-                    [(ngModel)]="editedDescription"
-                    name="editedDescription"
-                    maxlength="200"
-                    (keydown.enter)="saveDescription()"
-                />
+                <input type="text" class="channel-settings__input" [(ngModel)]="editedDescription"
+                    name="editedDescription" maxlength="200" (keydown.enter)="saveDescription()" />
             </div>
             }
-
             <div class="channel-settings__divider"></div>
-
             <span class="channel-settings__card-label">Created by</span>
-            <span class="channel-settings__creator">{{ activeChannel()?.createdBy }}</span>
+            @if (activeChannel(); as channel) {
+            <span class="channel-settings__creator">
+                {{getCreatorName(channel.createdBy) ?? ''}}</span>}
         </div>
-
         <div class="channel-settings__actions">
             <button class="channel-settings__leave-btn" (click)="leaveChannel()">
                 Leave Channel

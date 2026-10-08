@@ -12,10 +12,12 @@ export class DmHeader {
   currentDmPartner = input<UserModel | undefined>(undefined);
   @ViewChild('profileCard') dialogRef!: ElementRef<HTMLDialogElement>;
 
+  /** Opens the user card dialog */
   openUserCard() {
     this.dialogRef.nativeElement.showModal();
   }
 
+  /** Closes the user card dialog */
   closeUserCard() {
     this.dialogRef.nativeElement.close();
   }
