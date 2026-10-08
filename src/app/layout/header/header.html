@@ -45,7 +45,7 @@
     <div class="header__profile" (click)="$event.stopPropagation()">
       <div class="header__profile-header">
         <p class="header__profile-heading">Edit your Profile</p>
-        <button (click)="cancelUserProfileEdit()" class="header__profile-button"><img
+        <button (click)="cancelUserProfileEdit()" class="header__profile-button header__profile-button--close"><img
             src="app-icons/close.svg"></button>
       </div>
       <img [src]="currentUser()?.avatar || 'app-icons/avatar-placeholder.svg'" alt="" class="header__profile-avatar" />
@@ -79,13 +79,13 @@
     <div class="header__profile" (click)="$event.stopPropagation()">
       <div class="header__profile-header">
         <p class="header__profile-heading">Profile</p>
-        <button (click)="closeUserProfile()" class="header__profile-button"><img src="app-icons/close.svg"></button>
+        <button (click)="closeUserProfile()" class="header__profile-button header__profile-button--close"><img src="app-icons/close.svg"></button>
       </div>
       <img [src]="currentUser()?.avatar || 'app-icons/avatar-placeholder.svg'" alt="" class="header__profile-avatar" />
       <div class="header__profile-info-wrapper">
         <div class="header__profile-name-wrapper">
           <p>{{currentUser()?.name}}</p>
-          <button class="header__profile-button" (click)="editUserProfile()">Edit</button>
+          <button class="header__profile-button header__profile-button--edit" (click)="editUserProfile()">Edit</button>
         </div>
         <div class="header__profile-status-wrapper">
           <div class="header__profile-status-dot"></div>

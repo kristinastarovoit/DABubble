@@ -241,6 +241,24 @@
       background-color: transparent;
       font-size: 1.125rem;
       color: $midtone-purple-three;
+      transition: all ease-in-out 255ms;
+
+      &--edit:hover {
+        font-weight: 700;
+      }
+
+      &--close {
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+          background-color: $pastel-purple-bg;
+        }
+      }
     }
 
     &-info-wrapper {
