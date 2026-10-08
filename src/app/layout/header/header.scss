@@ -240,11 +240,15 @@
       border: none;
       background-color: transparent;
       font-size: 1.125rem;
-      color: $midtone-purple-three;
       transition: all ease-in-out 255ms;
 
-      &--edit:hover {
-        font-weight: 700;
+
+      &--edit {
+        color: $midtone-purple-three;
+
+        &:hover {
+          font-weight: 700;
+        }
       }
 
       &--close {
