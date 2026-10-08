@@ -12,49 +12,43 @@
     </div>
 
     <div class="header__search">
-      <input
-        type="text"
-        class="header__search-input"
-        placeholder="Search Devspace"
-        [(ngModel)]="searchQuery"
-        (input)="onSearchInput()"
-      />
+      <input type="text" class="header__search-input" placeholder="Search Devspace" [(ngModel)]="searchQuery"
+        (input)="onSearchInput()" />
       <img src="app-icons/search.svg" alt="Search Icon" class="header__search-icon" />
     </div>
   </div>
 
   @if (isUserMenuOpen) {
-    <div class="header__backdrop" (click)="closeUserMenu()"></div>
+  <div class="header__backdrop" (click)="closeUserMenu()"></div>
   }
 
-  <div
-    class="header__user"
-    [class.header__user--menu-open]="isUserMenuOpen"
-    (click)="toggleUserMenu()"
-  >
+  @if (isUserProfileOpen) {
+  <div class="header__backdrop" (click)="closeUserProfile()"></div>
+  }
+
+  <div class="header__user" [class.header__user--menu-open]="isUserMenuOpen" (click)="toggleUserMenu()">
     <span class="header__user-name">{{ currentUser()?.name }}</span>
 
-    <img
-      [src]="currentUser()?.avatar || 'app-icons/avatar-placeholder.svg'"
-      alt=""
-      class="header__user-avatar"
-    />
-    <img
-      src="app-icons/arrow_down.svg"
-      alt=""
-      class="header__user-chevron header__user-chevron--default"
-    />
-    <img
-      src="app-icons/arrow_down_purple.svg"
-      alt=""
-      class="header__user-chevron header__user-chevron--hover"
-    />
+    <img [src]="currentUser()?.avatar || 'app-icons/avatar-placeholder.svg'" alt="" class="header__user-avatar" />
+    <img src="app-icons/arrow_down.svg" alt="" class="header__user-chevron header__user-chevron--default" />
+    <img src="app-icons/arrow_down_purple.svg" alt="" class="header__user-chevron header__user-chevron--hover" />
 
     @if (isUserMenuOpen) {
-      <div class="header__user-menu">
-        <button (click)="goToProfile()">Profile</button>
-        <button (click)="logout()">Logout</button>
-      </div>
+    <div class="header__user-menu">
+      <button (click)="openUserProfile()">Profile</button>
+      <button (click)="logout()">Logout</button>
+    </div>
     }
+    @if(isUserProfileOpen){
+    <div class="header__profile-dialog">
+      <p>Profile</p>
+      <button (click)="closeUserProfile()">x</button>
+      <img [src]="currentUser()?.avatar || 'app-icons/avatar-placeholder.svg'" alt="" class="header__user-avatar" />
+      <p>{{currentUser()?.name}}</p>
+      <button>Edit</button>
+      <p>Status placeholder</p>
+      <p>E-Mail Address</p>
+      <p>{{currentUser()?.email}}</p>
+    </div>}
   </div>
 </header>

@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, output, ViewChild, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth';
 import { UserService } from '../../shared/services/users';
@@ -32,6 +32,8 @@ export class Header {
   /** Whether the user menu is visible. */
   isUserMenuOpen = false;
 
+  isUserProfileOpen = false;
+
   /** Toggles the user menu. */
   toggleUserMenu(): void {
     this.isUserMenuOpen = !this.isUserMenuOpen;
@@ -42,11 +44,26 @@ export class Header {
     this.isUserMenuOpen = false;
   }
 
-  /** Handles changes to the global search field. */
-  onSearchInput(): void {}
+  openUserProfile() {
+    this.isUserProfileOpen = true;
+  }
 
-  /** Navigates to the user profile. */
-  goToProfile(): void {}
+  closeUserProfile() {
+    this.isUserProfileOpen = false;
+  }
+
+  /** Handles changes to the global search field. */
+  onSearchInput(): void { }
+
+  /** Opens the User Profile Dialog. */
+  // openProfileDialog(): void {
+  //   this.dialogRef.nativeElement.show();
+  // }
+
+  // /** Closes the User Profile Dialog. */
+  // closeProfileDialog() {
+  //   this.dialogRef.nativeElement.close();
+  // }
 
   /** Signs the current user out. */
   async logout(): Promise<void> {
