@@ -8,6 +8,7 @@ import { AuthService } from '../../shared/services/auth';
 import { CreateChannel } from './create-channel/create-channel';
 import { Dm } from '../../shared/interfaces/dm';
 import { NewMessageService } from '../../shared/services/new-message-service';
+import { Presence } from '../../shared/services/presence';
 
 @Component({
   imports: [CommonModule, CreateChannel],
@@ -17,6 +18,7 @@ import { NewMessageService } from '../../shared/services/new-message-service';
 })
 /** Displays channels and direct-message contacts in the application sidebar. */
 export class Sidebar {
+  presenceService = inject(Presence);
   /** Provides the available channels and channel selection state. */
   channelService = inject(ChannelService);
 

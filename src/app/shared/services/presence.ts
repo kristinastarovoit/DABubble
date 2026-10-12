@@ -29,9 +29,11 @@ export class Presence {
     });
   }
 
-  isOnline(uid: string | undefined): boolean {
+  isOnline(uid: string | undefined, fallbackStatus?: string): boolean {
     if (!uid) return false;
-    return this.presenceByUid()[uid] === 'online';
+    const presence = this.presenceByUid()[uid];
+    if (presence !== undefined) return presence === 'online';
+    return fallbackStatus === 'online';
   }
 
   private trackOwnPresence(uid: string): void {

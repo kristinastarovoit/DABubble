@@ -274,12 +274,12 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    // background-color: $dark-grey;
-    // border: 2px solid $pastel-purple-bg;
+    background-color: $dark-grey;
+    border: 2px solid $pastel-purple-bg;
 
-    // &--online {
-    //   background-color: $online-green;
-    // }
+    &--online {
+      background-color: $online-green;
+    }
   }
 }
 

@@ -6,6 +6,7 @@ export interface UserModel {
   email: string;
   avatar: string;
   status: 'online' | 'away';
+  isDemoUser?: boolean;
   channels: string[];
   createdAt: FieldValue;
 }
