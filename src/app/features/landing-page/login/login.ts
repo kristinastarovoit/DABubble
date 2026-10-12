@@ -59,13 +59,14 @@ export class Login {
 
     try {
       const credential = await this.authService.loginAsGuest();
+      await credential.user.getIdToken(); // sicherstellen, dass der Token bereit ist
       await this.userService.createUserProfile(
         credential.user.uid,
         'Guest',
         `guest-${credential.user.uid}@dabubble.local`,
         'app-icons/avatar_default.svg',
       );
-      this.router.navigateByUrl('/dashboard'); // TODO: your actual route
+      this.router.navigateByUrl('/dashboard');
     } catch {
       this.errorMessage.set('Guest login failed. Please try again.');
     } finally {

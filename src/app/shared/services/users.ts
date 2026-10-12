@@ -1,21 +1,44 @@
-import { Service, inject, signal } from '@angular/core';
-import { collection, doc, getDoc, updateDoc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
+import { Service, effect, inject, signal } from '@angular/core';
+import {
+  collection,
+  doc,
+  getDoc,
+  updateDoc,
+  onSnapshot,
+  serverTimestamp,
+  setDoc,
+} from 'firebase/firestore';
 
 import { FIREBASE_FIRESTORE } from '../../app.config';
 import { UserModel } from '../model/user.model';
+import { AuthService } from './auth';
 
 @Service()
 /** Provides Firestore operations and reactive access to workspace users. */
 export class UserService {
   private firestore = inject(FIREBASE_FIRESTORE);
+  private authService = inject(AuthService);
+  private unsubscribeUsers: (() => void) | undefined;
 
   /** All users in the workspace, kept in sync with Firestore. */
   users = signal<UserModel[]>([]);
 
   constructor() {
-    const usersRef = collection(this.firestore, 'users');
-    onSnapshot(usersRef, (snapshot) => {
-      this.users.set(snapshot.docs.map((doc) => doc.data() as UserModel));
+    effect(() => {
+      const isLoggedIn = this.authService.currentUserId();
+
+      this.unsubscribeUsers?.();
+      this.unsubscribeUsers = undefined;
+
+      if (!isLoggedIn) {
+        this.users.set([]);
+        return;
+      }
+
+      const usersRef = collection(this.firestore, 'users');
+      this.unsubscribeUsers = onSnapshot(usersRef, (snapshot) => {
+        this.users.set(snapshot.docs.map((doc) => doc.data() as UserModel));
+      });
     });
   }
 
@@ -27,7 +50,7 @@ export class UserService {
    * @param avatar The URL or path of the user's chosen avatar.
    * @returns A promise that resolves once the profile has been written.
    */
-  createUserProfile(uid: string, name: string, email: string, avatar: string) {
+  async createUserProfile(uid: string, name: string, email: string, avatar: string) {
     const user: UserModel = {
       uid,
       name,
@@ -38,7 +61,9 @@ export class UserService {
       createdAt: serverTimestamp(),
     };
 
-    return setDoc(doc(this.firestore, 'users', uid), user);
+    await setDoc(doc(this.firestore, 'users', uid), user);
+
+    this.users.update((users) => (users.some((u) => u.uid === uid) ? users : [...users, user]));
   }
 
   /** Retrieves a single user profile from Firestore.
