@@ -96,8 +96,11 @@ export class Header {
 
   /** Signs the current user out. */
   async logout(): Promise<void> {
-    await this.presenceService.goOffline();
+    void this.presenceService.goOffline().catch((error) => {
+      console.error('Failed to set presence offline during logout.', error);
+    });
+
     await this.authService.logout();
-    this.router.navigateByUrl('/login');
+    await this.router.navigateByUrl('/login');
   }
 }
