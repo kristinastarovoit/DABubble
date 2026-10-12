@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth';
 import { UserService } from '../../shared/services/users';
 import { Router } from '@angular/router';
+import { Presence } from '../../shared/services/presence';
 
 @Component({
   imports: [FormsModule],
@@ -14,6 +15,7 @@ export class Header {
   private authService = inject(AuthService);
   private userService = inject(UserService);
   private router = inject(Router);
+  private presenceService = inject(Presence);
 
   /** The profile of the currently signed-in user, or `undefined` while loading or logged out. */
   currentUser = computed(() =>
@@ -69,12 +71,12 @@ export class Header {
   }
 
   /**
- * Saves a new display name for the signed-in user and leaves edit mode.
- * Does nothing if nobody is signed in or the trimmed name is empty.
- * If the name is unchanged, edit mode is closed without writing to Firestore.
- *
- * @param newName The raw value from the name input; it is trimmed before use.
- */
+   * Saves a new display name for the signed-in user and leaves edit mode.
+   * Does nothing if nobody is signed in or the trimmed name is empty.
+   * If the name is unchanged, edit mode is closed without writing to Firestore.
+   *
+   * @param newName The raw value from the name input; it is trimmed before use.
+   */
   async saveNewUserName(newName: string) {
     const currentUser = this.currentUser();
     if (!currentUser) return;
@@ -90,11 +92,11 @@ export class Header {
   }
 
   /** Handles changes to the global search field. */
-  onSearchInput(): void { }
-
+  onSearchInput(): void {}
 
   /** Signs the current user out. */
   async logout(): Promise<void> {
+    await this.presenceService.goOffline();
     await this.authService.logout();
     this.router.navigateByUrl('/login');
   }

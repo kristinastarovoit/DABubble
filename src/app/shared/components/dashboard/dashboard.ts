@@ -4,6 +4,7 @@ import { Header } from '../../../layout/header/header';
 import { Chat } from '../../../features/chat/chat';
 import { Thread } from '../../../features/thread/thread';
 import { Sidebar } from '../../../layout/sidebar/sidebar';
+import { Presence } from '../../services/presence';
 
 @Component({
   imports: [Header, Chat, Thread, Sidebar],
@@ -13,11 +14,12 @@ import { Sidebar } from '../../../layout/sidebar/sidebar';
 })
 export class Dashboard {
   private threadService = inject(ThreadService);
+  private presenceService = inject(Presence);
 
   sidebarOpen = signal(true);
   threadOpen = signal(true);
 
-   isSidebarOpen = true;
+  isSidebarOpen = true;
 
   /** Mobile only: whether the chat view (instead of the sidebar) is shown. */
   mobileChatOpen = signal(false);
