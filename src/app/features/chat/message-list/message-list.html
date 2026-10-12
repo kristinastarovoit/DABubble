@@ -1,4 +1,4 @@
-<div class="message-list">
+<div #messageList class="message-list" (scroll)="onMessageListScroll($event)">
   @for (group of groupedMessages(); track group.dateLabel) {
   <div class="message-list__divider">
     <span>{{ group.dateLabel }}</span>

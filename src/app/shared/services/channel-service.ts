@@ -408,7 +408,10 @@ export class ChannelService {
     onThreadMessages?: (threadMessages: ThreadMessage[]) => void,
   ): { threadMessage: ReturnType<typeof signal<ThreadMessage[]>>; unsubscribe: () => void } {
     const threadMessage = signal<ThreadMessage[]>([]);
-    const threadRef = collection(this.db, 'channels', channelId, 'messages', messageId, 'thread');
+    const threadRef = query(
+      collection(this.db, 'channels', channelId, 'messages', messageId, 'thread'),
+      orderBy('createdAt', 'asc'),
+    );
     const unsubscribe = onSnapshot(threadRef, (snapshot) => {
       const threadMessages = snapshot.docs.map((doc) => ({
         id: doc.id,

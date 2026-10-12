@@ -1,11 +1,20 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  afterRenderEffect,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MessageInput } from '../chat/message-input/message-input';
 import { ReactionBar } from '../chat/reaction-bar/reaction-bar';
 import { ReactionPicker } from '../chat/reaction-picker/reaction-picker';
 import { Message, MessageReaction } from '../../shared/interfaces/message';
 import { ThreadMessage } from '../../shared/interfaces/thread';
-import { ThreadService } from '../../shared/services/thread-service';
+import { ThreadService, type ActiveThread } from '../../shared/services/thread-service';
 import { ChannelService } from '../../shared/services/channel-service';
 import { DmService } from '../../shared/services/dm-service';
 import { AuthService } from '../../shared/services/auth';
@@ -67,6 +76,10 @@ export class Thread {
   /** Unsubscribes from the active parent-message listener when the open thread changes. */
   private currentMessageUnsubscribe: (() => void) | undefined;
 
+  private threadContentElement = viewChild<ElementRef<HTMLDivElement>>('threadContent');
+  private shouldAutoScroll = true;
+  private previousThread: ActiveThread | null = null;
+
   constructor() {
     effect(() => {
       this.currentThreadUnsubscribe?.();
@@ -76,6 +89,8 @@ export class Thread {
 
       const thread = this.activeThread();
       const messageId = thread?.message.id;
+      this.replies.set([]);
+      this.livingParentMessage.set(null);
 
       if (thread?.channelId && messageId) {
         const { unsubscribe: unsubscribeThread } = this.channelService.getThreads(
@@ -105,9 +120,24 @@ export class Thread {
           (message) => this.livingParentMessage.set(message),
         );
         this.currentMessageUnsubscribe = unsubscribeMessage;
-      } else {
-        this.replies.set([]);
-        this.livingParentMessage.set(null);
+      }
+    });
+
+    afterRenderEffect(() => {
+      const thread = this.activeThread();
+      this.replies();
+      const element = this.threadContentElement()?.nativeElement;
+      if (!thread || !element) {
+        this.previousThread = null;
+        return;
+      }
+
+      const isNewThread = thread !== this.previousThread;
+      this.previousThread = thread;
+      if (isNewThread) this.shouldAutoScroll = true;
+
+      if (isNewThread || this.shouldAutoScroll) {
+        element.scrollTop = element.scrollHeight;
       }
     });
   }
@@ -121,6 +151,13 @@ export class Thread {
   /** Closes the thread panel. */
   close(): void {
     this.threadService.close();
+  }
+
+  /** Tracks whether the reader is close enough to the bottom to follow new replies. */
+  onThreadContentScroll(event: Event): void {
+    const element = event.currentTarget as HTMLDivElement;
+    this.shouldAutoScroll =
+      element.scrollHeight - element.scrollTop - element.clientHeight <= 80;
   }
 
   /** Starts editing the parent message in the active thread. */

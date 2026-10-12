@@ -1,13 +1,13 @@
 import {
   Component,
-  EventEmitter,
-  Input,
-  Output,
+  afterRenderEffect,
   computed,
+  ElementRef,
   inject,
   input,
   output,
-  signal
+  signal,
+  viewChild,
 } from '@angular/core';
 import { toMessageReactions } from '../../../shared/utilities/reactions.utils';
 import { ReactionPicker } from '../reaction-picker/reaction-picker';
@@ -79,6 +79,9 @@ export class MessageList {
   /** Messages displayed in the list. */
   messages = input<Message[]>([]);
 
+  /** Identifies the conversation whose messages are displayed. */
+  scrollKey = input<string | undefined>();
+
   /** The identifier of the signed-in user. */
   currentUserId = input('');
 
@@ -96,6 +99,37 @@ export class MessageList {
 
   /** The current inline edit text for the active message. */
   editText = signal('');
+
+  private messageListElement = viewChild<ElementRef<HTMLDivElement>>('messageList');
+  private shouldAutoScroll = true;
+  private previousScrollKey: string | undefined;
+  private hasRendered = false;
+
+  constructor() {
+    afterRenderEffect(() => {
+      this.messages();
+      const scrollKey = this.scrollKey();
+      const element = this.messageListElement()?.nativeElement;
+      if (!element) return;
+
+      const isNewConversation = !this.hasRendered || scrollKey !== this.previousScrollKey;
+      this.hasRendered = true;
+      this.previousScrollKey = scrollKey;
+
+      if (isNewConversation) this.shouldAutoScroll = true;
+
+      if (this.shouldAutoScroll) {
+        element.scrollTop = element.scrollHeight;
+      }
+    });
+  }
+
+  /** Tracks whether the reader is close enough to the bottom to follow new messages. */
+  onMessageListScroll(event: Event): void {
+    const element = event.currentTarget as HTMLDivElement;
+    this.shouldAutoScroll =
+      element.scrollHeight - element.scrollTop - element.clientHeight <= 80;
+  }
 
   /** Starts editing the provided message and preloads its content. */
   startEditing(message: Message) {

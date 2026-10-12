@@ -142,7 +142,10 @@ export class DmService {
     onThreadMessages?: (threadMessages: ThreadMessage[]) => void,
   ): { threadMessage: ReturnType<typeof signal<ThreadMessage[]>>; unsubscribe: () => void } {
     const threadMessage = signal<ThreadMessage[]>([]);
-    const threadRef = collection(this.db, 'dms', dmId, 'messages', messageId, 'thread');
+    const threadRef = query(
+      collection(this.db, 'dms', dmId, 'messages', messageId, 'thread'),
+      orderBy('createdAt', 'asc'),
+    );
     const unsubscribe = onSnapshot(threadRef, (snapshot) => {
       const threadMessages = snapshot.docs.map((doc) => ({
         id: doc.id,

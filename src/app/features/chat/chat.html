@@ -10,6 +10,7 @@
     }
     <app-message-list
       [messages]="messages()"
+      [scrollKey]="dmId() ? 'dm:' + dmId() : channelId() ? 'channel:' + channelId() : undefined"
       [currentUserId]="uid() ?? ''"
       (reactionToggled)="onReactionToggled($event)"
       (editSaved)="onEditSaved($event)"

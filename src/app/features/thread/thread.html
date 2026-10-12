@@ -12,7 +12,7 @@
       <img src="app-icons/close.svg" alt="Close" />
     </button>
   </div>
-  <div class="thread__content">
+  <div #threadContent class="thread__content" (scroll)="onThreadContentScroll($event)">
     @if (parentMessage(); as parentMessage) {
       <div
         class="thread__message"
