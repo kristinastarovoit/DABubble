@@ -35,7 +35,7 @@ export class Presence {
   }
 
   private trackOwnPresence(uid: string): void {
-    const myStatusRef = ref(this.database, `string/${uid}`);
+    const myStatusRef = ref(this.database, `status/${uid}`);
     const connectedRef = ref(this.database, '.info/connected');
 
     onValue(connectedRef, (snapshot) => {

@@ -152,6 +152,11 @@
       object-fit: cover;
     }
 
+    &-avatar-wrapper {
+      position: relative;
+      display: inline-flex;
+    }
+
     &-chevron {
       width: 30px;
       height: 30px;
@@ -201,6 +206,21 @@
         }
       }
     }
+  }
+}
+
+.header__status-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: $dark-grey;
+  border: 2px solid $white;
+
+  &--online {
+    background-color: $online-green;
   }
 }
 
@@ -280,12 +300,10 @@
   .header__user {
     padding-bottom: 10px;
   }
-
 }
 
 @media (max-width: 800px) {
   .header--chat {
-
     .header__logo,
     .header__search {
       display: none;

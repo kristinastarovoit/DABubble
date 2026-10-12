@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth';
 import { UserService } from '../../shared/services/users';
@@ -15,7 +15,7 @@ export class Header {
   private authService = inject(AuthService);
   private userService = inject(UserService);
   private router = inject(Router);
-  private presenceService = inject(Presence);
+  presenceService = inject(Presence);
 
   /** The profile of the currently signed-in user, or `undefined` while loading or logged out. */
   currentUser = computed(() =>
