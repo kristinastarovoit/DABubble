@@ -11,7 +11,22 @@
             (click)="selectMentionOption(option)"
           >
             @if (mentionTrigger() === '@') {
-              <img class="message-input__mention-avatar" [src]="option.avatar" [alt]="option.label" />
+              <span class="message-input__mention-avatar-wrapper">
+                <img
+                  class="message-input__mention-avatar"
+                  [src]="option.avatar"
+                  [alt]="option.label"
+                />
+                <span
+                  class="message-input__mention-status"
+                  [class.message-input__mention-status--online]="
+                    presenceService.isOnline(
+                      option.id,
+                      option.isDemoUser ? option.status : undefined
+                    )
+                  "
+                ></span>
+              </span>
             } @else {
               <span class="message-input__mention-hash">#</span>
             }

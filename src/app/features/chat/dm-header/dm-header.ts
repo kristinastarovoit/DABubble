@@ -1,6 +1,7 @@
-import { Component, input, ViewChild, ElementRef } from '@angular/core';
+import { Component, input, ViewChild, ElementRef, inject } from '@angular/core';
 import { User } from '../../../shared/interfaces/user';
 import { UserModel } from '../../../shared/model/user.model';
+import { Presence } from '../../../shared/services/presence';
 
 @Component({
   imports: [],
@@ -9,6 +10,8 @@ import { UserModel } from '../../../shared/model/user.model';
   templateUrl: './dm-header.html',
 })
 export class DmHeader {
+  presenceService = inject(Presence);
+
   currentDmPartner = input<UserModel | undefined>(undefined);
   /** Whether the displayed DM partner is the currently signed-in user. */
   isSelf = input(false);

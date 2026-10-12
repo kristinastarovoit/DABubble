@@ -17,12 +17,15 @@ import { CURATED_EMOJIS } from '../../../shared/utilities/emoji-set';
 import { UserService } from '../../../shared/services/users';
 import { ChannelService } from '../../../shared/services/channel-service';
 import { AuthService } from '../../../shared/services/auth';
+import { Presence } from '../../../shared/services/presence';
 
 /** A single entry shown in the @/# mention dropdown. */
 interface MentionOption {
   id: string;
   label: string;
   avatar?: string;
+  status?: string;
+  isDemoUser?: boolean;
 }
 
 @Component({
@@ -37,6 +40,7 @@ export class MessageInput {
   private userService = inject(UserService);
   private channelService = inject(ChannelService);
   private authService = inject(AuthService);
+  presenceService = inject(Presence);
 
   @ViewChild('textarea') private textareaRef?: ElementRef<HTMLTextAreaElement>;
 
@@ -78,7 +82,10 @@ export class MessageInput {
     if (this.showEmojiPicker() && !this.elementRef.nativeElement.contains(event.target as Node)) {
       this.showEmojiPicker.set(false);
     }
-    if (this.mentionTrigger() !== null && !this.elementRef.nativeElement.contains(event.target as Node)) {
+    if (
+      this.mentionTrigger() !== null &&
+      !this.elementRef.nativeElement.contains(event.target as Node)
+    ) {
       this.closeMentionDropdown();
     }
   }
@@ -101,7 +108,13 @@ export class MessageInput {
     return this.userService
       .users()
       .filter((user) => user.uid !== currentUserId)
-      .map((user) => ({ id: user.uid, label: user.name, avatar: user.avatar }));
+      .map((user) => ({
+        id: user.uid,
+        label: user.name,
+        avatar: user.avatar,
+        status: user.status,
+        isDemoUser: user.isDemoUser,
+      }));
   });
 
   /** All channels as mention options. */
@@ -120,7 +133,9 @@ export class MessageInput {
   });
 
   /** Whether the mention dropdown should currently be shown. */
-  showMentionDropdown = computed(() => this.mentionTrigger() !== null && this.mentionOptions().length > 0);
+  showMentionDropdown = computed(
+    () => this.mentionTrigger() !== null && this.mentionOptions().length > 0,
+  );
 
   /** Inserts the mention prefix and opens the mention dropdown. */
   insertMention(): void {

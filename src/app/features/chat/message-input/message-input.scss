@@ -79,6 +79,27 @@
     object-fit: cover;
   }
 
+  &__mention-avatar-wrapper {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  &__mention-status {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: $dark-grey;
+    border: 1px solid $white;
+
+    &--online {
+      background-color: $online-green;
+    }
+  }
+
   &__mention-hash {
     display: flex;
     align-items: center;
