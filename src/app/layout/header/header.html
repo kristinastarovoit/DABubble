@@ -18,8 +18,54 @@
         placeholder="Search Devspace"
         [(ngModel)]="searchQuery"
         (input)="onSearchInput()"
+        (focus)="onSearchFocus()"
       />
       <img src="app-icons/search.svg" alt="Search Icon" class="header__search-icon" />
+      @if (showSearchResults()) {
+        <div class="header__search-backdrop" (click)="closeSearchResult()"></div>
+        <div class="header__search-results">
+          @if (searchResults().channels.length > 0) {
+            <p class="header__search-heading">Found channels:</p>
+            <ul class="header__search-list">
+              @for (channel of searchResults().channels; track channel.id) {
+                <li class="header__search-item" (click)="openChannelResult(channel)">
+                  <span class="header__search-prefix">#</span>{{ channel.name }}
+                </li>
+              }
+            </ul>
+          }
+
+          @if (searchResults().users.length > 0) {
+            <p class="header__search-heading">Found users:</p>
+            <ul class="header__search-list">
+              @for (user of searchResults().users; track user.uid) {
+                <li class="header__search-item" (click)="openUserResult(user)">
+                  <span class="header__search-prefix">&#64;</span>{{ user.name }}
+                </li>
+              }
+            </ul>
+          }
+
+          @if (searchResults().messages.length > 0) {
+            <p class="header__search-heading">Found messages:</p>
+            <ul class="header__search-list">
+              @for (result of searchResults().messages; track result.message.id) {
+                <li class="header__search-item" (click)="openMessageResult(result)">
+                  <strong>{{ result.senderName }}:</strong> {{ result.message.text }}
+                </li>
+              }
+            </ul>
+          }
+
+          @if (
+            searchResults().channels.length === 0 &&
+            searchResults().users.length === 0 &&
+            searchResults().messages.length === 0
+          ) {
+            <p class="header__search-empty">No results found.</p>
+          }
+        </div>
+      }
     </div>
   </div>
 

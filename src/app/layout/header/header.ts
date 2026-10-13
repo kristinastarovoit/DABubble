@@ -4,6 +4,12 @@ import { AuthService } from '../../shared/services/auth';
 import { UserService } from '../../shared/services/users';
 import { Router } from '@angular/router';
 import { Presence } from '../../shared/services/presence';
+import { MessageSearchResult, SearchService } from '../../shared/services/search-service';
+import { MessageNavigationService } from '../../shared/services/message-navigation-service';
+import { Channel } from '../../shared/interfaces/channel';
+import { ChannelService } from '../../shared/services/channel-service';
+import { DmService } from '../../shared/services/dm-service';
+import { UserModel } from '../../shared/model/user.model';
 
 @Component({
   imports: [FormsModule],
@@ -15,7 +21,14 @@ export class Header {
   private authService = inject(AuthService);
   private userService = inject(UserService);
   private router = inject(Router);
+  private searchService = inject(SearchService);
+  private navigationService = inject(MessageNavigationService);
+  private channelService = inject(ChannelService);
+  private dmService = inject(DmService);
   presenceService = inject(Presence);
+  searchResults = this.searchService.results;
+  showSearchResults = computed(() => this.searchService.isQueryValid() && this.isSearchOpen());
+  isSearchOpen = signal(false);
 
   /** The profile of the currently signed-in user, or `undefined` while loading or logged out. */
   currentUser = computed(() =>
@@ -92,7 +105,14 @@ export class Header {
   }
 
   /** Handles changes to the global search field. */
-  onSearchInput(): void {}
+  onSearchInput(): void {
+    this.searchService.setQuery(this.searchQuery);
+    this.isSearchOpen.set(true);
+  }
+
+  closeSearchResult() {
+    this.isSearchOpen.set(false);
+  }
 
   /** Signs the current user out. */
   async logout(): Promise<void> {
@@ -102,5 +122,37 @@ export class Header {
 
     await this.authService.logout();
     await this.router.navigateByUrl('/login');
+  }
+
+  openChannelResult(channel: Channel): void {
+    this.channelService.selectChannel(channel.id);
+    this.resetSearch();
+  }
+
+  openMessageResult(result: MessageSearchResult): void {
+    if (!result.message.id) return;
+    if (result.source === 'channel') {
+      this.navigationService.goToChannelMessage(result.conversationId, result.message.id);
+    } else {
+      this.navigationService.goToDmMessage(result.conversationId, result.message.id);
+    }
+    this.resetSearch();
+  }
+
+  private resetSearch(): void {
+    this.searchService.clear();
+    this.searchQuery = '';
+    this.closeSearchResult();
+  }
+
+  onSearchFocus(): void {
+    if (this.searchService.isQueryValid()) {
+      this.isSearchOpen.set(true);
+    }
+  }
+
+  async openUserResult(user: UserModel): Promise<void> {
+    await this.dmService.openDmWith(user.uid);
+    this.resetSearch();
   }
 }
