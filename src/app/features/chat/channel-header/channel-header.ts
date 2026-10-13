@@ -20,9 +20,11 @@ import { AuthService } from '../../../shared/services/auth';
 import { NewMessageService } from '../../../shared/services/new-message-service';
 import { FIREBASE_AUTH } from '../../../app.config';
 import { EditChannel } from '../edit-channel/edit-channel';
+import { UsercardDialog } from "../../../shared/components/usercard-dialog/usercard-dialog";
+import { UserModel } from '../../../shared/model/user.model';
 
 @Component({
-  imports: [CommonModule, FormsModule, EditChannel],
+  imports: [CommonModule, FormsModule, EditChannel, UsercardDialog],
   selector: 'app-channel-header',
   styleUrl: './channel-header.scss',
   templateUrl: './channel-header.html',
@@ -51,6 +53,8 @@ export class ChannelHeader {
 
   /** Fixed position and size of the recipient suggestions dropdown, kept within the viewport. */
   recipientSuggestionsPosition = { top: 0, left: 0, width: 0, maxHeight: 240 };
+
+  selectedUser = signal<UserModel | undefined>(undefined);
 
   /**
    * Channels and contacts matching the current recipient query.
