@@ -180,10 +180,10 @@
     border: none;
     cursor: pointer;
     padding: 0;
+    transition: all 255ms ease-in-out;
 
-    img {
-      width: 12px;
-      height: 12px;
+    &:hover svg path {
+      fill: $midtone-purple-three;
     }
   }
 
