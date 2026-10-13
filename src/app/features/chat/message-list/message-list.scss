@@ -103,8 +103,13 @@
 
   &__author {
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1.125rem;
     color: $black;
+    cursor: pointer;
+
+    &:hover {
+      color: $dark-purple-one;
+    }
   }
 
   &__time {
@@ -131,12 +136,13 @@
     border: none;
     cursor: pointer;
     padding: 0;
-    font-size: 0.8rem;
-    font-weight: 600;
-    // color: $color-primary;
+    font-size: 1.125rem;
+    font-weight: 400;
+    font-family: Nunito;
+    color: $midtone-purple-three;
 
     &:hover {
-      text-decoration: underline;
+      font-weight: 700;
     }
   }
 }
@@ -169,6 +175,11 @@
     border: 1px solid $border-purple;
     border-radius: 20px;
     height: fit-content;
+
+    &:focus-within,
+    &:focus {
+      border-color: $midtone-purple-three;
+    }
   }
 
   &__button-wrapper {
@@ -206,7 +217,9 @@
 @keyframes message-highlight-flash {
   from {
     background-color: rgba(121, 85, 255, 0.15);
-  } // Akzentfarbe nach Bedarf anpassen
+  }
+
+  // Akzentfarbe nach Bedarf anpassen
   to {
     background-color: transparent;
   }

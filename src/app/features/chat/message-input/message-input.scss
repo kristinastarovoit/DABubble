@@ -11,6 +11,11 @@
   flex-shrink: 0;
   font-family: 'Nunito';
 
+  &:focus-within,
+  &:focus {
+    border-color: $midtone-purple-three;
+  }
+
   &__field-wrapper {
     position: relative;
   }
@@ -69,6 +74,10 @@
     &:hover,
     &--active {
       background: $pastel-purple-bg;
+
+      & .message-input__mention-hash {
+        color: $midtone-purple-three;
+      }
     }
   }
 
@@ -131,6 +140,10 @@
 
     &:hover {
       background-color: $pastel-purple-bg;
+
+      & svg path {
+        fill: $midtone-purple-three;
+      }
     }
 
     img {
