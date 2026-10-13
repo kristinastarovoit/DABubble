@@ -81,27 +81,27 @@ export class ChannelHeader {
       mode === 'user'
         ? []
         : this.channelService
-            .channels()
-            .filter((channel) => channel.name.toLowerCase().includes(query))
-            .map((channel) => ({ type: 'channel' as const, id: channel.id, name: channel.name }));
+          .channels()
+          .filter((channel) => channel.name.toLowerCase().includes(query))
+          .map((channel) => ({ type: 'channel' as const, id: channel.id, name: channel.name }));
 
     const userMatches =
       mode === 'channel'
         ? []
         : this.dmService
-            .dmPartners()
-            .filter((partner) => partner.user.uid !== currentUserId)
-            .filter(
-              (partner) =>
-                partner.user.name.toLowerCase().includes(query) ||
-                partner.user.email.toLowerCase().includes(query),
-            )
-            .map((partner) => ({
-              type: 'user' as const,
-              id: partner.user.uid,
-              name: partner.user.name,
-              avatar: partner.user.avatar,
-            }));
+          .dmPartners()
+          .filter((partner) => partner.user.uid !== currentUserId)
+          .filter(
+            (partner) =>
+              partner.user.name.toLowerCase().includes(query) ||
+              partner.user.email.toLowerCase().includes(query),
+          )
+          .map((partner) => ({
+            type: 'user' as const,
+            id: partner.user.uid,
+            name: partner.user.name,
+            avatar: partner.user.avatar,
+          }));
 
     return [...channelMatches, ...userMatches];
   }
@@ -358,5 +358,26 @@ export class ChannelHeader {
         this.currentUnsubscribe = unsubscribe;
       }
     });
+  }
+
+  /**
+ * Opens the direct-message conversation with the given user and closes the members dialog.
+ * Creates the conversation first if none exists yet.
+ * Does nothing if nobody is signed in.
+ *
+ * @param user The user selected in the member list to start or continue a DM with.
+ */
+  async openDmWithUser(user: UserModel) {
+    const userId = this.authService.currentUserId();
+    if (!userId) return;
+    const partner = this.dmService.dmPartners().find((p) => p.user.uid === user.uid);
+    if (partner?.dm) {
+      this.dmService.selectDm(partner.dm.id);
+    } else {
+      const dmId = await this.dmService.addDm([userId, user.uid]);
+      this.dmService.selectDm(dmId);
+    }
+    this.channelService.activeChannelId.set(undefined);
+    this.closeDialog();
   }
 }

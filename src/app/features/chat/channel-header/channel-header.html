@@ -138,4 +138,4 @@
   }
 </dialog>
 
-<app-usercard-dialog #userCard [user]="selectedUser()"></app-usercard-dialog>
+<app-usercard-dialog #userCard [user]="selectedUser()" (dmUser)="openDmWithUser($event)"></app-usercard-dialog>
