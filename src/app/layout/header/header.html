@@ -18,6 +18,7 @@
         placeholder="Search Devspace"
         [(ngModel)]="searchQuery"
         (input)="onSearchInput()"
+        (focus)="onSearchFocus()"
       />
       <img src="app-icons/search.svg" alt="Search Icon" class="header__search-icon" />
       @if (showSearchResults()) {

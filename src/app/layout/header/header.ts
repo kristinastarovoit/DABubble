@@ -123,7 +123,7 @@ export class Header {
 
   openChannelResult(channel: Channel): void {
     this.channelService.selectChannel(channel.id);
-    this.closeSearchResult();
+    this.resetSearch();
   }
 
   openMessageResult(result: MessageSearchResult): void {
@@ -133,6 +133,18 @@ export class Header {
     } else {
       this.navigationService.goToDmMessage(result.conversationId, result.message.id);
     }
+    this.resetSearch();
+  }
+
+  private resetSearch(): void {
+    this.searchService.clear();
+    this.searchQuery = '';
     this.closeSearchResult();
+  }
+
+  onSearchFocus(): void {
+    if (this.searchService.isQueryValid()) {
+      this.isSearchOpen.set(true);
+    }
   }
 }
