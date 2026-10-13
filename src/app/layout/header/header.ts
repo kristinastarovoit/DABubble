@@ -4,6 +4,7 @@ import { AuthService } from '../../shared/services/auth';
 import { UserService } from '../../shared/services/users';
 import { Router } from '@angular/router';
 import { Presence } from '../../shared/services/presence';
+import { SearchService } from '../../shared/services/search-service';
 
 @Component({
   imports: [FormsModule],
@@ -15,7 +16,10 @@ export class Header {
   private authService = inject(AuthService);
   private userService = inject(UserService);
   private router = inject(Router);
+  private searchService = inject(SearchService);
   presenceService = inject(Presence);
+  searchResults = this.searchService.results;
+  showSearchResults = this.searchService.isQueryValid;
 
   /** The profile of the currently signed-in user, or `undefined` while loading or logged out. */
   currentUser = computed(() =>
@@ -92,7 +96,9 @@ export class Header {
   }
 
   /** Handles changes to the global search field. */
-  onSearchInput(): void {}
+  onSearchInput(): void {
+    this.searchService.setQuery(this.searchQuery);
+  }
 
   /** Signs the current user out. */
   async logout(): Promise<void> {
