@@ -389,4 +389,21 @@ export class DmService {
       text: text,
     });
   }
+
+  async openDmWith(partnerId: string): Promise<void> {
+    const currentUserId = this.authService.currentUserId();
+    if (!currentUserId) return;
+
+    if (partnerId === currentUserId) {
+      this.selectDm(`self_${currentUserId}`);
+      return;
+    }
+
+    const existingDm = this.dms().find(
+      (dm) => dm.memberIds.includes(currentUserId) && dm.memberIds.includes(partnerId),
+    );
+
+    const dmId = existingDm?.id ?? (await this.addDm([currentUserId, partnerId]));
+    this.selectDm(dmId);
+  }
 }
