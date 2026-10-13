@@ -368,15 +368,26 @@ export class ChannelService {
     onMessages?: (messages: Message[]) => void,
   ): { messages: ReturnType<typeof signal<Message[]>>; unsubscribe: () => void } {
     const messages = signal<Message[]>([]);
-    const messagesRef = query(collection(this.db, 'channels', channelId, 'messages'), orderBy('createdAt', 'asc'));
-    const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
-      const channelMessages = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as Message),
-      }));
-      messages.set(channelMessages);
-      onMessages?.(channelMessages);
-    });
+    const messagesRef = query(
+      collection(this.db, 'channels', channelId, 'messages'),
+      orderBy('createdAt', 'asc'),
+    );
+    const unsubscribe = onSnapshot(
+      messagesRef,
+      (snapshot) => {
+        const channelMessages = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Message),
+        }));
+        messages.set(channelMessages);
+        onMessages?.(channelMessages);
+      },
+      (err) => {
+        if (err.code !== 'permission-denied') {
+          console.error('[Channel-Messages-Listener]', err.code, err.message);
+        }
+      },
+    );
     return { messages, unsubscribe };
   }
 
@@ -387,11 +398,21 @@ export class ChannelService {
   ): { message: ReturnType<typeof signal<Message | null>>; unsubscribe: () => void } {
     const message = signal<Message | null>(null);
     const messageRef = doc(this.db, 'channels', channelId, 'messages', messageId);
-    const unsubscribe = onSnapshot(messageRef, (snapshot) => {
-      const value = snapshot.exists() ? { id: snapshot.id, ...(snapshot.data() as Message) } : null;
-      message.set(value);
-      onMessage?.(value);
-    });
+    const unsubscribe = onSnapshot(
+      messageRef,
+      (snapshot) => {
+        const value = snapshot.exists()
+          ? { id: snapshot.id, ...(snapshot.data() as Message) }
+          : null;
+        message.set(value);
+        onMessage?.(value);
+      },
+      (err) => {
+        if (err.code !== 'permission-denied') {
+          console.error('[Channel-Messages-Listener]', err.code, err.message);
+        }
+      },
+    );
     return { message, unsubscribe };
   }
 
@@ -412,14 +433,22 @@ export class ChannelService {
       collection(this.db, 'channels', channelId, 'messages', messageId, 'thread'),
       orderBy('createdAt', 'asc'),
     );
-    const unsubscribe = onSnapshot(threadRef, (snapshot) => {
-      const threadMessages = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as ThreadMessage),
-      }));
-      threadMessage.set(threadMessages);
-      onThreadMessages?.(threadMessages);
-    });
+    const unsubscribe = onSnapshot(
+      threadRef,
+      (snapshot) => {
+        const threadMessages = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as ThreadMessage),
+        }));
+        threadMessage.set(threadMessages);
+        onThreadMessages?.(threadMessages);
+      },
+      (err) => {
+        if (err.code !== 'permission-denied') {
+          console.error('[Channel-Messages-Listener]', err.code, err.message);
+        }
+      },
+    );
     return { threadMessage, unsubscribe };
   }
 
