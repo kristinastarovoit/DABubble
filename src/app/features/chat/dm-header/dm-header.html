@@ -1,5 +1,5 @@
 <div class="channel-header">
-  <div class="channel-header__title" (click)="openUserCard()">
+  <div class="channel-header__title" (click)="userCard.openUserCard()">
     <div class="sidebar__avatar-wrapper">
       <img
         [src]="currentDmPartner()?.avatar || 'app-icons/avatar-placeholder.svg'"
@@ -25,7 +25,8 @@
   </div>
 </div>
 
-<dialog
+<app-usercard-dialog #userCard [user]="currentDmPartner()"></app-usercard-dialog>
+<!-- <dialog
   #profileCard
   autofocus
   class="header__profile header__profile--dialog"
@@ -122,4 +123,4 @@
       <p>Message</p>
     </button>
   </div>
-</dialog>
+</dialog> -->

@@ -69,7 +69,10 @@
 
     <ul class="members-dialog__list">
       @for (member of channelMembers(); track member.uid) {
-      <li class="members-dialog__item">
+      <li class="members-dialog__item" 
+      /* (click)="userCard.openUserCard()" */
+      (click)="selectedUser.set(member); userCard.openUserCard()"
+      >
         <img [src]="member.avatar" alt="" class="members-dialog__avatar" />
         <span class="members-dialog__name">
           {{ member.name }}
@@ -134,3 +137,5 @@
   </ul>
   }
 </dialog>
+
+<app-usercard-dialog #userCard [user]="selectedUser()" (dmUser)="openDmWithUser($event)"></app-usercard-dialog>

@@ -20,9 +20,11 @@ import { AuthService } from '../../../shared/services/auth';
 import { NewMessageService } from '../../../shared/services/new-message-service';
 import { FIREBASE_AUTH } from '../../../app.config';
 import { EditChannel } from '../edit-channel/edit-channel';
+import { UsercardDialog } from "../../../shared/components/usercard-dialog/usercard-dialog";
+import { UserModel } from '../../../shared/model/user.model';
 
 @Component({
-  imports: [CommonModule, FormsModule, EditChannel],
+  imports: [CommonModule, FormsModule, EditChannel, UsercardDialog],
   selector: 'app-channel-header',
   styleUrl: './channel-header.scss',
   templateUrl: './channel-header.html',
@@ -52,6 +54,8 @@ export class ChannelHeader {
   /** Fixed position and size of the recipient suggestions dropdown, kept within the viewport. */
   recipientSuggestionsPosition = { top: 0, left: 0, width: 0, maxHeight: 240 };
 
+  selectedUser = signal<UserModel | undefined>(undefined);
+
   /**
    * Channels and contacts matching the current recipient query.
    *
@@ -77,27 +81,27 @@ export class ChannelHeader {
       mode === 'user'
         ? []
         : this.channelService
-            .channels()
-            .filter((channel) => channel.name.toLowerCase().includes(query))
-            .map((channel) => ({ type: 'channel' as const, id: channel.id, name: channel.name }));
+          .channels()
+          .filter((channel) => channel.name.toLowerCase().includes(query))
+          .map((channel) => ({ type: 'channel' as const, id: channel.id, name: channel.name }));
 
     const userMatches =
       mode === 'channel'
         ? []
         : this.dmService
-            .dmPartners()
-            .filter((partner) => partner.user.uid !== currentUserId)
-            .filter(
-              (partner) =>
-                partner.user.name.toLowerCase().includes(query) ||
-                partner.user.email.toLowerCase().includes(query),
-            )
-            .map((partner) => ({
-              type: 'user' as const,
-              id: partner.user.uid,
-              name: partner.user.name,
-              avatar: partner.user.avatar,
-            }));
+          .dmPartners()
+          .filter((partner) => partner.user.uid !== currentUserId)
+          .filter(
+            (partner) =>
+              partner.user.name.toLowerCase().includes(query) ||
+              partner.user.email.toLowerCase().includes(query),
+          )
+          .map((partner) => ({
+            type: 'user' as const,
+            id: partner.user.uid,
+            name: partner.user.name,
+            avatar: partner.user.avatar,
+          }));
 
     return [...channelMatches, ...userMatches];
   }
@@ -354,5 +358,26 @@ export class ChannelHeader {
         this.currentUnsubscribe = unsubscribe;
       }
     });
+  }
+
+  /**
+ * Opens the direct-message conversation with the given user and closes the members dialog.
+ * Creates the conversation first if none exists yet.
+ * Does nothing if nobody is signed in.
+ *
+ * @param user The user selected in the member list to start or continue a DM with.
+ */
+  async openDmWithUser(user: UserModel) {
+    const userId = this.authService.currentUserId();
+    if (!userId) return;
+    const partner = this.dmService.dmPartners().find((p) => p.user.uid === user.uid);
+    if (partner?.dm) {
+      this.dmService.selectDm(partner.dm.id);
+    } else {
+      const dmId = await this.dmService.addDm([userId, user.uid]);
+      this.dmService.selectDm(dmId);
+    }
+    this.channelService.activeChannelId.set(undefined);
+    this.closeDialog();
   }
 }

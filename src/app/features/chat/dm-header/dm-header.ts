@@ -2,35 +2,18 @@ import { Component, input, ViewChild, ElementRef, inject } from '@angular/core';
 import { User } from '../../../shared/interfaces/user';
 import { UserModel } from '../../../shared/model/user.model';
 import { Presence } from '../../../shared/services/presence';
+import { UsercardDialog } from '../../../shared/components/usercard-dialog/usercard-dialog';
 
 @Component({
-  imports: [],
+  imports: [UsercardDialog],
   selector: 'app-dm-header',
   styleUrl: './dm-header.scss',
   templateUrl: './dm-header.html',
 })
 export class DmHeader {
   presenceService = inject(Presence);
-
   currentDmPartner = input<UserModel | undefined>(undefined);
+
   /** Whether the displayed DM partner is the currently signed-in user. */
   isSelf = input(false);
-  @ViewChild('profileCard') dialogRef!: ElementRef<HTMLDialogElement>;
-
-  /** Opens the user card dialog */
-  openUserCard() {
-    this.dialogRef.nativeElement.showModal();
-  }
-
-  /** Closes the user card dialog */
-  closeUserCard() {
-    this.dialogRef.nativeElement.close();
-  }
-
-  /** Closes the dialog only when the backdrop itself (not the card) was clicked. */
-  onBackdropClick(event: MouseEvent): void {
-    if (event.target === this.dialogRef.nativeElement) {
-      this.closeUserCard();
-    }
-  }
 }
