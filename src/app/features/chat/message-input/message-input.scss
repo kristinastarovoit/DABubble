@@ -69,6 +69,10 @@
     &:hover,
     &--active {
       background: $pastel-purple-bg;
+
+      & .message-input__mention-hash {
+        color: $midtone-purple-three;
+      }
     }
   }
 
