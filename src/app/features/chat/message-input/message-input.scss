@@ -131,6 +131,10 @@
 
     &:hover {
       background-color: $pastel-purple-bg;
+
+      & svg path {
+        fill: $midtone-purple-three;
+      }
     }
 
     img {

@@ -47,9 +47,10 @@
   }
 
   &__channel-name {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: $light-purple-two;
     cursor: pointer;
+    word-break: break-all;
   }
 
   &__close-btn {
