@@ -5,7 +5,7 @@ import { ChannelService } from './channel-service';
 import { UserService } from './users';
 import { FIREBASE_FIRESTORE } from '../../app.config';
 import { Message } from '../interfaces/message';
-import { collectionGroup, getDocs } from 'firebase/firestore';
+import { collection, collectionGroup, getDocs, QueryDocumentSnapshot } from 'firebase/firestore';
 import { DmService } from './dm-service';
 import { AuthService } from './auth';
 
@@ -99,31 +99,47 @@ export class SearchService {
   }
 
   private async searchMessages(needle: string): Promise<MessageSearchResult[]> {
-    const snapshot = await getDocs(collectionGroup(this.firestore, 'messages'));
-    const channelNameById = new Map(this.channelService.channels().map((c) => [c.id, c.name]));
     const currentUserId = this.authService.currentUserId();
 
-    return snapshot.docs
-      .map((doc) => {
-        const message = { id: doc.id, ...(doc.data() as Message) };
-        const conversationId = doc.ref.parent.parent?.id ?? '';
-        const parentCollection = doc.ref.parent.parent?.parent.id;
-        const source: 'channel' | 'dm' = parentCollection === 'dms' ? 'dm' : 'channel';
+    const channelSearches = this.channelService
+      .channels()
+      .map((channel) =>
+        getDocs(collection(this.firestore, 'channels', channel.id, 'messages')).then((snapshot) =>
+          snapshot.docs.map((doc) =>
+            this.toMessageResult(doc, 'channel', channel.id, channel.name),
+          ),
+        ),
+      );
 
-        const conversationName =
-          source === 'channel'
-            ? (channelNameById.get(conversationId) ?? 'Unknown')
-            : this.getDmPartnerName(conversationId, currentUserId);
+    const dmSearches = this.dmService
+      .dms()
+      .map((dm) =>
+        getDocs(collection(this.firestore, 'dms', dm.id, 'messages')).then((snapshot) =>
+          snapshot.docs.map((doc) =>
+            this.toMessageResult(doc, 'dm', dm.id, this.getDmPartnerName(dm.id, currentUserId)),
+          ),
+        ),
+      );
 
-        return {
-          message,
-          conversationId,
-          conversationName,
-          source,
-          senderName: this.userService.getUserName(message.senderId),
-        };
-      })
-      .filter(({ message }) => message.text.toLowerCase().includes(needle));
+    const results = await Promise.all([...channelSearches, ...dmSearches]);
+
+    return results.flat().filter(({ message }) => message.text.toLowerCase().includes(needle));
+  }
+
+  private toMessageResult(
+    doc: QueryDocumentSnapshot,
+    source: 'channel' | 'dm',
+    conversationId: string,
+    conversationName: string,
+  ): MessageSearchResult {
+    const message = { id: doc.id, ...(doc.data() as Message) };
+    return {
+      message,
+      conversationId,
+      conversationName,
+      source,
+      senderName: this.userService.getUserName(message.senderId),
+    };
   }
 
   /** Resolves a display name for the "other side" of a DM conversation. */

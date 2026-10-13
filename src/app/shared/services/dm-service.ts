@@ -1,4 +1,4 @@
-import { Service, computed, effect, inject, signal } from '@angular/core';
+import { Injector, Service, computed, effect, inject, signal } from '@angular/core';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../../app.config';
 import { Dm } from '../interfaces/dm';
 import {
@@ -23,6 +23,7 @@ import { ThreadMessage } from '../interfaces/thread';
 import { UserService } from './users';
 import { AuthService } from './auth';
 import { NewMessageService } from './new-message-service';
+import { ChannelService } from './channel-service';
 
 @Service()
 /** Provides Firestore operations and reactive direct-message data. */
@@ -32,6 +33,7 @@ export class DmService {
   private authService = inject(AuthService);
   private newMessageService = inject(NewMessageService);
   private auth = inject(FIREBASE_AUTH);
+  private injector = inject(Injector);
 
   /** The direct-message conversations available to the application. */
   dms = signal<Dm[]>([]);
@@ -44,6 +46,7 @@ export class DmService {
    */
   selectDm(dmId: string): void {
     this.activeDmId.set(dmId);
+    this.injector.get(ChannelService).activeChannelId.set(undefined);
     this.newMessageService.close();
   }
 

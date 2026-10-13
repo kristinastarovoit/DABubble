@@ -1,4 +1,4 @@
-import { Service, inject, signal } from '@angular/core';
+import { Injector, Service, inject, signal } from '@angular/core';
 import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../../app.config';
 import { Channel } from '../interfaces/channel';
 import {
@@ -24,6 +24,7 @@ import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
 import { onAuthStateChanged } from 'firebase/auth';
 import { NewMessageService } from './new-message-service';
+import { DmService } from './dm-service';
 
 @Service()
 /** Provides Firestore operations and reactive channel data for the current user. */
@@ -31,6 +32,7 @@ export class ChannelService {
   private db = inject(FIREBASE_FIRESTORE);
   private auth = inject(FIREBASE_AUTH);
   private newMessageService = inject(NewMessageService);
+  private injector = inject(Injector);
 
   /** The channels in which the currently authenticated user is a member. */
   channels = signal<Channel[]>([]);
@@ -38,6 +40,7 @@ export class ChannelService {
 
   selectChannel(channelId: string): void {
     this.activeChannelId.set(channelId);
+    this.injector.get(DmService).activeDmId.set(undefined);
     this.newMessageService.close();
   }
 
