@@ -1,12 +1,12 @@
 <section class="chat">
   @if (channelId() || dmId() || newMessageService.isNewMessageMode()) {
-    @if (channelId() || newMessageService.isNewMessageMode()) {
-      <app-channel-header /* (memberIconClicked)="openMemberList()" */></app-channel-header>
-    } @else if (dmId()) {
+    @if (dmId()) {
       <app-dm-header
         [currentDmPartner]="activeDmPartner()"
         [isSelf]="activeDmPartnerIsSelf()"
       ></app-dm-header>
+    } @else if (channelId() || newMessageService.isNewMessageMode()) {
+      <app-channel-header></app-channel-header>
     }
     <app-message-list
       [messages]="messages()"
@@ -17,7 +17,10 @@
       (threadOpened)="openThread($event)"
     />
 
-    @if (dmId() && messagesLoaded() && messages().length === 0 && activeDmIntroContact(); as contact) {
+    @if (
+      dmId() && messagesLoaded() && messages().length === 0 && activeDmIntroContact();
+      as contact
+    ) {
       <section class="chat__empty-dm-intro">
         <div class="chat__empty-dm-identity">
           <img
@@ -45,12 +48,20 @@
       </section>
     }
 
-    @if (channelId() && messagesLoaded() && messages().length === 0 && activeChannel()?.createdBy === uid() && activeChannel(); as channel) {
+    @if (
+      channelId() &&
+        messagesLoaded() &&
+        messages().length === 0 &&
+        activeChannel()?.createdBy === uid() &&
+        activeChannel();
+      as channel
+    ) {
       <section class="chat__empty-channel-intro">
         <div class="chat__empty-channel-identity"># {{ channel.name }}</div>
         <p class="chat__empty-channel-description">
           You created this channel. This is the beginning of channel
-          <span class="chat__empty-channel-mention">#{{ channel.name }}</span>.
+          <span class="chat__empty-channel-mention">#{{ channel.name }}</span
+          >.
         </p>
       </section>
     }

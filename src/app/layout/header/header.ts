@@ -8,6 +8,8 @@ import { MessageSearchResult, SearchService } from '../../shared/services/search
 import { MessageNavigationService } from '../../shared/services/message-navigation-service';
 import { Channel } from '../../shared/interfaces/channel';
 import { ChannelService } from '../../shared/services/channel-service';
+import { DmService } from '../../shared/services/dm-service';
+import { UserModel } from '../../shared/model/user.model';
 
 @Component({
   imports: [FormsModule],
@@ -22,6 +24,7 @@ export class Header {
   private searchService = inject(SearchService);
   private navigationService = inject(MessageNavigationService);
   private channelService = inject(ChannelService);
+  private dmService = inject(DmService);
   presenceService = inject(Presence);
   searchResults = this.searchService.results;
   showSearchResults = computed(() => this.searchService.isQueryValid() && this.isSearchOpen());
@@ -146,5 +149,10 @@ export class Header {
     if (this.searchService.isQueryValid()) {
       this.isSearchOpen.set(true);
     }
+  }
+
+  async openUserResult(user: UserModel): Promise<void> {
+    await this.dmService.openDmWith(user.uid);
+    this.resetSearch();
   }
 }
