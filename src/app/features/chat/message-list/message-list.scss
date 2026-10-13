@@ -175,6 +175,11 @@
     border: 1px solid $border-purple;
     border-radius: 20px;
     height: fit-content;
+
+    &:focus-within,
+    &:focus {
+      border-color: $midtone-purple-three;
+    }
   }
 
   &__button-wrapper {

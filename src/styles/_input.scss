@@ -7,6 +7,11 @@
     border: 1px solid $border-purple;
     border-radius: 32px;
     padding: 12px 20px;
+
+    &:focus-within,
+    &:focus {
+        border-color: $midtone-purple-three;
+    }
 }
 
 .input {
@@ -21,4 +26,3 @@
         color: $dark-grey;
     }
 }
-

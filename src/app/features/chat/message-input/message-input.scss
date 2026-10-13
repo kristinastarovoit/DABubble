@@ -11,6 +11,11 @@
   flex-shrink: 0;
   font-family: 'Nunito';
 
+  &:focus-within,
+  &:focus {
+    border-color: $midtone-purple-three;
+  }
+
   &__field-wrapper {
     position: relative;
   }
