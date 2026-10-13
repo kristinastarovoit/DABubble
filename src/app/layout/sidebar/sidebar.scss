@@ -216,20 +216,33 @@
     border-radius: 24px;
     cursor: pointer;
     color: $black;
+    transition: all 255ms ease-in-out;
 
-    &:hover {
-      color: $midtone-purple-three;
+    &-channel:hover {
+      border-radius: 20px;
+
+      & .sidebar__item-icon--hash {
+        color: $midtone-purple-three;
+      }
     }
 
-    // &--active {
-    //   background-color: $color-primary-light;
-    //   color: $color-primary;
-    //   font-weight: 600;
-    // }
+    &:hover {
+      background-color: $pastel-purple-bg;
+    }
 
-    // &--add {
-    //   color: $color-text-secondary;
-    // }
+    &--active {
+      background-color: $pastel-purple-bg;
+      font-weight: 600;
+
+      &-channel {
+        font-weight: 600;
+        color: $midtone-purple-three;
+
+        & .sidebar__item-icon--hash {
+          font-weight: 700;
+        }
+      }
+    }
 
     &-icon {
       width: 20px;
