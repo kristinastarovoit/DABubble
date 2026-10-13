@@ -16,6 +16,7 @@ import { ReactionBar } from '../reaction-bar/reaction-bar';
 import { Message, MessageReaction } from '../../../shared/interfaces/message';
 import { UserService } from '../../../shared/services/users';
 import { MentionHighlightPipe } from '../../../shared/utilities/mention-highlight.pipe';
+import { MessageNavigationService } from '../../../shared/services/message-navigation-service';
 
 /** Groups messages under a calendar date. */
 interface MessageGroup {
@@ -75,6 +76,7 @@ export class MessageList {
   // }
 
   private userService = inject(UserService);
+  private navigationService = inject(MessageNavigationService);
 
   /** Messages displayed in the list. */
   messages = input<Message[]>([]);
@@ -118,6 +120,19 @@ export class MessageList {
 
       if (isNewConversation) this.shouldAutoScroll = true;
 
+      const targetMessageId = this.navigationService.pendingMessageId();
+      const targetElement = targetMessageId
+        ? element.querySelector<HTMLElement>(`#message-${targetMessageId}`)
+        : null;
+
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        targetElement.classList.add('message-list__item--highlighted');
+        (setTimeout(() => targetElement.classList.remove('message-list__item--highlighted'), 2000),
+          this.navigationService.pendingMessageId.set(undefined));
+        return;
+      }
+
       if (this.shouldAutoScroll) {
         element.scrollTop = element.scrollHeight;
       }
@@ -127,8 +142,7 @@ export class MessageList {
   /** Tracks whether the reader is close enough to the bottom to follow new messages. */
   onMessageListScroll(event: Event): void {
     const element = event.currentTarget as HTMLDivElement;
-    this.shouldAutoScroll =
-      element.scrollHeight - element.scrollTop - element.clientHeight <= 80;
+    this.shouldAutoScroll = element.scrollHeight - element.scrollTop - element.clientHeight <= 80;
   }
 
   /** Starts editing the provided message and preloads its content. */
@@ -142,7 +156,9 @@ export class MessageList {
     const groups = new Map<string, MessageGroup>();
 
     for (const message of this.messages()) {
-      if (!message.createdAt) { continue; }
+      if (!message.createdAt) {
+        continue;
+      }
       const date = message.createdAt.toDate();
       const key = date.toISOString().slice(0, 10);
       let group = groups.get(key);
@@ -180,11 +196,11 @@ export class MessageList {
 
   /** Returns the display name for the given sender ID. */
   getSenderName(senderId: string): string {
-    return this.userService.users().find(user => user.uid === senderId)?.name ?? senderId;
+    return this.userService.users().find((user) => user.uid === senderId)?.name ?? senderId;
   }
 
   /** Returns the display name for the given sender ID. */
   getSenderAvatar(senderId: string): string {
-    return this.userService.users().find(user => user.uid === senderId)?.avatar ?? senderId;
+    return this.userService.users().find((user) => user.uid === senderId)?.avatar ?? senderId;
   }
 }
