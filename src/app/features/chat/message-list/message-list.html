@@ -40,9 +40,29 @@
                 "
               ></textarea>
               <div class="edit-message-input__footer-wrapper">
-                <button class="message-input__icon-btn">
-                  <img src="app-icons/emoji.svg" alt="Emoji" />
-                </button>
+                <div class="message-input__emoji-wrapper">
+                  <button
+                    type="button"
+                    class="message-input__icon-btn"
+                    (click)="toggleEmojiPicker()"
+                  >
+                    <img src="app-icons/emoji.svg" alt="Emoji" />
+                  </button>
+
+                  @if (showEmojiPicker()) {
+                    <div class="message-input__emoji-panel">
+                      @for (emoji of curatedEmojis; track emoji) {
+                        <button
+                          type="button"
+                          class="message-input__emoji-option"
+                          (click)="selectEmoji(emoji)"
+                        >
+                          {{ emoji }}
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
                 <div class="edit-message-input__button-wrapper">
                   <button
                     class="button button--dismiss"

@@ -44,6 +44,11 @@ export class MessageInput {
 
   @ViewChild('textarea') private textareaRef?: ElementRef<HTMLTextAreaElement>;
 
+  /** Moves keyboard focus into the message textarea. */
+  focusInput(): void {
+    this.textareaRef?.nativeElement.focus();
+  }
+
   /** Placeholder displayed in the message field. */
   @Input() placeholder = 'Write Message';
 

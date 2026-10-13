@@ -8,6 +8,7 @@ import {
   computed,
   signal,
   effect,
+  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChannelHeader } from './channel-header/channel-header';
@@ -32,6 +33,8 @@ import { ThreadService } from '../../shared/services/thread-service';
 })
 export class Chat {
   private threadService = inject(ThreadService);
+
+  @ViewChild('messageInput') private messageInputRef?: MessageInput;
 
   openThread(message: Message): void {
     this.threadService.open(message, {
@@ -126,6 +129,7 @@ export class Chat {
       const channelId = this.channelId();
       const dmId = this.dmId();
       console.log('[Chat-Effect]', { channelId, dmId });
+      queueMicrotask(() => this.messageInputRef?.focusInput());
       this.messages.set([]);
       this.messagesLoaded.set(false);
 

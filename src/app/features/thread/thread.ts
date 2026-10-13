@@ -20,6 +20,7 @@ import { DmService } from '../../shared/services/dm-service';
 import { AuthService } from '../../shared/services/auth';
 import { UserService } from '../../shared/services/users';
 import { MentionHighlightPipe } from '../../shared/utilities/mention-highlight.pipe';
+import { CURATED_EMOJIS } from '../../shared/utilities/emoji-set';
 
 @Component({
   imports: [CommonModule, MessageInput, ReactionBar, ReactionPicker, MentionHighlightPipe],
@@ -33,6 +34,23 @@ export class Thread {
   private dmService = inject(DmService);
   private authService = inject(AuthService);
   private userService = inject(UserService);
+
+  /** The curated set of emojis offered by the picker. */
+  protected readonly curatedEmojis = CURATED_EMOJIS;
+
+  /** Whether the emoji picker panel is currently open for the message being edited. */
+  showEmojiPicker = signal(false);
+
+  /** Opens or closes the emoji picker panel. */
+  toggleEmojiPicker(): void {
+    this.showEmojiPicker.update((open) => !open);
+  }
+
+  /** Appends the chosen emoji to the edit draft and closes the picker. */
+  selectEmoji(emoji: string): void {
+    this.editText.set(this.editText() + emoji);
+    this.showEmojiPicker.set(false);
+  }
 
   /** The thread currently opened via ThreadService, shared with Chat. */
   activeThread = this.threadService.activeThread;
@@ -156,12 +174,12 @@ export class Thread {
   /** Tracks whether the reader is close enough to the bottom to follow new replies. */
   onThreadContentScroll(event: Event): void {
     const element = event.currentTarget as HTMLDivElement;
-    this.shouldAutoScroll =
-      element.scrollHeight - element.scrollTop - element.clientHeight <= 80;
+    this.shouldAutoScroll = element.scrollHeight - element.scrollTop - element.clientHeight <= 80;
   }
 
   /** Starts editing the parent message in the active thread. */
   startEditingParentMessage(): void {
+    this.showEmojiPicker.set(false);
     const parentMessage = this.parentMessage();
     if (!parentMessage) return;
 
@@ -172,6 +190,7 @@ export class Thread {
 
   /** Starts editing a thread reply message. */
   startEditingReply(reply: ThreadMessage): void {
+    this.showEmojiPicker.set(false);
     if (!reply.id) return;
 
     this.editingParentMessage.set(false);

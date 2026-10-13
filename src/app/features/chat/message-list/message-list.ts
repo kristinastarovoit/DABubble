@@ -17,6 +17,7 @@ import { Message, MessageReaction } from '../../../shared/interfaces/message';
 import { UserService } from '../../../shared/services/users';
 import { MentionHighlightPipe } from '../../../shared/utilities/mention-highlight.pipe';
 import { MessageNavigationService } from '../../../shared/services/message-navigation-service';
+import { CURATED_EMOJIS } from '../../../shared/utilities/emoji-set';
 
 /** Groups messages under a calendar date. */
 interface MessageGroup {
@@ -31,49 +32,22 @@ interface MessageGroup {
   templateUrl: './message-list.html',
 })
 export class MessageList {
-  /** Messages displayed in the list. */
-  // @Input() messages: Message[] = [];
+  /** The curated set of emojis offered by the picker. */
+  protected readonly curatedEmojis = CURATED_EMOJIS;
 
-  // /** The identifier of the signed-in user. */
-  // @Input() currentUserId = '';
+  /** Whether the emoji picker panel is currently open for the message being edited. */
+  showEmojiPicker = signal(false);
 
-  // /** Emitted when a message thread is opened. */
-  // @Output() threadOpened = new EventEmitter<Message>();
+  /** Opens or closes the emoji picker panel. */
+  toggleEmojiPicker(): void {
+    this.showEmojiPicker.update((open) => !open);
+  }
 
-  // /** Emitted when a message reaction changes. */
-  // @Output() reactionToggled = new EventEmitter<{ message: Message; emoji: string }>();
-
-  // /** Groups messages by their calendar date. */
-  // get groupedMessages(): MessageGroup[] {
-  //   const groups = new Map<string, MessageGroup>();
-
-  //   for (const message of this.messages) {
-  //     const date = new Date(message.createdAt.toDate());
-  //     const key = date.toISOString().slice(0, 10);
-  //     let group = groups.get(key);
-
-  //     if (!group) {
-  //       group = {
-  //         dateLabel: date.toLocaleDateString('en-US', {
-  //           weekday: 'long',
-  //           month: 'long',
-  //           day: 'numeric',
-  //         }),
-  //         messages: [],
-  //       };
-  //       groups.set(key, group);
-  //     }
-
-  //     group.messages.push(message);
-  //   }
-
-  //   return Array.from(groups.values());
-  // }
-
-  // /** Emits a changed reaction for a message. */
-  // onReactionToggled(message: Message, emoji: string): void {
-  //   this.reactionToggled.emit({ message, emoji });
-  // }
+  /** Appends the chosen emoji to the edit draft and closes the picker. */
+  selectEmoji(emoji: string): void {
+    this.editText.set(this.editText() + emoji);
+    this.showEmojiPicker.set(false);
+  }
 
   private userService = inject(UserService);
   private navigationService = inject(MessageNavigationService);
@@ -149,6 +123,7 @@ export class MessageList {
   startEditing(message: Message) {
     this.editingMessageId.set(message.id);
     this.editText.set(message.text);
+    this.showEmojiPicker.set(false);
   }
 
   /** Groups messages by their calendar date. */
