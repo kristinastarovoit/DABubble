@@ -63,7 +63,7 @@ export class Login {
       await this.userService.createUserProfile(
         credential.user.uid,
         'Guest',
-        `guest-${credential.user.uid}@dabubble.local`,
+        this.generateGuestEmail(),
         'app-icons/avatar_default.svg',
       );
       this.router.navigateByUrl('/dashboard');
@@ -100,5 +100,11 @@ export class Login {
     } finally {
       this.isGoogleLoggingIn.set(false);
     }
+  }
+
+  /** Generates a short, human-friendlier placeholder email for guest accounts. */
+  private generateGuestEmail(): string {
+    const randomNumber = Math.floor(1000 + Math.random() * 9000); // 4-stellig, 1000–9999
+    return `guest${randomNumber}@dabubble.de`;
   }
 }
