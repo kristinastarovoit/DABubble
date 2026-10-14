@@ -9,15 +9,25 @@ import {
   viewChild,
 } from '@angular/core';
 
-const ENTER_MS = 1000;
-const LETTER_MS = 350;
-const LETTER_STEP_MS = 120;
-const HOLD_MS = 2000;
-const FLY_MS = 1000;
+/** Duration of the logo symbol sliding in from the right. */
+const ENTER_MS = 800;
+/** Duration of the wordmark wipe from left to right. */
+const WIPE_MS = 500;
+/** Pause after the wordmark is fully visible. */
+const HOLD_MS = 1000;
+/** Duration of the flight to the header logo. */
+const FLY_MS = 800;
+/** Shared easing for the larger movements. */
 const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+/** Width of the logo SVG viewBox. */
 const LOGO_WIDTH = 243;
+/** Height of the logo SVG viewBox. */
 const LOGO_HEIGHT = 70;
 
+/**
+ * Fullscreen intro overlay: the logo slides in, the wordmark is wiped in,
+ * and after a short pause both fly to the header logo position.
+ */
 @Component({
   selector: 'app-intro',
   templateUrl: './intro.html',
@@ -25,7 +35,9 @@ const LOGO_HEIGHT = 70;
   host: { 'aria-hidden': 'true', '(click)': 'finish()', '(document:keydown)': 'finish()' },
 })
 export class Intro {
+  /** Header logo element whose position and size the intro logo flies to. */
   readonly target = input.required<HTMLElement>();
+  /** Emits once when the intro ends, by completion or skip. */
   readonly finished = output<void>();
 
   private logo = viewChild.required<ElementRef<HTMLElement>>('logo');
@@ -39,16 +51,28 @@ export class Intro {
     afterNextRender(() => this.play());
   }
 
+  /** Ends the intro (idempotent) and notifies the parent. Also stops any running sequence. */
   protected finish() {
     if (this.stopped) return;
     this.stopped = true;
     this.finished.emit();
   }
 
+  /**
+   * Runs a Web Animation that keeps its end state.
+   * @param el Element to animate.
+   * @param keyframes Keyframes of the animation.
+   * @param options Timing options.
+   * @returns Promise resolving when the animation has finished.
+   */
   private animate(el: Element, keyframes: Keyframe[], options: KeyframeAnimationOptions) {
     return el.animate(keyframes, { fill: 'both', ...options }).finished;
   }
 
+  /**
+   * Plays the full sequence: enter, wordmark wipe, hold, fly to header.
+   * Skips immediately where the Web Animations API is unavailable (e.g. jsdom).
+   */
   private async play() {
     const logo = this.logo().nativeElement;
     if (typeof logo.animate !== 'function') return this.finish();
@@ -76,17 +100,10 @@ export class Intro {
     if (this.stopped) return;
 
     const word = this.word().nativeElement;
-    await Promise.all(
-      Array.from(word.children).map((letter, i) =>
-        this.animate(
-          letter,
-          [
-            { opacity: 0, transform: 'translateX(-12px)' },
-            { opacity: 1, transform: 'translateX(0)' },
-          ],
-          { duration: LETTER_MS, delay: i * LETTER_STEP_MS, easing: 'ease-out' },
-        ),
-      ),
+    await this.animate(
+      word,
+      [{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }],
+      { duration: WIPE_MS, easing: 'ease-out' },
     );
     if (this.stopped) return;
 

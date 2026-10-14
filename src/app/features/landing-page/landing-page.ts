@@ -4,9 +4,13 @@ import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router
 import { filter, map, startWith } from 'rxjs';
 import { Intro } from './intro/intro';
 
-// Module state resets on a full page load, so in-app navigation does not replay the intro.
+/** Module state; resets on a full page load, so in-app navigation does not replay the intro. */
 let introPlayed = false;
 
+/**
+ * Decides whether the intro should play now and marks it as played.
+ * @returns `true` on the first call per page load unless reduced motion is preferred.
+ */
 function shouldPlayIntro(): boolean {
   if (introPlayed) return false;
   introPlayed = true;
@@ -22,6 +26,7 @@ function shouldPlayIntro(): boolean {
 export class LandingPage {
   private router = inject(Router);
 
+  /** Whether the intro overlay is shown; also hides the real header logo while active. */
   protected showIntro = signal(shouldPlayIntro());
 
   protected isLoginPage = toSignal(
