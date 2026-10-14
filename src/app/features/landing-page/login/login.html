@@ -16,7 +16,7 @@
       />
     </svg>
 
-    <input type="email" placeholder="examplename@email.com" [formField]="loginForm.email" />
+    <input type="email" placeholder="example@email.com" [formField]="loginForm.email" />
     @if (loginForm.email().invalid() && loginForm.email().touched()) {
       <span class="error-msg">{{ loginForm.email().errors()[0].message }}</span>
     }
@@ -51,7 +51,6 @@
 
   <button
     class="gsi-material-button"
-    style="width: 500px"
     type="button"
     (click)="loginWithGoogle()"
     [disabled]="isGoogleLoggingIn()"

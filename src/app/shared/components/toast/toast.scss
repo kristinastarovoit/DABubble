@@ -8,7 +8,8 @@ dialog {
   border: none;
   background: transparent;
   overflow: visible;
-  transform: translateX(120%);
+  max-width: calc(100vw - 32px);
+  transform: translateX(calc(-50% + 120%));
   outline: none;
 
   &[open] {
@@ -22,20 +23,19 @@ dialog {
   div {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: clamp(0.5rem, 0.27rem + 1.14vw, 1rem);
     width: 100%;
     max-width: 531px;
-    height: 149px;
-    padding: 24px 32px;
+    height: auto;
+    padding: clamp(0.75rem, 0.41rem + 1.7vw, 1.5rem) clamp(1rem, 0.55rem + 2.27vw, 2rem);
     background: #4b4bea;
     border-top-left-radius: 30px;
     border-top-right-radius: 30px;
     border-bottom-left-radius: 30px;
     box-shadow: 0 8px 24px rgba(75, 75, 234, 0.35);
     color: #fff;
-    font-size: 24px;
     font-weight: 700;
-    white-space: nowrap;
+    white-space: normal;
   }
 
   ::ng-deep svg,
@@ -48,16 +48,16 @@ dialog {
   span {
     font-family: 'Nunito';
     font-weight: 700;
-    font-size: 2.25rem;
-    line-height: 100%;
+    font-size: clamp(1.125rem, 0.61rem + 2.56vw, 2.25rem);
+    line-height: 120%;
   }
 }
 
 @keyframes slide-in {
   from {
-    transform: translateX(120%);
+    transform: translateX(calc(-50% + 120%));
   }
   to {
-    transform: translateX(0);
+    transform: translateX(-50%);
   }
 }
