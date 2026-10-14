@@ -75,10 +75,20 @@ export class MessageInput {
     this.showEmojiPicker.update((open) => !open);
   }
 
-  /** Appends the chosen emoji to the draft and closes the picker. */
+  /** Inserts the chosen emoji at the caret, closes the picker and returns focus to the field. */
   selectEmoji(emoji: string): void {
-    this.text.set(this.text() + emoji);
+    const textarea = this.textareaRef?.nativeElement;
+    const value = this.text();
+    const start = textarea?.selectionStart ?? value.length;
+    const end = textarea?.selectionEnd ?? value.length;
+    const next = value.slice(0, start) + emoji + value.slice(end);
+
+    this.text.set(next);
     this.showEmojiPicker.set(false);
+    if (!textarea) return;
+    textarea.value = next;
+    textarea.focus();
+    textarea.setSelectionRange(start + emoji.length, start + emoji.length);
   }
 
   /** Closes the emoji picker when clicking anywhere outside the component. */
@@ -151,7 +161,10 @@ export class MessageInput {
     this.text.set(value.slice(0, caret) + '@' + value.slice(caret));
     this.openMentionDropdown('@', caret);
 
-    queueMicrotask(() => textarea?.setSelectionRange(caret + 1, caret + 1));
+    if (!textarea) return;
+    textarea.value = this.text();
+    textarea.focus();
+    textarea.setSelectionRange(caret + 1, caret + 1);
   }
 
   /** Updates the draft text and re-evaluates whether the mention dropdown should be shown. */
@@ -261,5 +274,6 @@ export class MessageInput {
     this.send.emit(value);
     this.text.set('');
     this.closeMentionDropdown();
+    this.focusInput();
   }
 }
