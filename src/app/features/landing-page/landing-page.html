@@ -1,12 +1,14 @@
 <header>
-  <img src="/app-icons/dabubble-logo.svg" alt="DABubble logo" />
-  @if (isLoginPage()) {
-    <div class="signup">
-      <p>New to DABubble?</p>
-      <a routerLink="/signup">Create account</a>
-    </div>
-  }
+  <a routerLink="/login" aria-label="Back to login">
+    <img src="/app-icons/dabubble-logo.svg" alt="DABubble logo" />
+  </a>
 </header>
+@if (isLoginPage()) {
+  <div class="signup">
+    <p>New to DABubble?</p>
+    <a routerLink="/signup">Create account</a>
+  </div>
+}
 <main>
   <router-outlet></router-outlet>
 </main>

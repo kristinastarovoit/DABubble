@@ -21,7 +21,7 @@
     <p>With your name and email address, you'll have your new DABubble account.</p>
 
     <div class="inputs">
-      <div class="input-wrapper">
+      <div class="signup-input-wrapper">
         <svg
           class="input-icon"
           width="16"
@@ -41,7 +41,7 @@
           <span class="error-msg">Please enter your name.</span>
         }
       </div>
-      <div class="input-wrapper">
+      <div class="signup-input-wrapper">
         <svg
           class="input-icon"
           width="20"
@@ -56,12 +56,12 @@
           />
         </svg>
 
-        <input type="email" [formField]="signupForm.email" placeholder="examplename@email.com" />
+        <input type="email" [formField]="signupForm.email" placeholder="example@email.com" />
         @if (signupForm.email().touched() && signupForm.email().invalid()) {
           <span class="error-msg">This email address is invalid.</span>
         }
       </div>
-      <div class="input-wrapper">
+      <div class="signup-input-wrapper">
         <svg
           class="input-icon"
           width="16"
