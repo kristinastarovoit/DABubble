@@ -66,6 +66,7 @@
 
   &__empty-dm-mention {
     color: $midtone-purple-three;
+    cursor: pointer;
 
     &:hover {
       font-weight: 700;

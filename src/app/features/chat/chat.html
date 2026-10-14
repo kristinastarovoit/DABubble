@@ -31,7 +31,7 @@
       space to talk things over with yourself.
       } @else {
       This conversation is taking place only between
-      <span class="chat__empty-dm-mention">@{{ contact.user.name }}</span> and you.
+      <span class="chat__empty-dm-mention" (click)="selectedUser.set(contact.user); userCard.openUserCard()">@{{ contact.user.name }}</span> and you.
       }
     </p>
   </section>
