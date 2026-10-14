@@ -87,4 +87,11 @@ export class UserService {
       name: name,
     });
   }
+
+  async editUserAvatar(userId: string, avatar: string) {
+    const userRef = doc(this.firestore, 'users', userId);
+    await updateDoc(userRef, {
+      avatar: avatar,
+    });
+  }
 }

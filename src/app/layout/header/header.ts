@@ -53,6 +53,17 @@ export class Header {
   /** Whether the profile card is in edit mode. */
   isEditingUser = signal(false);
 
+  selectedAvatar = signal('');
+
+  protected readonly avatar = [
+    'app-icons/avatar_1.svg',
+    'app-icons/avatar_2.svg',
+    'app-icons/avatar_3.svg',
+    'app-icons/avatar_4.svg',
+    'app-icons/avatar_5.svg',
+    'app-icons/avatar_6.svg',
+  ];
+
   /** Toggles the user menu. */
   toggleUserMenu(): void {
     this.isUserMenuOpen.update((isOpen) => !isOpen);
@@ -75,32 +86,44 @@ export class Header {
 
   /** Opens the user-profile editing-menu. */
   editUserProfile() {
+    this.selectedAvatar.set(this.currentUser()?.avatar ?? '');
     this.isEditingUser.set(true);
   }
 
   /** Closes the user-profile editing-menu. */
   cancelUserProfileEdit() {
+    this.selectedAvatar.set('');
     this.isEditingUser.set(false);
   }
 
+  selectAvatar(avatar: string) {
+    this.selectedAvatar.set(avatar);
+  }
+
   /**
-   * Saves a new display name for the signed-in user and leaves edit mode.
+   * Saves changes to the signed-in user's display name and/or avatar, then leaves edit mode.
    * Does nothing if nobody is signed in or the trimmed name is empty.
-   * If the name is unchanged, edit mode is closed without writing to Firestore.
    *
    * @param newName The raw value from the name input; it is trimmed before use.
    */
-  async saveNewUserName(newName: string) {
+  async saveProfileChanges(newName: string) {
     const currentUser = this.currentUser();
     if (!currentUser) return;
 
-    const trimmed = newName.trim();
-    if (trimmed == '') return;
-    if (trimmed === currentUser.name) {
-      this.isEditingUser.set(false);
-      return;
+    const trimmedName = newName.trim();
+    if (trimmedName === '') return;
+
+    const nameChanged = trimmedName !== currentUser.name;
+    const avatarChanged =
+      this.selectedAvatar() !== currentUser.avatar && this.selectedAvatar() !== '';
+
+    if (nameChanged) {
+      await this.userService.editUserName(currentUser.uid, trimmedName);
     }
-    await this.userService.editUserName(currentUser.uid, trimmed);
+    if (avatarChanged) {
+      await this.userService.editUserAvatar(currentUser.uid, this.selectedAvatar());
+    }
+
     this.isEditingUser.set(false);
   }
 

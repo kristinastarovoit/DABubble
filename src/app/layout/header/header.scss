@@ -298,6 +298,79 @@
   z-index: 99;
 }
 
+.header__profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+
+  .picker-label {
+    font-family: 'Nunito';
+    font-size: 1rem;
+    font-weight: 700;
+    color: #000000;
+    text-align: left;
+  }
+
+  .avatar-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    gap: clamp(0.5rem, 3vw, 1rem);
+
+    .avatar-option {
+      position: relative;
+      width: clamp(2.5rem, 2.27rem + 1.14vw, 3rem);
+      height: clamp(2.5rem, 2.27rem + 1.14vw, 3rem);
+      border-radius: 50%;
+      border: 2px solid transparent;
+      padding: 0;
+      cursor: pointer;
+      background: none;
+      transition: border-color 0.15s ease;
+
+      img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      &.selected {
+        border-color: #444df2;
+      }
+
+      &:hover {
+        border-color: #c4c4f9;
+      }
+
+      &__check {
+        z-index: 5;
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #4caf50;
+        border: 2px solid #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+}
+
 @media (max-width: 1200px) {
   .header__user-name {
     display: none;
