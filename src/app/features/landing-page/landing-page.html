@@ -1,6 +1,11 @@
 <header>
   <a routerLink="/login" aria-label="Back to login">
-    <img src="/app-icons/dabubble-logo.svg" alt="DABubble logo" />
+    <img
+      #logo
+      src="/app-icons/dabubble-logo.svg"
+      alt="DABubble logo"
+      [style.visibility]="showIntro() ? 'hidden' : null"
+    />
   </a>
 </header>
 @if (isLoginPage()) {
@@ -15,3 +20,6 @@
 <footer>
   <a routerLink="/legal-notice">Legal Notice</a><a routerLink="/privacy-policy">Privacy Policy</a>
 </footer>
+@if (showIntro()) {
+  <app-intro [target]="logo" (finished)="showIntro.set(false)" />
+}
