@@ -4,6 +4,8 @@ import { Login } from './features/landing-page/login/login';
 import { Signup } from './features/landing-page/signup/signup';
 import { PasswordRecovery } from './features/landing-page/password-recovery/password-recovery';
 import { PasswordReset } from './features/landing-page/password-reset/password-reset';
+import { LegalNotice } from './features/legal/legal-notice/legal-notice';
+import { PrivacyPolicy } from './features/legal/privacy-policy/privacy-policy';
 import { Dashboard } from './shared/components/dashboard/dashboard';
 import { Chat } from './features/chat/chat';
 export const routes: Routes = [
@@ -16,6 +18,8 @@ export const routes: Routes = [
       { path: 'signup', component: Signup },
       { path: 'password-recovery', component: PasswordRecovery },
       { path: 'password-reset', component: PasswordReset },
+      { path: 'impressum', component: LegalNotice },
+      { path: 'datenschutz', component: PrivacyPolicy },
     ],
   },
   { path: 'dashboard', component: Dashboard },
