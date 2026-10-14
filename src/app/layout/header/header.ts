@@ -151,10 +151,16 @@ export class Header {
           this.channelService.deleteGuestMessages(currentUser.uid),
           this.dmService.deleteGuestMessages(currentUser.uid),
         ]);
+      } catch (error) {
+        console.error('Failed to delete guest messages during logout.', error);
+      }
+
+      try {
         await this.channelService.removeGuestFromChannels(currentUser.uid);
       } catch (error) {
-        console.error('Failed to delete guest content during logout.', error);
+        console.error('Failed to remove guest from channels during logout.', error);
       }
+
       await this.userService.deleteUserProfile(currentUser.uid);
       await this.authService.deleteCurrentUser();
     } else {

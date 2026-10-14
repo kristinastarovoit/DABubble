@@ -599,10 +599,7 @@ export class ChannelService {
       await batch.commit();
     }
   }
-  /** Removes a departing guest from every channel's member list. A channel that
-   * ends up with no members left (the guest was the only one) is deleted
-   * entirely — its messages are already cleaned up by `deleteGuestMessages`
-   * beforehand, since a guest-only channel could only contain guest messages. */
+
   async removeGuestFromChannels(uid: string): Promise<void> {
     const channelsSnapshot = await getDocs(
       query(collection(this.db, 'channels'), where('memberIds', 'array-contains', uid)),
@@ -613,6 +610,14 @@ export class ChannelService {
 
     for (const channelDoc of channelsSnapshot.docs) {
       const channel = channelDoc.data() as Channel;
+
+      if (channel.createdBy === uid) {
+        // Guest's own channel: delete it entirely, regardless of other members.
+        batch.delete(channelDoc.ref);
+        hasWrites = true;
+        continue;
+      }
+
       const remainingMembers = channel.memberIds.filter((memberId) => memberId !== uid);
 
       if (remainingMembers.length === 0) {
