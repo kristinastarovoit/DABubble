@@ -137,13 +137,29 @@ export class Header {
     this.isSearchOpen.set(false);
   }
 
-  /** Signs the current user out. */
   async logout(): Promise<void> {
     void this.presenceService.goOffline().catch((error) => {
       console.error('Failed to set presence offline during logout.', error);
     });
 
-    await this.authService.logout();
+    const currentUser = this.currentUser();
+    const isGuest = this.authService.isCurrentUserAnonymous;
+
+    if (isGuest && currentUser) {
+      try {
+        await Promise.all([
+          this.channelService.deleteGuestMessages(currentUser.uid),
+          this.dmService.deleteGuestMessages(currentUser.uid),
+        ]);
+      } catch (error) {
+        console.error('Failed to delete guest content during logout.', error);
+      }
+      await this.userService.deleteUserProfile(currentUser.uid);
+      await this.authService.deleteCurrentUser();
+    } else {
+      await this.authService.logout();
+    }
+
     await this.router.navigateByUrl('/login');
   }
 

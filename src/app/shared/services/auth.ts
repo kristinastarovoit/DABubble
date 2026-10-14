@@ -11,6 +11,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   onAuthStateChanged,
+  deleteUser,
 } from 'firebase/auth';
 
 import { FIREBASE_AUTH } from '../../app.config';
@@ -55,6 +56,15 @@ export class AuthService {
 
   loginAsGuest() {
     return signInAnonymously(this.auth);
+  }
+
+  get isCurrentUserAnonymous(): boolean {
+    return this.auth.currentUser?.isAnonymous ?? false;
+  }
+
+  deleteCurrentUser() {
+    if (!this.auth.currentUser) return Promise.resolve();
+    return deleteUser(this.auth.currentUser);
   }
 
   loginWithGoogle() {

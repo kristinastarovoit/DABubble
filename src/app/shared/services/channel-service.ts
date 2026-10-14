@@ -19,6 +19,8 @@ import {
   getDoc,
   deleteField,
   orderBy,
+  writeBatch,
+  DocumentReference,
 } from 'firebase/firestore';
 import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
@@ -510,5 +512,79 @@ export class ChannelService {
     await updateDoc(threadRef, {
       text: text,
     });
+  }
+
+  /** Removes a departing guest's uid from a reactions map, queuing the necessary
+   * batch update(s). Returns whether any change was queued. */
+  private removeGuestReactions(
+    batch: ReturnType<typeof writeBatch>,
+    ref: DocumentReference,
+    reactions: Record<string, string[]> | undefined,
+    senderId: string,
+  ): boolean {
+    if (!reactions) return false;
+    let changed = false;
+    for (const [emoji, userIds] of Object.entries(reactions)) {
+      if (!userIds.includes(senderId)) continue;
+      const remaining = userIds.filter((id) => id !== senderId);
+      if (remaining.length === 0) {
+        batch.update(ref, { [`reactions.${emoji}`]: deleteField() });
+      } else {
+        batch.update(ref, { [`reactions.${emoji}`]: arrayRemove(senderId) });
+      }
+      changed = true;
+    }
+    return changed;
+  }
+
+  /** Deletes every message and thread reply authored by the given user, across all
+   * channels, and strips their reactions from everyone else's messages/replies. */
+  async deleteGuestMessages(senderId: string): Promise<void> {
+    const channelsSnapshot = await getDocs(collection(this.db, 'channels'));
+    const batch = writeBatch(this.db);
+    let hasWrites = false;
+
+    for (const channelDoc of channelsSnapshot.docs) {
+      const messagesRef = collection(this.db, 'channels', channelDoc.id, 'messages');
+      const allMessages = await getDocs(messagesRef);
+
+      for (const messageDoc of allMessages.docs) {
+        const message = messageDoc.data() as Message;
+
+        if (message.senderId === senderId) {
+          batch.delete(messageDoc.ref);
+          hasWrites = true;
+        } else if (this.removeGuestReactions(batch, messageDoc.ref, message.reactions, senderId)) {
+          hasWrites = true;
+        }
+
+        if (message.threadCount && message.threadCount > 0) {
+          const threadRef = collection(
+            this.db,
+            'channels',
+            channelDoc.id,
+            'messages',
+            messageDoc.id,
+            'thread',
+          );
+          const allThreadReplies = await getDocs(threadRef);
+
+          for (const threadDoc of allThreadReplies.docs) {
+            const reply = threadDoc.data() as ThreadMessage;
+
+            if (reply.senderId === senderId) {
+              batch.delete(threadDoc.ref);
+              hasWrites = true;
+            } else if (this.removeGuestReactions(batch, threadDoc.ref, reply.reactions, senderId)) {
+              hasWrites = true;
+            }
+          }
+        }
+      }
+    }
+
+    if (hasWrites) {
+      await batch.commit();
+    }
   }
 }

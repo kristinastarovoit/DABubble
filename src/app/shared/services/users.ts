@@ -7,6 +7,12 @@ import {
   onSnapshot,
   serverTimestamp,
   setDoc,
+  deleteDoc,
+  query,
+  collectionGroup,
+  where,
+  getDocs,
+  writeBatch,
 } from 'firebase/firestore';
 
 import { FIREBASE_FIRESTORE } from '../../app.config';
@@ -93,5 +99,58 @@ export class UserService {
     await updateDoc(userRef, {
       avatar: avatar,
     });
+  }
+
+  async deleteUserProfile(userId: string) {
+    await deleteDoc(doc(this.firestore, 'users', userId));
+  }
+
+  /** Deletes every message and thread reply authored by the given user,
+   * across all channels and direct-message conversations. */
+  async deleteAllContentBySender(senderId: string): Promise<void> {
+    const messagesQuery = query(
+      collectionGroup(this.firestore, 'messages'),
+      where('senderId', '==', senderId),
+    );
+    const threadQuery = query(
+      collectionGroup(this.firestore, 'thread'),
+      where('senderId', '==', senderId),
+    );
+
+    let messagesSnapshot;
+    try {
+      messagesSnapshot = await getDocs(messagesQuery);
+      console.log('[Cleanup] messages found:', messagesSnapshot.size);
+    } catch (error) {
+      console.error('[Cleanup] messages query failed', error);
+      throw error;
+    }
+
+    let threadSnapshot;
+    try {
+      threadSnapshot = await getDocs(threadQuery);
+      console.log('[Cleanup] thread replies found:', threadSnapshot.size);
+    } catch (error) {
+      console.error('[Cleanup] thread query failed', error);
+      throw error;
+    }
+
+    const batch = writeBatch(this.firestore);
+    messagesSnapshot.docs.forEach((d) => {
+      console.log('[Cleanup] deleting message at', d.ref.path);
+      batch.delete(d.ref);
+    });
+    threadSnapshot.docs.forEach((d) => {
+      console.log('[Cleanup] deleting thread reply at', d.ref.path);
+      batch.delete(d.ref);
+    });
+
+    try {
+      await batch.commit();
+      console.log('[Cleanup] batch committed successfully');
+    } catch (error) {
+      console.error('[Cleanup] batch commit failed', error);
+      throw error;
+    }
   }
 }
