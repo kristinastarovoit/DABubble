@@ -8,9 +8,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  padding: 32px 20px;
-  box-sizing: border-box;
   background-color: $pastel-purple-bg;
   font-family: "Nunito", sans-serif;
 }
@@ -104,14 +101,44 @@ a {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 800px) {
+  :host {
+    width: 100%;
+  }
+
+  .legal-card {
+    max-width: 480px;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 650px) {
   .legal-page {
     align-items: flex-start;
-    padding: 24px 16px;
   }
 
   .legal-card {
     max-width: 100%;
-    padding: 24px;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    margin-top: 20px;
+  }
+
+  p {
+    font-size: 1rem;
   }
 }

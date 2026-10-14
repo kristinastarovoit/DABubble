@@ -9,6 +9,18 @@
   background: #eceefe;
 }
 
+@media (max-width: 800px) {
+  :host {
+    padding-inline: 32px;
+  }
+}
+
+@media (max-width: 650px) {
+  :host {
+    padding-inline: 16px;
+  }
+}
+
 header {
   display: flex;
   justify-content: space-between;
