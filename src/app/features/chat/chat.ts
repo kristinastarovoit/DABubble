@@ -24,15 +24,18 @@ import { AuthService } from '../../shared/services/auth';
 import { DmHeader } from './dm-header/dm-header';
 import { NewMessageService } from '../../shared/services/new-message-service';
 import { ThreadService } from '../../shared/services/thread-service';
+import { UsercardDialog } from "../../shared/components/usercard-dialog/usercard-dialog";
+import { UserModel } from '../../shared/model/user.model';
 
 @Component({
-  imports: [CommonModule, ChannelHeader, MessageInput, MessageList, LandingPage, DmHeader],
+  imports: [CommonModule, ChannelHeader, MessageInput, MessageList, LandingPage, DmHeader, UsercardDialog],
   selector: 'app-chat',
   styleUrl: './chat.scss',
   templateUrl: './chat.html',
 })
 export class Chat {
   private threadService = inject(ThreadService);
+  selectedUser = signal<UserModel | undefined>(undefined);
 
   @ViewChild('messageInput') private messageInputRef?: MessageInput;
 

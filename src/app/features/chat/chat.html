@@ -15,7 +15,7 @@
   as contact
   ) {
   <section class="chat__empty-dm-intro">
-    <div class="chat__empty-dm-identity">
+    <div class="chat__empty-dm-identity" (click)="selectedUser.set(contact.user); userCard.openUserCard()">
       <img class="chat__empty-dm-avatar" [src]="contact.user.avatar || 'app-icons/avatar-placeholder.svg'" alt="" />
       <span class="chat__empty-dm-name">
         {{ contact.user.name }}
@@ -82,4 +82,5 @@
   } @else {
   <app-landing-page></app-landing-page>
   }
+  <app-usercard-dialog #userCard [user]="selectedUser()"></app-usercard-dialog>
 </section>
