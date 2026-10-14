@@ -70,7 +70,7 @@
     @if (isDirectMessagesOpen) {
     <ul class="sidebar__list">
       @for (partner of dmService.dmPartners(); track partner.user.uid) {
-      <li class="sidebar__item" [class.sidebar__item--active]="partner.dm?.id === dmService.activeDmId()"
+      <li class="sidebar__item" [class.sidebar__item--active]="!!dmService.activeDmId() && partner.dm?.id === dmService.activeDmId()"
         (click)="selectDirectMessage(partner)">
         <div class="sidebar__avatar-wrapper">
           <img [src]="partner.user.avatar || 'app-icons/avatar-placeholder.svg'" alt="" referrerpolicy="no-referrer"
