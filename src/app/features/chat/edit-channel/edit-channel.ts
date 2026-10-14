@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, inject, computed } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, inject, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChannelService } from '../../../shared/services/channel-service';
 import { UserService } from '../../../shared/services/users';
@@ -30,10 +30,10 @@ export class EditChannel {
   @ViewChild('dialogRef') private dialogRef!: ElementRef<HTMLDialogElement>;
 
   /** Whether the name field is in edit mode. */
-  isEditingName = false;
+  isEditingName = signal(false);
 
   /** Whether the description field is in edit mode. */
-  isEditingDescription = false;
+  isEditingDescription = signal(false);
 
   /** Draft value while editing the name. */
   editedName = '';
@@ -63,8 +63,8 @@ export class EditChannel {
   /** Closes the dialog and discards unsaved edits. */
   close(): void {
     this.dialogRef.nativeElement.close();
-    this.isEditingName = false;
-    this.isEditingDescription = false;
+    this.isEditingName.set(false);
+    this.isEditingDescription.set(false);
     this.closed.emit();
   }
 
@@ -72,7 +72,7 @@ export class EditChannel {
   startEditingName(): void {
     this.editedName = this.activeChannel()?.name ?? '';
     this.nameErrorMessage = '';
-    this.isEditingName = true;
+    this.isEditingName.set(true);
   }
 
   /** Validates and saves the edited channel name. */
@@ -84,7 +84,7 @@ export class EditChannel {
     if (!this.isValidName(trimmed, channel.name)) return;
 
     await this.channelService.editChannelName(trimmed, channel.id);
-    this.isEditingName = false;
+    this.isEditingName.set(false);
     this.nameUpdated.emit(trimmed);
   }
 
@@ -108,7 +108,7 @@ export class EditChannel {
   /** Enters edit mode for the channel description. */
   startEditingDescription(): void {
     this.editedDescription = this.activeChannel()?.description ?? '';
-    this.isEditingDescription = true;
+    this.isEditingDescription.set(true);
   }
 
   /** Saves the edited channel description. */
@@ -120,7 +120,7 @@ export class EditChannel {
       description,
       channel.id
     );
-    this.isEditingDescription = false;
+    this.isEditingDescription.set(false);
   }
 
   /** Leaves the currently active channel. */
