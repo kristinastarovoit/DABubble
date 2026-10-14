@@ -13,6 +13,7 @@ import {
   where,
   getDocs,
   writeBatch,
+  arrayUnion,
 } from 'firebase/firestore';
 
 import { FIREBASE_FIRESTORE } from '../../app.config';
@@ -70,6 +71,25 @@ export class UserService {
     await setDoc(doc(this.firestore, 'users', uid), user);
 
     this.users.update((users) => (users.some((u) => u.uid === uid) ? users : [...users, user]));
+
+    await this.joinDefaultChannel(uid);
+  }
+
+  /** Adds a newly created user to the default "Allgemeines" channel, if it exists. */
+  private async joinDefaultChannel(uid: string): Promise<void> {
+    const channelsRef = collection(this.firestore, 'channels');
+    const q = query(channelsRef, where('name', '==', 'Allgemeines'));
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      console.warn('[UserService] Default channel "Allgemeines" not found; skipping auto-join.');
+      return;
+    }
+
+    const defaultChannel = snapshot.docs[0];
+    await updateDoc(defaultChannel.ref, {
+      memberIds: arrayUnion(uid),
+    });
   }
 
   /** Retrieves a single user profile from Firestore.

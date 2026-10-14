@@ -23,7 +23,7 @@ import { AuthService } from '../../shared/services/auth';
 import { DmHeader } from './dm-header/dm-header';
 import { NewMessageService } from '../../shared/services/new-message-service';
 import { ThreadService } from '../../shared/services/thread-service';
-import { UsercardDialog } from "../../shared/components/usercard-dialog/usercard-dialog";
+import { UsercardDialog } from '../../shared/components/usercard-dialog/usercard-dialog';
 import { UserModel } from '../../shared/model/user.model';
 
 @Component({
@@ -91,6 +91,13 @@ export class Chat {
     this.channelService.channels().find((channel) => channel.id === this.channelId()),
   );
 
+  isChannelMember = computed(() => {
+    const channel = this.activeChannel();
+    const uid = this.uid();
+    if (!channel || !uid) return false;
+    return channel.memberIds.includes(uid);
+  });
+
   /** The user in the active DM, falling back to the current user for a self-DM. */
   activeDmPartner = computed(() => {
     const dm = this.dmService.dms().find((dm) => dm.id === this.dmId());
@@ -156,7 +163,6 @@ export class Chat {
     this.currentUnsubscribe?.();
   }
 
-  /** Sends a message to the active channel or direct-message conversation. */
   onSend(text: string) {
     const uid = this.authService.currentUserId();
     if (!uid) {
@@ -169,6 +175,9 @@ export class Chat {
     if (dmId) {
       this.dmService.addMessageToDm(dmId, text, uid);
     } else if (channelId) {
+      if (!this.isChannelMember()) {
+        return;
+      }
       this.channelService.addMessageToChannel(channelId, text, uid);
     }
   }

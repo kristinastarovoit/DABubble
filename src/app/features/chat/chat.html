@@ -1,84 +1,96 @@
 <section class="chat">
   @if (channelId() || dmId() || newMessageService.isNewMessageMode()) {
-  @if (dmId()) {
-  <app-dm-header [currentDmPartner]="activeDmPartner()" [isSelf]="activeDmPartnerIsSelf()"></app-dm-header>
-  } @else if (channelId() || newMessageService.isNewMessageMode()) {
-  <app-channel-header></app-channel-header>
-  }
-  <app-message-list [messages]="messages()"
-    [scrollKey]="dmId() ? 'dm:' + dmId() : channelId() ? 'channel:' + channelId() : undefined"
-    [currentUserId]="uid() ?? ''" (reactionToggled)="onReactionToggled($event)" (editSaved)="onEditSaved($event)"
-    (threadOpened)="openThread($event)" />
+    @if (dmId()) {
+      <app-dm-header
+        [currentDmPartner]="activeDmPartner()"
+        [isSelf]="activeDmPartnerIsSelf()"
+      ></app-dm-header>
+    } @else if (channelId() || newMessageService.isNewMessageMode()) {
+      <app-channel-header></app-channel-header>
+    }
+    <app-message-list
+      [messages]="messages()"
+      [scrollKey]="dmId() ? 'dm:' + dmId() : channelId() ? 'channel:' + channelId() : undefined"
+      [currentUserId]="uid() ?? ''"
+      (reactionToggled)="onReactionToggled($event)"
+      (editSaved)="onEditSaved($event)"
+      (threadOpened)="openThread($event)"
+    />
 
-  @if (
-  dmId() && messagesLoaded() && messages().length === 0 && activeDmIntroContact();
-  as contact
-  ) {
-  <section class="chat__empty-dm-intro">
-    <div class="chat__empty-dm-identity" (click)="selectedUser.set(contact.user); userCard.openUserCard()">
-      <img class="chat__empty-dm-avatar" [src]="contact.user.avatar || 'app-icons/avatar-placeholder.svg'" alt="" />
-      <span class="chat__empty-dm-name">
-        {{ contact.user.name }}
-        @if (contact.isSelf) {
-        <span>(You)</span>
-        }
-      </span>
-    </div>
-    <p class="chat__empty-dm-description">
-      @if (contact.isSelf) {
-      <strong>This space is just for you.</strong>
-      Take notes, list to-dos, or keep links and files handy. You’re also welcome to use this
-      space to talk things over with yourself.
-      } @else {
-      This conversation is taking place only between
-      <span class="chat__empty-dm-mention" (click)="selectedUser.set(contact.user); userCard.openUserCard()">@{{ contact.user.name }}</span> and you.
-      }
-    </p>
-  </section>
-  }
+    @if (
+      dmId() && messagesLoaded() && messages().length === 0 && activeDmIntroContact();
+      as contact
+    ) {
+      <section class="chat__empty-dm-intro">
+        <div
+          class="chat__empty-dm-identity"
+          (click)="selectedUser.set(contact.user); userCard.openUserCard()"
+        >
+          <img
+            class="chat__empty-dm-avatar"
+            [src]="contact.user.avatar || 'app-icons/avatar-placeholder.svg'"
+            alt=""
+          />
+          <span class="chat__empty-dm-name">
+            {{ contact.user.name }}
+            @if (contact.isSelf) {
+              <span>(You)</span>
+            }
+          </span>
+        </div>
+        <p class="chat__empty-dm-description">
+          @if (contact.isSelf) {
+            <strong>This space is just for you.</strong>
+            Take notes, list to-dos, or keep links and files handy. You’re also welcome to use this
+            space to talk things over with yourself.
+          } @else {
+            This conversation is taking place only between
+            <span
+              class="chat__empty-dm-mention"
+              (click)="selectedUser.set(contact.user); userCard.openUserCard()"
+              >@{{ contact.user.name }}</span
+            >
+            and you.
+          }
+        </p>
+      </section>
+    }
 
-  @if (
-  channelId() &&
-  messagesLoaded() &&
-  messages().length === 0 &&
-  activeChannel()?.createdBy === uid() &&
-  activeChannel();
-  as channel
-  ) {
-  <section class="chat__empty-channel-intro">
-    <div class="chat__empty-channel-identity"># {{ channel.name }}</div>
-    <p class="chat__empty-channel-description">
-      You created this channel. This is the beginning of channel
-      <span class="chat__empty-channel-mention">#{{ channel.name }}</span>
-    </p>
-  </section>
-  }
+    @if (
+      channelId() && messagesLoaded() && messages().length === 0 && activeChannel();
+      as channel
+    ) {
+      <section class="chat__empty-channel-intro">
+        <div class="chat__empty-channel-identity"># {{ channel.name }}</div>
+        <p class="chat__empty-channel-description">
+          @if (channel.createdBy === uid()) {
+            You created this channel. This is the beginning of channel
+            <span class="chat__empty-channel-mention">#{{ channel.name }}</span>
+          } @else if (isChannelMember()) {
+            You are a member in this channel. This is the beginning of channel
+            <span class="chat__empty-channel-mention">#{{ channel.name }}</span>
+          } @else {
+            You are not a member of this channel yet. Join to write messages in
+            <span class="chat__empty-channel-mention">#{{ channel.name }}</span>
+          }
+        </p>
+      </section>
+    }
 
-  @if (
-  channelId() &&
-  messagesLoaded() &&
-  messages().length === 0 &&
-  activeChannel()?.createdBy !== uid() &&
-  activeChannel();
-  as channel
-  ) {
-  <section class="chat__empty-channel-intro">
-    <div class="chat__empty-channel-identity"># {{ channel.name }}</div>
-    <p class="chat__empty-channel-description">
-      You are a member in this channel. This is the beginning of channel
-      <span class="chat__empty-channel-mention">#{{ channel.name }}</span>
-    </p>
-  </section>
+    <app-message-input
+      (send)="onSend($event)"
+      #messageInput
+      [disabled]="(!channelId() && !dmId()) || (!!channelId() && !isChannelMember())"
+      [placeholder]="
+        channelId() && !isChannelMember()
+          ? 'Join #' + (activeChannel()?.name ?? '') + ' to write messages'
+          : channelId()
+            ? 'Message to #' + (activeChannel()?.name ?? '')
+            : dmId()
+              ? 'Message to #' + (activeDmPartner()?.name ?? '')
+              : 'Choose a recipient first'
+      "
+    />
   }
-
-  <app-message-input (send)="onSend($event)" #messageInput [disabled]="!channelId() && !dmId()" [placeholder]="
-        channelId()
-          ? 'Message to #' + (activeChannel()?.name ?? '')
-          : dmId()
-            ? 'Message to #' + (activeDmPartner()?.name ?? '')
-            : 'Choose a recipient first'
-      " /* (messageSent)="sendMessage($event)" */ /* (messageSent)="this.channelService.addMessageToChannel($event)"
-    */ />
-  } 
   <app-usercard-dialog #userCard [user]="selectedUser()"></app-usercard-dialog>
 </section>

@@ -151,6 +151,7 @@ export class Header {
           this.channelService.deleteGuestMessages(currentUser.uid),
           this.dmService.deleteGuestMessages(currentUser.uid),
         ]);
+        await this.channelService.removeGuestFromChannels(currentUser.uid);
       } catch (error) {
         console.error('Failed to delete guest content during logout.', error);
       }

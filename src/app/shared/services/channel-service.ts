@@ -514,31 +514,29 @@ export class ChannelService {
     });
   }
 
-  /** Removes a departing guest's uid from a reactions map, queuing the necessary
-   * batch update(s). Returns whether any change was queued. */
-  private removeGuestReactions(
-    batch: ReturnType<typeof writeBatch>,
-    ref: DocumentReference,
+  /** Builds the field updates needed to remove a departing guest's uid from a
+   * reactions map. Returns an empty object if there's nothing to remove. */
+  private buildReactionRemovalUpdates(
     reactions: Record<string, string[]> | undefined,
     senderId: string,
-  ): boolean {
-    if (!reactions) return false;
-    let changed = false;
+  ): Record<string, unknown> {
+    const updates: Record<string, unknown> = {};
+    if (!reactions) return updates;
+
     for (const [emoji, userIds] of Object.entries(reactions)) {
       if (!userIds.includes(senderId)) continue;
       const remaining = userIds.filter((id) => id !== senderId);
-      if (remaining.length === 0) {
-        batch.update(ref, { [`reactions.${emoji}`]: deleteField() });
-      } else {
-        batch.update(ref, { [`reactions.${emoji}`]: arrayRemove(senderId) });
-      }
-      changed = true;
+      updates[`reactions.${emoji}`] =
+        remaining.length === 0 ? deleteField() : arrayRemove(senderId);
     }
-    return changed;
+
+    return updates;
   }
 
   /** Deletes every message and thread reply authored by the given user, across all
-   * channels, and strips their reactions from everyone else's messages/replies. */
+   * channels; strips their reactions from everyone else's messages/replies; and
+   * decrements each parent message's threadCount by the number of its thread
+   * replies that were deleted. */
   async deleteGuestMessages(senderId: string): Promise<void> {
     const channelsSnapshot = await getDocs(collection(this.db, 'channels'));
     const batch = writeBatch(this.db);
@@ -550,13 +548,8 @@ export class ChannelService {
 
       for (const messageDoc of allMessages.docs) {
         const message = messageDoc.data() as Message;
-
-        if (message.senderId === senderId) {
-          batch.delete(messageDoc.ref);
-          hasWrites = true;
-        } else if (this.removeGuestReactions(batch, messageDoc.ref, message.reactions, senderId)) {
-          hasWrites = true;
-        }
+        const isOwnMessage = message.senderId === senderId;
+        let deletedReplyCount = 0;
 
         if (message.threadCount && message.threadCount > 0) {
           const threadRef = collection(
@@ -574,13 +567,60 @@ export class ChannelService {
 
             if (reply.senderId === senderId) {
               batch.delete(threadDoc.ref);
+              deletedReplyCount++;
               hasWrites = true;
-            } else if (this.removeGuestReactions(batch, threadDoc.ref, reply.reactions, senderId)) {
-              hasWrites = true;
+            } else {
+              const replyUpdates = this.buildReactionRemovalUpdates(reply.reactions, senderId);
+              if (Object.keys(replyUpdates).length > 0) {
+                batch.update(threadDoc.ref, replyUpdates);
+                hasWrites = true;
+              }
             }
           }
         }
+
+        if (isOwnMessage) {
+          batch.delete(messageDoc.ref);
+          hasWrites = true;
+        } else {
+          const messageUpdates = this.buildReactionRemovalUpdates(message.reactions, senderId);
+          if (deletedReplyCount > 0) {
+            messageUpdates['threadCount'] = increment(-deletedReplyCount);
+          }
+          if (Object.keys(messageUpdates).length > 0) {
+            batch.update(messageDoc.ref, messageUpdates);
+            hasWrites = true;
+          }
+        }
       }
+    }
+
+    if (hasWrites) {
+      await batch.commit();
+    }
+  }
+  /** Removes a departing guest from every channel's member list. A channel that
+   * ends up with no members left (the guest was the only one) is deleted
+   * entirely — its messages are already cleaned up by `deleteGuestMessages`
+   * beforehand, since a guest-only channel could only contain guest messages. */
+  async removeGuestFromChannels(uid: string): Promise<void> {
+    const channelsSnapshot = await getDocs(
+      query(collection(this.db, 'channels'), where('memberIds', 'array-contains', uid)),
+    );
+
+    const batch = writeBatch(this.db);
+    let hasWrites = false;
+
+    for (const channelDoc of channelsSnapshot.docs) {
+      const channel = channelDoc.data() as Channel;
+      const remainingMembers = channel.memberIds.filter((memberId) => memberId !== uid);
+
+      if (remainingMembers.length === 0) {
+        batch.delete(channelDoc.ref);
+      } else {
+        batch.update(channelDoc.ref, { memberIds: remainingMembers });
+      }
+      hasWrites = true;
     }
 
     if (hasWrites) {
