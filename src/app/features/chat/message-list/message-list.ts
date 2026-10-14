@@ -15,6 +15,9 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ReactionBar } from '../reaction-bar/reaction-bar';
 import { Message, MessageReaction } from '../../../shared/interfaces/message';
 import { UserService } from '../../../shared/services/users';
+import { UserModel } from '../../../shared/model/user.model';
+import { DmService } from '../../../shared/services/dm-service';
+import { UsercardDialog } from '../../../shared/components/usercard-dialog/usercard-dialog';
 import { MentionHighlightPipe } from '../../../shared/utilities/mention-highlight.pipe';
 import { MessageNavigationService } from '../../../shared/services/message-navigation-service';
 import { CURATED_EMOJIS } from '../../../shared/utilities/emoji-set';
@@ -26,7 +29,7 @@ interface MessageGroup {
 }
 
 @Component({
-  imports: [CommonModule, ReactionBar, DatePipe, ReactionPicker, MentionHighlightPipe],
+  imports: [CommonModule, ReactionBar, DatePipe, ReactionPicker, UsercardDialog, MentionHighlightPipe],
   selector: 'app-message-list',
   styleUrl: './message-list.scss',
   templateUrl: './message-list.html',
@@ -51,6 +54,8 @@ export class MessageList {
 
   private userService = inject(UserService);
   private navigationService = inject(MessageNavigationService);
+  private dmService = inject(DmService);
+  selectedUser = signal<UserModel | undefined>(undefined);
 
   /** Messages displayed in the list. */
   messages = input<Message[]>([]);
@@ -177,5 +182,17 @@ export class MessageList {
   /** Returns the display name for the given sender ID. */
   getSenderAvatar(senderId: string): string {
     return this.userService.users().find((user) => user.uid === senderId)?.avatar ?? senderId;
+  }
+
+  /** Returns the sender's user profile when it is available. */
+  getSenderUser(senderId: string): UserModel | undefined {
+    return this.userService.users().find((user) => user.uid === senderId);
+  }
+
+  /**
+   * Opens the direct-message conversation with the selected message author.
+   */
+  async openDmWithUser(user: UserModel): Promise<void> {
+    await this.dmService.openDmWith(user.uid);
   }
 }

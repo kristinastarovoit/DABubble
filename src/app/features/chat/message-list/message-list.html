@@ -13,7 +13,10 @@
 
     <div class="message-list__content">
       <div class="message-list__meta">
-        <span class="message-list__author">{{ getSenderName(message.senderId) }}</span>
+        <span class="message-list__author" role="button" tabindex="0"
+          (click)="selectedUser.set(getSenderUser(message.senderId)); userCard.openUserCard()">
+          {{ getSenderName(message.senderId) }}
+        </span>
         <span class="message-list__time">
           @if (message.createdAt) {
           {{ message.createdAt.toDate() | date: 'shortTime' }}
@@ -92,3 +95,5 @@
   }
   }
 </div>
+
+<app-usercard-dialog #userCard [user]="selectedUser()" (dmUser)="openDmWithUser($event)"></app-usercard-dialog>

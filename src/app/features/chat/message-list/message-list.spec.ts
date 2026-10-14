@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MessageList } from './message-list';
 import { UserService } from '../../../shared/services/users';
+import { Presence } from '../../../shared/services/presence';
+import { DmService } from '../../../shared/services/dm-service';
+import { signal } from '@angular/core';
 
 describe('MessageList', () => {
   let component: MessageList;
@@ -9,7 +12,14 @@ describe('MessageList', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MessageList],
-      providers: [{ provide: UserService, useValue: { users: () => [] } }],
+      providers: [
+        { provide: UserService, useValue: { users: () => [] } },
+        { provide: Presence, useValue: { isOnline: () => false } },
+        {
+          provide: DmService,
+          useValue: { openDmWith: async () => undefined },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MessageList);
