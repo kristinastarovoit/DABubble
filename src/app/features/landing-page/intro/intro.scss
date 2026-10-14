@@ -1,0 +1,39 @@
+@use '../../../../styles/variables' as *;
+
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: $dark-purple-one;
+}
+
+.logo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+
+  svg {
+    display: block;
+    overflow: visible;
+  }
+}
+
+.mark {
+  opacity: 0;
+}
+
+.word {
+  fill: $white;
+}
+
+.letter {
+  opacity: 0;
+}
