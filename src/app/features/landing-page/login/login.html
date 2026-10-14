@@ -16,7 +16,7 @@
       />
     </svg>
 
-    <input type="email" placeholder="example@email.com" [formField]="loginForm.email" />
+    <input type="email" placeholder="example@email.com" [formField]="loginForm.email" (keydown.enter)="onSubmit(); $event.preventDefault()"/>
     @if (loginForm.email().invalid() && loginForm.email().touched()) {
       <span class="error-msg">{{ loginForm.email().errors()[0].message }}</span>
     }
@@ -36,7 +36,8 @@
       />
     </svg>
 
-    <input type="password" placeholder="Password" [formField]="loginForm.password" />
+    <input type="password" placeholder="Password" [formField]="loginForm.password" (keydown.enter)="onSubmit(); $event.preventDefault()"
+/>
     @if (loginForm.password().invalid() && loginForm.password().touched()) {
       <span class="error-msg">{{ loginForm.password().errors()[0].message }}</span>
     }
