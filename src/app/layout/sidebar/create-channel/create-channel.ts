@@ -26,7 +26,7 @@ export class CreateChannel {
   description = '';
 
   /** Validation error message shown to the user. */
-  errorMessage = '';
+  errorMessage = signal('');
 
   /** Provides the available channels and channel selection state. */
   channelService = inject(ChannelService);
@@ -47,7 +47,7 @@ export class CreateChannel {
   selectedMembers = signal<UserModel[]>([]);
 
   /** Validation or persistence error shown in the second step. */
-  membersError = '';
+  membersError = signal('');
 
   /** Whether enough information has been provided to create the channel. */
   canCreateChannel = computed(
@@ -84,17 +84,24 @@ export class CreateChannel {
     this.resetForm();
   }
 
+  /** Clears the channel-name validation message as soon as the user edits the field. */
+  onNameInput(): void {
+    if (this.errorMessage()) {
+      this.errorMessage.set('');
+    }
+  }
+
   /** Validates the channel name and advances to the member-selection step. */
   async submit(): Promise<void> {
-    this.errorMessage = '';
+    this.errorMessage.set('');
     const trimmedName = this.name.trim();
     if (!trimmedName) {
-      this.errorMessage = 'Please enter a channel name.';
+      this.errorMessage.set('Please enter a channel name.');
       return;
     }
 
     if (await this.channelService.channelNameExists(trimmedName)) {
-      this.errorMessage = 'A channel with this name already exists.';
+      this.errorMessage.set('A channel with this name already exists.');
       return;
     }
 
@@ -115,7 +122,7 @@ export class CreateChannel {
 
   /** Creates the channel with the chosen members and closes both dialogs. */
   async createChannel(): Promise<void> {
-    this.membersError = '';
+    this.membersError.set('');
 
     const currentUserId = this.authService.currentUserId();
     const memberIds =
@@ -130,7 +137,7 @@ export class CreateChannel {
     );
 
     if (!channelId) {
-      this.membersError = 'A channel with this name already exists.';
+      this.membersError.set('A channel with this name already exists.');
       return;
     }
 
@@ -168,11 +175,10 @@ export class CreateChannel {
   private resetForm(): void {
     this.name = '';
     this.description = '';
-    this.errorMessage = '';
+    this.errorMessage.set('');
     this.memberOption.set('all');
     this.memberQuery = '';
     this.selectedMembers.set([]);
-    this.membersError = '';
+    this.membersError.set('');
   }
 }
-
