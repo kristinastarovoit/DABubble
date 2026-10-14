@@ -1,5 +1,6 @@
 @if (isSidebarOpen() || isMobile()) {
 <aside class="sidebar">
+  @if (!isMobile()) {
   <div class="sidebar__header">
     <div class="sidebar__title">
       <img src="app-icons/workspace.svg" alt="Workspace Logo" class="sidebar__title-icon" />
@@ -10,6 +11,7 @@
       <img src="app-icons/edit-purple.svg" alt="Edit" class="sidebar__edit-icon sidebar__edit-icon--hover" />
     </button>
   </div>
+  }
 
   <div class="sidebar__section">
     <div class="sidebar__section-header" (click)="toggleChannels()">
@@ -94,6 +96,12 @@
     }
   </div>
 </aside>
+}
+
+@if (isMobile()) {
+<button type="button" class="sidebar__new-message-fab" aria-label="New message" (click)="openWorkspaceEdit()">
+  <img src="app-icons/edit_mobile.svg" alt="" />
+</button>
 }
 
 <button class="sidebar-toggle" [class.sidebar-toggle--open]="isSidebarOpen()" (click)="toggleSidebar()">
