@@ -18,7 +18,6 @@ import { Message } from '../../shared/interfaces/message';
 import { ChannelService } from '../../shared/services/channel-service';
 import { DmService } from '../../shared/services/dm-service';
 import { FIREBASE_AUTH } from '../../app.config';
-import { LandingPage } from '../landing-page/landing-page';
 import { UserService } from '../../shared/services/users';
 import { AuthService } from '../../shared/services/auth';
 import { DmHeader } from './dm-header/dm-header';
@@ -28,7 +27,7 @@ import { UsercardDialog } from "../../shared/components/usercard-dialog/usercard
 import { UserModel } from '../../shared/model/user.model';
 
 @Component({
-  imports: [CommonModule, ChannelHeader, MessageInput, MessageList, LandingPage, DmHeader, UsercardDialog],
+  imports: [CommonModule, ChannelHeader, MessageInput, MessageList, DmHeader, UsercardDialog],
   selector: 'app-chat',
   styleUrl: './chat.scss',
   templateUrl: './chat.html',

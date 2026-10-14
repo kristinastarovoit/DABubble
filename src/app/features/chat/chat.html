@@ -79,8 +79,6 @@
             : 'Choose a recipient first'
       " /* (messageSent)="sendMessage($event)" */ /* (messageSent)="this.channelService.addMessageToChannel($event)"
     */ />
-  } @else {
-  <app-landing-page></app-landing-page>
-  }
+  } 
   <app-usercard-dialog #userCard [user]="selectedUser()"></app-usercard-dialog>
 </section>
