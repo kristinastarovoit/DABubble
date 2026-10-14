@@ -1,4 +1,13 @@
-import { Component, ElementRef, EventEmitter, Output, ViewChild, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Output,
+  ViewChild,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ChannelService } from '../../../shared/services/channel-service';
@@ -37,6 +46,8 @@ export class CreateChannel {
   /** Provides reactive authentication state. */
   private authService = inject(AuthService);
 
+  private userService = inject(UserService);
+
   /** Which member option is currently selected in the second step. */
   memberOption = signal<'all' | 'specific'>('all');
 
@@ -54,13 +65,30 @@ export class CreateChannel {
     () => this.memberOption() === 'all' || this.selectedMembers().length > 0,
   );
 
-  /** All users eligible as "contacts", excluding the signed-in user. */
-  private contactUsers = computed(() =>
-    this.dmService
-      .dmPartners()
-      .filter((partner) => !partner.isSelf)
-      .map((partner) => partner.user),
-  );
+  /** The channel that was active when channel creation started — the source for "all
+   * contacts". Falls back to "Allgemeines" if no channel was active. */
+  private sourceChannel = computed(() => {
+    const channels = this.channelService.channels();
+    const activeId = this.channelService.activeChannelId();
+    return (
+      channels.find((channel) => channel.id === activeId) ??
+      channels.find((channel) => channel.name === 'Allgemeines')
+    );
+  });
+
+  /** Display name of the source channel, shown in the "Add all contacts from #..." label. */
+  sourceChannelName = computed(() => this.sourceChannel()?.name ?? '');
+
+  /** The source channel's members (excluding the signed-in user), used by "Add all contacts". */
+  private contactUsers = computed(() => {
+    const channel = this.sourceChannel();
+    if (!channel) return [];
+
+    const currentUserId = this.authService.currentUserId();
+    return this.userService
+      .users()
+      .filter((user) => channel.memberIds.includes(user.uid) && user.uid !== currentUserId);
+  });
 
   /** Contacts matching the current search query that have not been selected yet. */
   get memberSuggestions(): UserModel[] {
