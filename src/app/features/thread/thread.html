@@ -31,7 +31,10 @@
 
       <div class="thread__message-content">
         <div class="thread__meta">
-          <span class="thread__author">{{ getSenderName(parentMessage.senderId) }}</span>
+          <span class="thread__author" role="button" tabindex="0"
+            (click)="selectedUser.set(getSenderUser(parentMessage.senderId)); userCard.openUserCard()">
+            {{ getSenderName(parentMessage.senderId) }}
+          </span>
           <span class="thread__time">{{
             parentMessage.createdAt?.toDate() | date: 'shortTime'
             }}</span>
@@ -107,7 +110,10 @@
 
       <div class="thread__message-content">
         <div class="thread__meta">
-          <span class="thread__author">{{ getSenderName(reply.senderId) }}</span>
+          <span class="thread__author" role="button" tabindex="0"
+            (click)="selectedUser.set(getSenderUser(reply.senderId)); userCard.openUserCard()"
+>            {{ getSenderName(reply.senderId) }}
+          </span>
           <span class="thread__time">{{ reply.createdAt?.toDate() | date: 'shortTime' }}</span>
         </div>
 
@@ -177,3 +183,5 @@
 
   <app-message-input [placeholder]="'Reply...'" (send)="sendReply($event)"></app-message-input>
 </aside>
+
+<app-usercard-dialog #userCard [user]="selectedUser()" (dmUser)="openDmWithUser($event)"></app-usercard-dialog>

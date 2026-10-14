@@ -159,6 +159,11 @@
     font-weight: 700;
     font-size: 1.1rem;
     color: $black;
+    cursor: pointer;
+
+    &:hover {
+      color: $dark-purple-one;
+    }
   }
 
   &__time {
@@ -191,8 +196,10 @@
   right: auto;
   left: 12px;
 }
+
 @media (max-width: 650px) {
   .thread {
+
     &__header,
     &__content {
       padding: 12px;

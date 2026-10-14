@@ -19,11 +19,13 @@ import { ChannelService } from '../../shared/services/channel-service';
 import { DmService } from '../../shared/services/dm-service';
 import { AuthService } from '../../shared/services/auth';
 import { UserService } from '../../shared/services/users';
+import { UserModel } from '../../shared/model/user.model';
+import { UsercardDialog } from '../../shared/components/usercard-dialog/usercard-dialog';
 import { MentionHighlightPipe } from '../../shared/utilities/mention-highlight.pipe';
 import { CURATED_EMOJIS } from '../../shared/utilities/emoji-set';
 
 @Component({
-  imports: [CommonModule, MessageInput, ReactionBar, ReactionPicker, MentionHighlightPipe],
+  imports: [CommonModule, MessageInput, ReactionBar, ReactionPicker, UsercardDialog, MentionHighlightPipe],
   selector: 'app-thread',
   styleUrl: './thread.scss',
   templateUrl: './thread.html',
@@ -34,6 +36,7 @@ export class Thread {
   private dmService = inject(DmService);
   private authService = inject(AuthService);
   private userService = inject(UserService);
+  selectedUser = signal<UserModel | undefined>(undefined);
 
   /** The curated set of emojis offered by the picker. */
   protected readonly curatedEmojis = CURATED_EMOJIS;
@@ -359,6 +362,17 @@ export class Thread {
   /** Resolves a sender's display name from their user ID. */
   getSenderAvatar(senderId: string): string {
     return this.userService.users().find((user) => user.uid === senderId)?.avatar ?? senderId;
+  }
+
+  /** Resolves a sender's user profile from their ID. */
+  getSenderUser(senderId: string): UserModel | undefined {
+    return this.userService.users().find((user) => user.uid === senderId);
+  }
+
+  /** Opens the direct-message conversation with the selected thread author. */
+  async openDmWithUser(user: UserModel): Promise<void> {
+    await this.dmService.openDmWith(user.uid);
+    this.close();
   }
 
   /** The channel the open thread belongs to, if it was opened from a channel. */
