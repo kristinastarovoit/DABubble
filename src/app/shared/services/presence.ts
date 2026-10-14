@@ -23,9 +23,40 @@ export class Presence {
       this.presenceByUid.set(next);
     });
 
-    effect(() => {
+    effect((onCleanup) => {
       const uid = this.authService.currentUserId();
-      if (uid) this.trackOwnPresence(uid);
+      if (!uid) return;
+
+      const myStatusRef = ref(this.database, `status/${uid}`);
+      const connectedRef = ref(this.database, '.info/connected');
+
+      const unsubscribeConnected = onValue(connectedRef, (snapshot) => {
+        if (snapshot.val() !== true) return;
+
+        onDisconnect(myStatusRef)
+          .set({
+            state: 'offline' satisfies PresenceState,
+            lastChanged: serverTimestamp(),
+          })
+          .then(() => {
+            return set(myStatusRef, {
+              state: 'online' satisfies PresenceState,
+              lastChanged: serverTimestamp(),
+            });
+          })
+          .then(() => {
+            // Optimistic local update: don't rely solely on the global listener
+            // picking up our own write, which can lag after a reconnect.
+            this.presenceByUid.update((current) => ({ ...current, [uid]: 'online' }));
+          })
+          .catch((error) => {
+            console.error('[Presence] failed to register presence', error);
+          });
+      });
+
+      onCleanup(() => {
+        unsubscribeConnected();
+      });
     });
   }
 
@@ -36,27 +67,6 @@ export class Presence {
     return fallbackStatus === 'online';
   }
 
-  private trackOwnPresence(uid: string): void {
-    const myStatusRef = ref(this.database, `status/${uid}`);
-    const connectedRef = ref(this.database, '.info/connected');
-
-    onValue(connectedRef, (snapshot) => {
-      if (snapshot.val() !== true) return;
-    });
-
-    onDisconnect(myStatusRef)
-      .set({
-        state: 'offline' satisfies PresenceState,
-        lastChanged: serverTimestamp(),
-      })
-      .then(() => {
-        set(myStatusRef, {
-          state: 'online' satisfies PresenceState,
-          lastChanged: serverTimestamp(),
-        });
-      });
-  }
-
   async goOffline(): Promise<void> {
     const uid = this.authService.currentUserId();
     if (!uid) return;
@@ -64,5 +74,6 @@ export class Presence {
       state: 'offline' satisfies PresenceState,
       lastChanged: serverTimestamp(),
     });
+    this.presenceByUid.update((current) => ({ ...current, [uid]: 'offline' }));
   }
 }
