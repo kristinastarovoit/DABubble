@@ -61,6 +61,17 @@ export class EditChannel {
 
   @ViewChild('dialogRef') private dialogRef!: ElementRef<HTMLDialogElement>;
 
+  @ViewChild('descriptionInput')
+  set descriptionInput(element: ElementRef<HTMLTextAreaElement> | undefined) {
+    if (!element) return;
+
+    requestAnimationFrame(() => {
+      if (element.nativeElement.isConnected) {
+        this.resizeDescriptionElement(element.nativeElement);
+      }
+    });
+  }
+
   /** Whether the name field is in edit mode. */
   isEditingName = signal(false);
 
@@ -204,6 +215,21 @@ export class EditChannel {
   startEditingDescription(): void {
     this.editedDescription = this.activeChannel()?.description ?? '';
     this.isEditingDescription.set(true);
+  }
+
+  /** Resizes the description textarea to fit its current content. */
+  resizeDescription(event: Event): void {
+    this.resizeDescriptionElement(event.currentTarget as HTMLTextAreaElement);
+  }
+
+  saveDescriptionOnEnter(event: Event): void {
+    event.preventDefault();
+    void this.saveDescription();
+  }
+
+  private resizeDescriptionElement(textarea: HTMLTextAreaElement): void {
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
   }
 
   /** Saves the edited channel description. */
