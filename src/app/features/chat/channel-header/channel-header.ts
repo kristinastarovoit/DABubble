@@ -216,9 +216,16 @@ export class ChannelHeader {
 
   /** Positions the dialog directly below the meta container (avatars + add-button row). */
   private positionDialog(): void {
-    const rect = this.metaRef.nativeElement.getBoundingClientRect();
     const dialog = this.membersDialog.nativeElement;
 
+    if (window.matchMedia('(max-width: 800px)').matches) {
+      dialog.style.removeProperty('top');
+      dialog.style.removeProperty('right');
+      dialog.style.removeProperty('left');
+      return;
+    }
+
+    const rect = this.metaRef.nativeElement.getBoundingClientRect();
     dialog.style.top = `${rect.bottom + 8}px`;
     dialog.style.right = `${window.innerWidth - rect.right}px`;
     dialog.style.left = 'auto';
