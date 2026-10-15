@@ -145,7 +145,7 @@ export class MessageList {
 
       if (!group) {
         group = {
-          dateLabel: date.toLocaleDateString('de-DE', {
+          dateLabel: date.toLocaleDateString('en-EN', {
             weekday: 'long',
             month: 'long',
             day: 'numeric',
