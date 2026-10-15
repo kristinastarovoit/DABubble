@@ -79,6 +79,7 @@
 
     <app-message-input
       (send)="onSend($event)"
+      (composerFocused)="onComposerFocus()"
       #messageInput
       [disabled]="(!channelId() && !dmId()) || (!!channelId() && !isChannelMember())"
       [placeholder]="

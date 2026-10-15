@@ -50,6 +50,26 @@
   }
 }
 
+@media (max-width: 1350px) and (min-width: 901px) {
+  .app-wrapper {
+    position: relative;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+
+    app-thread {
+      display: contents;
+    }
+
+    &.sidebar-hidden {
+      grid-template-columns: 0px minmax(0, 1fr);
+    }
+
+    &.thread-hidden,
+    &.sidebar-hidden.thread-hidden {
+      grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+    }
+  }
+}
+
 @media (max-width: 900px) {
   :host {
     display: flex;

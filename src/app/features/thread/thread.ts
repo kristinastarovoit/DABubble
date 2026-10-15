@@ -31,11 +31,22 @@ import { CURATED_EMOJIS } from '../../shared/utilities/emoji-set';
   templateUrl: './thread.html',
 })
 export class Thread {
+  /** Holds the currently opened thread. */
   private threadService = inject(ThreadService);
+
+  /** Provides channel messages, replies and reactions. */
   private channelService = inject(ChannelService);
+
+  /** Provides direct-message conversations, replies and reactions. */
   private dmService = inject(DmService);
+
+  /** Provides the signed-in user. */
   private authService = inject(AuthService);
+
+  /** Provides the list of known users. */
   private userService = inject(UserService);
+
+  /** The user whose profile card is currently shown, if any. */
   selectedUser = signal<UserModel | undefined>(undefined);
 
   /** The curated set of emojis offered by the picker. */
@@ -97,10 +108,16 @@ export class Thread {
   /** Unsubscribes from the active parent-message listener when the open thread changes. */
   private currentMessageUnsubscribe: (() => void) | undefined;
 
+  /** The scrollable content container of the thread panel. */
   private threadContentElement = viewChild<ElementRef<HTMLDivElement>>('threadContent');
+
+  /** Whether the content should follow new replies by scrolling to the bottom. */
   private shouldAutoScroll = true;
+
+  /** The previously rendered thread, used to detect when a different thread is opened. */
   private previousThread: ActiveThread | null = null;
 
+  /** Subscribes to the live thread data and keeps the scroll position at the bottom. */
   constructor() {
     effect(() => {
       this.currentThreadUnsubscribe?.();
@@ -359,7 +376,7 @@ export class Thread {
     return this.userService.users().find((user) => user.uid === senderId)?.name ?? senderId;
   }
 
-  /** Resolves a sender's display name from their user ID. */
+  /** Resolves a sender's avatar from their user ID. */
   getSenderAvatar(senderId: string): string {
     return this.userService.users().find((user) => user.uid === senderId)?.avatar ?? senderId;
   }
