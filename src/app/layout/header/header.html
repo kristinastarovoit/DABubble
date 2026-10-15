@@ -46,12 +46,37 @@
             </ul>
           }
 
-          @if (searchResults().messages.length > 0) {
-            <p class="header__search-heading">Found messages:</p>
+          @if (channelMessageResult().length > 0) {
+            <p class="header__search-heading">Found channel messages:</p>
             <ul class="header__search-list">
-              @for (result of searchResults().messages; track result.message.id) {
+              @for (result of channelMessageResult(); track result.message.id) {
                 <li class="header__search-item" (click)="openMessageResult(result)">
-                  <strong>{{ result.senderName }}:</strong> {{ result.message.text }}
+                  <strong>{{ result.senderName }}</strong> in #{{ result.conversationName }}:
+                  {{ result.message.text }}
+                </li>
+              }
+            </ul>
+          }
+
+          @if (dmMessageResult().length > 0) {
+            <p class="header__search-heading">Found direct messages:</p>
+            <ul class="header__search-list">
+              @for (result of dmMessageResult(); track result.message.id) {
+                <li class="header__search-item" (click)="openMessageResult(result)">
+                  <strong>{{ result.senderName }}</strong> to {{ result.conversationName }}:
+                  {{ result.message.text }}
+                </li>
+              }
+            </ul>
+          }
+
+          @if (threadMessageResult().length > 0) {
+            <p class="header__search-heading">Found thread replies:</p>
+            <ul class="header__search-list">
+              @for (result of threadMessageResult(); track result.message.id) {
+                <li class="header__search-item" (click)="openMessageResult(result)">
+                  <strong>{{ result.senderName }}</strong> in {{ result.conversationName }}:
+                  {{ result.message.text }}
                 </li>
               }
             </ul>

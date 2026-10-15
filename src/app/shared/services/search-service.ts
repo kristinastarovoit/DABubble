@@ -25,9 +25,10 @@ const EMPTY_RESULTS: SearchResults = { channels: [], users: [], messages: [] };
 export interface MessageSearchResult {
   message: Message;
   senderName: string;
-  source: 'channel' | 'dm';
+  source: 'channel' | 'dm' | 'channel-thread' | 'dm-thread';
   conversationId: string;
   conversationName: string;
+  parentMessageId?: string;
 }
 
 @Service()
@@ -84,7 +85,11 @@ export class SearchService {
       channels = this.searchChannels(needle);
     } else {
       channels = this.searchChannels(needle);
-      messages = await this.searchMessages(needle);
+      const [channelAndDmMessages, threadMessages] = await Promise.all([
+        this.searchMessages(needle),
+        this.searchThreads(needle),
+      ]);
+      messages = [...channelAndDmMessages, ...threadMessages];
     }
 
     this.results.set({ channels, users, messages });
@@ -126,11 +131,59 @@ export class SearchService {
     return results.flat().filter(({ message }) => message.text.toLowerCase().includes(needle));
   }
 
+  private async searchThreads(needle: string): Promise<MessageSearchResult[]> {
+    const currentUserId = this.authService.currentUserId();
+
+    const channelThreadSearches = this.channelService.channels().map(async (channel) => {
+      const messagesSnapshot = await getDocs(
+        collection(this.firestore, 'channels', channel.id, 'messages'),
+      );
+      const threadFetches = messagesSnapshot.docs
+        .filter((messageDoc) => (messageDoc.data() as Message).threadCount)
+        .map((messageDoc) =>
+          getDocs(
+            collection(this.firestore, 'channels', channel.id, 'messages', messageDoc.id, 'thread'),
+          ).then((threadSnapshot) =>
+            threadSnapshot.docs.map((doc) =>
+              this.toMessageResult(doc, 'channel-thread', channel.id, channel.name, messageDoc.id),
+            ),
+          ),
+        );
+      return (await Promise.all(threadFetches)).flat();
+    });
+
+    const dmThreadSearches = this.dmService.dms().map(async (dm) => {
+      const messagesSnapshot = await getDocs(collection(this.firestore, 'dms', dm.id, 'messages'));
+      const threadFetches = messagesSnapshot.docs
+        .filter((messageDoc) => (messageDoc.data() as Message).threadCount)
+        .map((messageDoc) =>
+          getDocs(
+            collection(this.firestore, 'dms', dm.id, 'messages', messageDoc.id, 'thread'),
+          ).then((threadSnapshot) =>
+            threadSnapshot.docs.map((doc) =>
+              this.toMessageResult(
+                doc,
+                'dm-thread',
+                dm.id,
+                this.getDmPartnerName(dm.id, currentUserId),
+                messageDoc.id,
+              ),
+            ),
+          ),
+        );
+      return (await Promise.all(threadFetches)).flat();
+    });
+
+    const results = await Promise.all([...channelThreadSearches, ...dmThreadSearches]);
+    return results.flat().filter(({ message }) => message.text.toLowerCase().includes(needle));
+  }
+
   private toMessageResult(
     doc: QueryDocumentSnapshot,
-    source: 'channel' | 'dm',
+    source: 'channel' | 'dm' | 'channel-thread' | 'dm-thread',
     conversationId: string,
     conversationName: string,
+    parentMessageId?: string,
   ): MessageSearchResult {
     const message = { id: doc.id, ...(doc.data() as Message) };
     return {
@@ -138,6 +191,7 @@ export class SearchService {
       conversationId,
       conversationName,
       source,
+      parentMessageId,
       senderName: this.userService.getUserName(message.senderId),
     };
   }

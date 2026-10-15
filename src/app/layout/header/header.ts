@@ -10,6 +10,8 @@ import { Channel } from '../../shared/interfaces/channel';
 import { ChannelService } from '../../shared/services/channel-service';
 import { DmService } from '../../shared/services/dm-service';
 import { UserModel } from '../../shared/model/user.model';
+import { ThreadService } from '../../shared/services/thread-service';
+import { Message } from '../../shared/interfaces/message';
 
 @Component({
   imports: [FormsModule],
@@ -25,6 +27,7 @@ export class Header {
   private navigationService = inject(MessageNavigationService);
   private channelService = inject(ChannelService);
   private dmService = inject(DmService);
+  private threadService = inject(ThreadService);
   presenceService = inject(Presence);
   searchResults = this.searchService.results;
   showSearchResults = computed(() => this.searchService.isQueryValid() && this.isSearchOpen());
@@ -54,6 +57,18 @@ export class Header {
   isEditingUser = signal(false);
 
   selectedAvatar = signal('');
+
+  channelMessageResult = computed(() =>
+    this.searchResults().messages.filter((r) => r.source === 'channel'),
+  );
+
+  dmMessageResult = computed(() => this.searchResults().messages.filter((r) => r.source === 'dm'));
+
+  threadMessageResult = computed(() =>
+    this.searchResults().messages.filter(
+      (r) => r.source === 'channel-thread' || r.source === 'dm-thread',
+    ),
+  );
 
   protected readonly avatar = [
     'app-icons/avatar_1.svg',
@@ -177,11 +192,15 @@ export class Header {
 
   openMessageResult(result: MessageSearchResult): void {
     if (!result.message.id) return;
-    if (result.source === 'channel') {
+
+    if (result.source === 'channel-thread' || result.source === 'dm-thread') {
+      void this.openThreadResult(result);
+    } else if (result.source === 'channel') {
       this.navigationService.goToChannelMessage(result.conversationId, result.message.id);
     } else {
       this.navigationService.goToDmMessage(result.conversationId, result.message.id);
     }
+
     this.resetSearch();
   }
 
@@ -189,6 +208,37 @@ export class Header {
     this.searchService.clear();
     this.searchQuery = '';
     this.closeSearchResult();
+  }
+
+  private async openThreadResult(result: MessageSearchResult): Promise<void> {
+    if (!result.parentMessageId) return;
+
+    const isChannel = result.source === 'channel-thread';
+    const service = isChannel ? this.channelService : this.dmService;
+
+    const parentMessage = await new Promise<Message | null>((resolve) => {
+      const { unsubscribe } = service.getMessage(
+        result.conversationId,
+        result.parentMessageId!,
+        (message) => {
+          unsubscribe();
+          resolve(message);
+        },
+      );
+    });
+
+    if (!parentMessage) return;
+
+    if (isChannel) {
+      this.channelService.selectChannel(result.conversationId);
+    } else {
+      this.dmService.selectDm(result.conversationId);
+    }
+
+    this.threadService.open(parentMessage, {
+      channelId: isChannel ? result.conversationId : undefined,
+      dmId: isChannel ? undefined : result.conversationId,
+    });
   }
 
   onSearchFocus(): void {
