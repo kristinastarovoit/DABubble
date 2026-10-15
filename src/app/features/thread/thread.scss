@@ -1,5 +1,13 @@
-@use '../../../styles/variables' as *;
+@use '../../../styles.scss' as *;
 @use '../chat/message-list/message-list.scss';
+
+.thread-wrapper {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  padding-right: 10px;
+}
 
 .thread {
   display: flex;
@@ -69,10 +77,11 @@
   &__content {
     flex: 1;
     overflow-y: auto;
-    padding: 24px 32px;
+    padding: 24px 22px 24px 32px;
     display: flex;
     flex-direction: column;
     gap: 4px;
+    @include custom-scrollbar;
   }
 
   &__divider {
@@ -199,7 +208,6 @@
 
 @media (max-width: 650px) {
   .thread {
-
     &__header,
     &__content {
       padding: 12px;

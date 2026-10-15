@@ -242,6 +242,7 @@
   width: 100%;
   max-width: 420px;
   max-height: 400px;
+  @include custom-scrollbar;
   overflow-y: auto;
 
   background: #fff;
