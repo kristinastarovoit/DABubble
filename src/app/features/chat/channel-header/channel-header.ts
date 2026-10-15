@@ -22,6 +22,7 @@ import { FIREBASE_AUTH } from '../../../app.config';
 import { EditChannel } from '../edit-channel/edit-channel';
 import { UsercardDialog } from "../../../shared/components/usercard-dialog/usercard-dialog";
 import { UserModel } from '../../../shared/model/user.model';
+import { Presence } from '../../../shared/services/presence';
 
 type RecipientSuggestion =
   | { type: 'channel'; id: string; name: string }
@@ -337,6 +338,9 @@ export class ChannelHeader {
 
   /** Provides all workspace users. */
   userService = inject(UserService);
+
+  /** Provides the live presence state for workspace members. */
+  presenceService = inject(Presence);
 
   /** Identifier of the currently selected channel. */
   channelId = computed(() => this.channelService.activeChannelId());

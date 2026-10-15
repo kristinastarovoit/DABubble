@@ -235,6 +235,27 @@
     flex-shrink: 0;
   }
 
+  &__member-avatar-wrapper {
+    position: relative;
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  &__member-status {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 10px;
+    height: 10px;
+    border: 2px solid $white;
+    border-radius: 50%;
+    background-color: $dark-grey;
+
+    &--online {
+      background-color: $online-green;
+    }
+  }
+
   &__member-name {
     font-size: 1rem;
   }

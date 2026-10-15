@@ -6,6 +6,7 @@ import { UserModel } from '../../../shared/model/user.model';
 import { DmService } from '../../../shared/services/dm-service';
 import { AuthService } from '../../../shared/services/auth';
 import { UsercardDialog } from '../../../shared/components/usercard-dialog/usercard-dialog';
+import { Presence } from '../../../shared/services/presence';
 
 @Component({
   imports: [FormsModule, UsercardDialog],
@@ -22,6 +23,9 @@ export class EditChannel {
 
   /** Provides the currently authenticated user. */
   private authService = inject(AuthService);
+
+  /** Provides the live presence state for channel members. */
+  presenceService = inject(Presence);
 
   /** Names of channels already in use, used for duplicate validation. */
   @Input() existingChannelNames: string[] = [];

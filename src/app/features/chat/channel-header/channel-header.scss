@@ -293,6 +293,27 @@
     object-fit: cover;
   }
 
+  &__avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+  }
+
+  &__status {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: $dark-grey;
+    border: 2px solid $white;
+
+    &--online {
+      background-color: $online-green;
+    }
+  }
+
   &__add-icon {
     width: 40px;
     height: 40px;

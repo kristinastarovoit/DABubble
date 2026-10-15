@@ -153,7 +153,15 @@
             <ul class="channel-settings__members-list">
                 @for (member of channelMembers(); track member.uid) {
                 <li class="channel-settings__member" (click)="selectedUser.set(member); userCard.openUserCard()">
-                    <img [src]="member.avatar" alt="" class="channel-settings__member-avatar" />
+                    <div class="channel-settings__member-avatar-wrapper">
+                        <img [src]="member.avatar" alt="" class="channel-settings__member-avatar" />
+                        <span
+                            class="channel-settings__member-status"
+                            [class.channel-settings__member-status--online]="
+                                presenceService.isOnline(member.uid, member.isDemoUser ? member.status : undefined)
+                            "
+                        ></span>
+                    </div>
                     <span class="channel-settings__member-name">
                         {{ member.name }}
                         @if (member.uid === currentUserId()) {
