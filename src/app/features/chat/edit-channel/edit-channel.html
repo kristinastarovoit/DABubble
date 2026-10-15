@@ -6,7 +6,8 @@
                 {{ activeChannel()?.name }}
             </h2>
             <button class="close-btn" (click)="close()">
-                <svg alt="close channel settings" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg alt="close channel settings" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
                     <mask id="mask0_179340_6328" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0"
                         width="24" height="24">
                         <rect width="24" height="24" fill="#D9D9D9" />
@@ -76,6 +77,61 @@
             <span class="channel-settings__creator">
                 {{getCreatorName(channel.createdBy) ?? ''}}</span>}
         </div>
+        <div class="channel-settings__card channel-settings__card--inner channel-settings__members">
+            <div class="channel-settings__card-header">
+                <span class="channel-settings__card-label">Members</span>
+                <span class="channel-settings__members-count">{{ channelMembers().length }}</span>
+            </div>
+            <ul class="channel-settings__members-list">
+                @for (member of channelMembers(); track member.uid) {
+                <li class="channel-settings__member" (click)="selectedUser.set(member); userCard.openUserCard()">
+                    <img [src]="member.avatar" alt="" class="channel-settings__member-avatar" />
+                    <span class="channel-settings__member-name">
+                        {{ member.name }}
+                        @if (member.uid === currentUserId()) {
+                        <span class="channel-settings__member-you">(You)</span>
+                        }
+                    </span>
+                </li>
+                }
+                <li class="channel-settings__member channel-settings__member--add">
+                    <button type="button" class="channel-settings__add-member" (click)="openAddMembers()">
+                        <span class="channel-settings__add-member-icon">
+                            <img src="app-icons/add-members.svg" alt="" />
+                        </span>
+                        <span>Add Members</span>
+                    </button>
+                </li>
+            </ul>
+            @if (showAddMembers()) {
+            <div class="channel-settings__add-members-form">
+                <input type="text" class="channel-settings__input" placeholder="Enter name" [ngModel]="addMemberQuery()"
+                    (ngModelChange)="addMemberQuery.set($event); addMemberError.set('')" name="addMemberQuery" />
+                @if (memberSuggestions().length > 0) {
+                <ul class="channel-settings__member-suggestions">
+                    @for (member of memberSuggestions(); track member.uid) {
+                    <li>
+                        <button type="button" class="channel-settings__member-suggestion"
+                            (click)="addMemberQuery.set(member.name)">
+                            <img [src]="member.avatar" [alt]="member.name" />
+                            <span>{{ member.name }}</span>
+                        </button>
+                    </li>
+                    }
+                </ul>
+                }
+                @if (addMemberError()) {
+                <span class="channel-settings__error">{{ addMemberError() }}</span>
+                }
+                <div class="channel-settings__add-members-actions">
+                    <button type="button" class="channel-settings__edit-btn" [disabled]="!addMemberQuery().trim()"
+                        (click)="addMember()">
+                        Add
+                    </button>
+                </div>
+            </div>
+            }
+        </div>
         <div class="channel-settings__actions">
             <button class="channel-settings__leave-btn" (click)="leaveChannel()">
                 Leave Channel
@@ -83,3 +139,4 @@
         </div>
     </div>
 </dialog>
+<app-usercard-dialog #userCard [user]="selectedUser()" (dmUser)="openDmWithUser($event)"></app-usercard-dialog>

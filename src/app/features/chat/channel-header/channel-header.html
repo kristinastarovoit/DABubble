@@ -62,7 +62,11 @@
   }
 </div>
 
-<app-edit-channel #editChannel></app-edit-channel>
+<app-edit-channel
+  #editChannel
+  [channelMembers]="channelMembers()"
+  [currentUserId]="currentUserId()"
+></app-edit-channel>
 
 <dialog #membersDialog class="members-dialog" (click)="onBackdropClick($event)">
   @if (!showAddMembersView()) {

@@ -25,7 +25,6 @@
   &__card {
     width: 100%;
     max-width: 800px;
-    max-height: 90vh;
     overflow-y: auto;
     background-color: $white;
     border-radius: 30px;
@@ -39,6 +38,8 @@
       border: 1px solid $border-purple;
       border-radius: 20px;
       gap: 8px;
+      height: auto;
+      flex: 0 0 auto;
     }
   }
 
@@ -175,6 +176,142 @@
     color: $midtone-purple-three;
   }
 
+  &__members {
+    gap: 12px;
+    display: none;
+  }
+
+  &__members-count {
+    color: $dark-grey;
+    font-size: 0.95rem;
+  }
+
+  &__members-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__member {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 40px;
+  }
+
+  &__member-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  &__member-name {
+    font-size: 1rem;
+  }
+
+  &__member-you {
+    color: $dark-grey;
+  }
+
+  &__add-member {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 4px 0;
+    border: 0;
+    background: transparent;
+    color: $black;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+
+    &:hover {
+      color: $midtone-purple-three;
+    }
+  }
+
+  &__add-member-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: $pastel-purple-bg;
+    flex-shrink: 0;
+
+    img {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__add-members-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    >.channel-settings__input {
+      min-height: 42px;
+      border: 1px solid $border-purple;
+      border-radius: 24px;
+      padding: 8px 16px;
+      box-sizing: border-box;
+    }
+  }
+
+  &__member-suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 120px;
+    overflow-y: auto;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__member-suggestion {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 20px;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+
+    &:hover {
+      background-color: $pastel-purple-bg;
+    }
+
+    img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  }
+
+  &__add-members-actions {
+    display: flex;
+    justify-content: flex-end;
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+
   &__actions {
     display: flex;
     justify-content: flex-end;
@@ -200,8 +337,21 @@
 
 @media (max-width: 800px) {
   .channel-settings {
+    padding: 0px;
+    height: 100dvh;
+
     &__card {
       padding: 40px 20px;
+      max-height: 100dvh;
+      margin: auto;
+
+      &--inner {
+        padding: 24px;
+      }
+    }
+
+    &__members {
+      display: flex;
     }
   }
 }
