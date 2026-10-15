@@ -80,6 +80,10 @@
         align-items: flex-end;
       }
 
+      .message-list__thread-link {
+        align-self: flex-end;
+      }
+
       &:hover .message-list__bubble {
         background-color: #797ef3;
       }

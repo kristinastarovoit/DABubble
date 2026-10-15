@@ -128,7 +128,7 @@
 
             @if (message.threadCount) {
               <button class="message-list__thread-link" (click)="threadOpened.emit(message)">
-                {{ message.threadCount }} Antworten
+                {{ message.threadCount }} {{ message.threadCount === 1 ? 'reply' : 'replies' }}
               </button>
             }
           </div>
