@@ -184,29 +184,6 @@
             }
           </button>
           }
-              <p class="header__profile-mail-heading">Full name</p>
-            </div>
-            <div class="input-wrapper">
-              <input
-                class="input"
-                type="text"
-                [value]="currentUser()?.name"
-                (input)="onNameInput($event)"
-                (keydown.enter)="saveProfileChanges(nameInput())"
-              />
-              @if (nameError()) {
-                <span class="error-msg">{{ nameError() }}</span>
-              }
-            </div>
-          </div>
-          <div class="header__profile-button-wrapper">
-            <button class="button button--dismiss" (click)="cancelUserProfileEdit()">
-              Dismiss
-            </button>
-            <button class="button button--submit" (click)="saveProfileChanges(nameInput())">
-              Save
-            </button>
-          </div>
         </div>
       </div>
       <div class="header__profile-mail-wrapper">
@@ -225,15 +202,18 @@
           <p class="header__profile-mail-heading">Full name</p>
         </div>
         <div class="input-wrapper">
-          <input #inputName class="input" type="text" [value]="currentUser()?.name"
-            (keydown.enter)="saveProfileChanges(inputName.value)" />
+          <input class="input" type="text" [value]="currentUser()?.name" (input)="onNameInput($event)"
+            (keydown.enter)="saveProfileChanges(nameInput())" />
+          @if (nameError()) {
+          <span class="error-msg">{{ nameError() }}</span>
+          }
         </div>
       </div>
       <div class="header__profile-button-wrapper">
         <button class="button button--dismiss" (click)="cancelUserProfileEdit()">
           Dismiss
         </button>
-        <button class="button button--submit" (click)="saveProfileChanges(inputName.value)">
+        <button class="button button--submit" (click)="saveProfileChanges(nameInput())">
           Save
         </button>
       </div>
@@ -261,7 +241,8 @@
       <div class="header__profile-info-wrapper">
         <div class="header__profile-name-wrapper">
           <p>{{ currentUser()?.name }}</p>
-          <button class="header__profile-button header__profile-button--edit header__profile-button--edit--mobile" (click)="editUserProfile()">
+          <button class="header__profile-button header__profile-button--edit header__profile-button--edit--mobile"
+            (click)="editUserProfile()">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <mask id="mask0_237_469" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24"
                 height="24">
