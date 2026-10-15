@@ -26,7 +26,8 @@
     }
 
     <textarea #textarea class="message-input__field" (keydown)="onKeydown($event)" [value]="text()"
-      (input)="onInput($event)" [disabled]="disabled" [placeholder]="placeholder"></textarea>
+      (input)="onInput($event)" (focus)="composerFocused.emit()" [disabled]="disabled"
+      [placeholder]="placeholder"></textarea>
   </div>
 
   <div class="message-input__actions">

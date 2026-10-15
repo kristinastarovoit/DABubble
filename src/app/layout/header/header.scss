@@ -264,6 +264,7 @@
   width: 100%;
   max-width: 420px;
   max-height: 400px;
+  @include custom-scrollbar;
   overflow-y: auto;
 
   background: #fff;
@@ -391,6 +392,17 @@
       }
     }
   }
+}
+
+.error-msg {
+  position: absolute;
+  align-self: flex-start;
+  top: 56px;
+  color: #ed1e79;
+  font-family: 'Nunito';
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 100%;
 }
 
 @media (max-width: 1200px) {

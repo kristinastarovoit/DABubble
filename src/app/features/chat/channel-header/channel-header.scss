@@ -160,6 +160,14 @@
     }
   }
 
+  &__new-message-suggestion-email {
+    margin-left: 42px;
+    overflow: hidden;
+    color: $dark-grey;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   &__new-message-avatar {
     width: 32px;
     height: 32px;

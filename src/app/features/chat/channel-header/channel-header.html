@@ -19,10 +19,13 @@
           <button type="button" class="channel-header__new-message-suggestion" (click)="selectRecipient(suggestion)">
             @if (suggestion.type === 'channel') {
             <span class="channel-header__hash">#</span>
-            } @else {
-            <img [src]="suggestion.avatar" [alt]="suggestion.name" class="channel-header__new-message-avatar" />
-            }
             <span>{{ suggestion.name }}</span>
+            } @else if (suggestion.type === 'user') {
+            <img [src]="suggestion.avatar" [alt]="suggestion.name" class="channel-header__new-message-avatar" />
+            <span>{{ suggestion.name }}</span>
+            } @else {
+            <span class="channel-header__new-message-suggestion-email">{{ suggestion.email }}</span>
+            }
           </button>
         </li>
         }

@@ -184,6 +184,29 @@
             }
           </button>
           }
+              <p class="header__profile-mail-heading">Full name</p>
+            </div>
+            <div class="input-wrapper">
+              <input
+                class="input"
+                type="text"
+                [value]="currentUser()?.name"
+                (input)="onNameInput($event)"
+                (keydown.enter)="saveProfileChanges(nameInput())"
+              />
+              @if (nameError()) {
+                <span class="error-msg">{{ nameError() }}</span>
+              }
+            </div>
+          </div>
+          <div class="header__profile-button-wrapper">
+            <button class="button button--dismiss" (click)="cancelUserProfileEdit()">
+              Dismiss
+            </button>
+            <button class="button button--submit" (click)="saveProfileChanges(nameInput())">
+              Save
+            </button>
+          </div>
         </div>
       </div>
       <div class="header__profile-mail-wrapper">

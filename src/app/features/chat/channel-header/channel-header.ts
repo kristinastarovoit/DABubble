@@ -23,6 +23,11 @@ import { EditChannel } from '../edit-channel/edit-channel';
 import { UsercardDialog } from "../../../shared/components/usercard-dialog/usercard-dialog";
 import { UserModel } from '../../../shared/model/user.model';
 
+type RecipientSuggestion =
+  | { type: 'channel'; id: string; name: string }
+  | { type: 'user'; id: string; name: string; avatar: string }
+  | { type: 'email'; id: string; email: string };
+
 @Component({
   imports: [CommonModule, FormsModule, EditChannel, UsercardDialog],
   selector: 'app-channel-header',
@@ -57,20 +62,17 @@ export class ChannelHeader {
   selectedUser = signal<UserModel | undefined>(undefined);
 
   /**
-   * Channels and contacts matching the current recipient query.
+   * Channels, contacts, and matching contact email addresses for the current recipient query.
    *
-   * A leading `#` restricts the search to channels, a leading `@` restricts it to contacts
-   * (matched by name or email). Without a prefix, both are searched by name.
+   * A leading `#` restricts the search to channels. Contact names and email addresses are
+   * matched independently, so both suggestions appear when the query matches both fields.
    *
-   * @returns The matching channels and users, channels first.
+   * @returns The matching channels, contacts, and email addresses, with channels first.
    */
-  get recipientSuggestions(): Array<
-    | { type: 'channel'; id: string; name: string }
-    | { type: 'user'; id: string; name: string; avatar: string }
-  > {
+  get recipientSuggestions(): RecipientSuggestion[] {
     const raw = this.recipientQuery.trim();
-    const mode = raw.startsWith('#') ? 'channel' : raw.startsWith('@') ? 'user' : 'mixed';
-    const query = (mode === 'mixed' ? raw : raw.slice(1)).toLowerCase();
+    const mode = this.recipientSearchMode;
+    const query = (raw.startsWith('#') || raw.startsWith('@') ? raw.slice(1) : raw).toLowerCase();
 
     // Without a prefix, an empty query yields no suggestions; with a prefix, it lists everything.
     if (mode === 'mixed' && !query) return [];
@@ -91,19 +93,34 @@ export class ChannelHeader {
         : this.dmService
           .dmPartners()
           .filter((partner) => partner.user.uid !== currentUserId)
-          .filter(
-            (partner) =>
-              partner.user.name.toLowerCase().includes(query) ||
-              partner.user.email.toLowerCase().includes(query),
-          )
-          .map((partner) => ({
-            type: 'user' as const,
-            id: partner.user.uid,
-            name: partner.user.name,
-            avatar: partner.user.avatar,
-          }));
+          .flatMap((partner): RecipientSuggestion[] => {
+            const matches: RecipientSuggestion[] = [];
+            if (partner.user.name.toLowerCase().includes(query)) {
+              matches.push({
+                type: 'user',
+                id: partner.user.uid,
+                name: partner.user.name,
+                avatar: partner.user.avatar,
+              });
+            }
+            if (partner.user.email.toLowerCase().includes(query)) {
+              matches.push({
+                type: 'email',
+                id: partner.user.uid,
+                email: partner.user.email,
+              });
+            }
+            return matches;
+          });
 
     return [...channelMatches, ...userMatches];
+  }
+
+  private get recipientSearchMode(): 'channel' | 'user' | 'mixed' {
+    const raw = this.recipientQuery.trim();
+    if (raw.startsWith('#')) return 'channel';
+    if (raw.startsWith('@') || raw.includes('@')) return 'user';
+    return 'mixed';
   }
 
   /** Updates the recipient suggestions dropdown and its viewport-relative position while the user types. */
@@ -127,11 +144,7 @@ export class ChannelHeader {
    *
    * @param suggestion The chosen channel or user suggestion.
    */
-  async selectRecipient(
-    suggestion:
-      | { type: 'channel'; id: string; name: string }
-      | { type: 'user'; id: string; name: string; avatar: string },
-  ): Promise<void> {
+  async selectRecipient(suggestion: RecipientSuggestion): Promise<void> {
     this.recipientQuery = '';
     this.showRecipientSuggestions.set(false);
 

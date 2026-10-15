@@ -1,19 +1,28 @@
-@use '../../../../styles/variables' as *;
+@use '../../../../styles/' as *;
 @use '../message-input/message-input.scss';
 
 :root {
   box-sizing: border-box;
 }
 
+.message-list__wrapper {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  padding-right: 10px;
+}
+
 .message-list {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 24px 32px;
+  padding: 24px 22px 24px 32px;
   display: flex;
   flex-direction: column;
   gap: 4px;
   font-family: 'Nunito';
+  @include custom-scrollbar;
 
   &__divider {
     display: flex;
@@ -69,6 +78,10 @@
 
       .message-list__content {
         align-items: flex-end;
+      }
+
+      .message-list__thread-link {
+        align-self: flex-end;
       }
 
       &:hover .message-list__bubble {
