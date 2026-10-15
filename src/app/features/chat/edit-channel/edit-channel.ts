@@ -14,8 +14,13 @@ import { UsercardDialog } from '../../../shared/components/usercard-dialog/userc
   templateUrl: './edit-channel.html',
 })
 export class EditChannel {
+  /** Provides access to workspace users. */
   private userService = inject(UserService);
+
+  /** Provides direct-message lookup and creation. */
   private dmService = inject(DmService);
+
+  /** Provides the currently authenticated user. */
   private authService = inject(AuthService);
 
   /** Names of channels already in use, used for duplicate validation. */
@@ -59,8 +64,10 @@ export class EditChannel {
   /** Emitted when the dialog is closed. */
   @Output() closed = new EventEmitter<void>();
 
+  /** Reference to the native channel-settings dialog. */
   @ViewChild('dialogRef') private dialogRef!: ElementRef<HTMLDialogElement>;
 
+  /** Resizes the description field after it is rendered. */
   @ViewChild('descriptionInput')
   set descriptionInput(element: ElementRef<HTMLTextAreaElement> | undefined) {
     if (!element) return;
@@ -98,8 +105,14 @@ export class EditChannel {
   /** The ID of the currently active channel. */
   channelId = computed(() => this.channelService.activeChannelId());
 
+  /** User currently selected for display in the profile dialog. */
   selectedUser = signal<UserModel | undefined>(undefined);
 
+  /**
+   * Opens an existing direct message with the selected user or creates one if needed.
+   * Clears the active channel after selecting the direct message.
+   * @param user The user to message.
+   */
   async openDmWithUser(user: UserModel) {
     const userId = this.authService.currentUserId();
     if (!userId) return;
@@ -222,11 +235,13 @@ export class EditChannel {
     this.resizeDescriptionElement(event.currentTarget as HTMLTextAreaElement);
   }
 
+  /** Saves the description when Enter is pressed instead of inserting a line break. */
   saveDescriptionOnEnter(event: Event): void {
     event.preventDefault();
     void this.saveDescription();
   }
 
+  /** Sets the textarea height to match its content. */
   private resizeDescriptionElement(textarea: HTMLTextAreaElement): void {
     textarea.style.height = 'auto';
     textarea.style.height = `${textarea.scrollHeight}px`;
