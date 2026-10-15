@@ -1,4 +1,4 @@
-@use '../../../../styles/variables' as *;
+@use '../../../../styles.scss' as *;
 
 .channel-header {
   height: 100px;
@@ -223,6 +223,10 @@
   width: 100%;
   overflow-y: scroll;
   max-height: 450px;
+  @include custom-scrollbar;
+  --sb-track-color: transparent;
+  --sb-thumb-color: #d2d2e8;
+  --sb-size: 4px;
 
   &::backdrop {
     background-color: rgba(0, 0, 0, 0.3);
@@ -233,6 +237,7 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+
   }
 
   &__header {

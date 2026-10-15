@@ -1,4 +1,4 @@
-@use '../../../../styles/variables' as *;
+@use '../../../../styles.scss' as *;
 
 .channel-settings {
   position: fixed;
@@ -34,6 +34,10 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+    @include custom-scrollbar;
+    --sb-track-color: transparent;
+    --sb-thumb-color: #d2d2e8;
+    --sb-size: 4px;
 
     &--inner {
       padding: 24px;
