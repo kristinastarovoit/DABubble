@@ -38,7 +38,7 @@
 
         <input type="text" [formField]="signupForm.name" placeholder="First and last name" />
         @if (signupForm.name().touched() && signupForm.name().invalid()) {
-          <span class="error-msg">Please enter your name.</span>
+          <span class="error-msg">Please enter your full name.</span>
         }
       </div>
       <div class="signup-input-wrapper">

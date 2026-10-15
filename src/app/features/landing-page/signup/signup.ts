@@ -1,5 +1,14 @@
 import { Component, inject, signal } from '@angular/core';
-import { email, form, FormField, minLength, required, submit } from '@angular/forms/signals';
+import {
+  email,
+  FieldContext,
+  form,
+  FormField,
+  minLength,
+  required,
+  submit,
+  validate,
+} from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../shared/services/auth';
@@ -11,6 +20,15 @@ interface SignupFormModel {
   email: string;
   password: string;
   acceptedPolicy: boolean;
+}
+
+function fullName(ctx: FieldContext<string>) {
+  const parts = ctx.value().trim().split(/\s+/).filter(Boolean);
+  const onlyLetters = /^[\p{L}'-]+$/u;
+
+  const isValid = parts.length >= 2 && parts.every((p) => onlyLetters.test(p));
+
+  return isValid ? null : { kind: 'fullName', message: 'Please enter your first and last name.' };
 }
 
 @Component({
@@ -33,6 +51,7 @@ export class Signup {
 
   protected readonly signupForm = form(this.model, (f) => {
     required(f.name);
+    validate(f.name, fullName);
     required(f.email);
     email(f.email);
     required(f.password);
