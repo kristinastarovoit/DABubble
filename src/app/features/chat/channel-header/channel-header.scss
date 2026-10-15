@@ -31,7 +31,7 @@
     padding: 8px 12px;
     border-radius: 24px;
     transition: background-color 0.2s ease;
-    
+
     &:hover {
       background-color: $pastel-purple-bg;
       color: $midtone-purple-three;
@@ -182,6 +182,10 @@
     padding: 8px;
     border-radius: 50%;
 
+    &--mobile {
+      display: none;
+    }
+
     &:hover {
       .channel-header__add-icon--default {
         display: none;
@@ -217,8 +221,8 @@
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
   max-width: 420px;
   width: 100%;
-  overflow: visible;
-  
+  overflow-y: scroll;
+  max-height: 450px;
 
   &::backdrop {
     background-color: rgba(0, 0, 0, 0.3);
@@ -274,15 +278,11 @@
     transition: background-color 0.2s ease;
 
     &:hover {
-        background-color: $pastel-purple-bg;
-      }
+      background-color: $pastel-purple-bg;
+    }
 
     &--add {
       cursor: pointer;
-
-      // &:hover {
-      //   background-color: $pastel-purple-bg;
-      // }
     }
   }
 
@@ -316,18 +316,6 @@
   &__you {
     color: $midtone-purple-three;
   }
-
-  // &__status {
-  //   margin-left: auto;
-  //   width: 10px;
-  //   height: 10px;
-  //   border-radius: 50%;
-  //   background-color: $white;
-
-  //   &--online {
-  //     background-color: $online-green;
-  //   }
-  // }
 
   &__channel-ref {
     display: flex;
@@ -416,15 +404,38 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
+
     &:not(:disabled) {
       background-color: $midtone-purple-three;
     }
-
-    // &:hover:not(:disabled) {
-    //   background-color: $midtone-purple-three;
-    // }
   }
 }
+
+@media (max-width: 800px) {
+  .channel-header {
+    &__add-btn--mobile {
+      display: flex;
+    }
+
+    &__meta--desktop {
+      display: none;
+    }
+  }
+
+  .members-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 30px;
+    max-height: 90dvh;
+
+    &__content {
+      padding: 40px 20px;
+    }
+  }
+}
+
 @media (max-width: 650px) {
   .channel-header {
     height: auto;

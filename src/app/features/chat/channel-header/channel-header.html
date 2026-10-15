@@ -37,35 +37,40 @@
   <div class="channel-header__title" (click)="openChannelDetails()">
     <span class="channel-header__hash">#</span>
     <span class="channel-header__name">{{ activeChannel()?.name ?? '' }}</span>
-    <!-- <img src="app-icons/arrow_down.svg" alt="" class="channel-header__chevron" /> -->
     <svg width="14" height="9" viewBox="0 0 14 9" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M7 8.1875C6.83259 8.1875 6.67061 8.15625 6.51408 8.09375C6.35671 8.03125 6.22571 7.94792 6.12108 7.84375L0.345291 2.09375C0.115097 1.86458 0 1.57292 0 1.21875C0 0.864583 0.115097 0.572916 0.345291 0.34375C0.575485 0.114583 0.86846 0 1.22422 0C1.57997 0 1.87294 0.114583 2.10314 0.34375L7 5.21875L11.8969 0.34375C12.1271 0.114583 12.42 0 12.7758 0C13.1315 0 13.4245 0.114583 13.6547 0.34375C13.8849 0.572916 14 0.864583 14 1.21875C14 1.57292 13.8849 1.86458 13.6547 2.09375L7.87892 7.84375C7.75336 7.96875 7.61734 8.05708 7.47085 8.10875C7.32436 8.16125 7.16741 8.1875 7 8.1875Z"
         fill="black" />
     </svg>
-
-
   </div>
 
   <div class="channel-header__meta" #metaRef>
-    <div class="channel-header__avatars" (click)="openMembersList()">
+    <div class="channel-header__avatars channel-header__meta--desktop" (click)="openMembersList()">
       @for (member of channelMembers().slice(0, 3); track member.uid) {
       <img [src]="member.avatar" alt="" class="channel-header__avatar" />
       }
       <span class="channel-header__count">{{ channelMembers().length }}</span>
     </div>
 
-    <button class="channel-header__add-btn" (click)="openAddMembers()">
+    <button class="channel-header__add-btn channel-header__meta--desktop" (click)="openAddMembers()">
       <img src="app-icons/add-members.svg" alt="Add Members"
         class="channel-header__add-icon channel-header__add-icon--default" />
       <img src="app-icons/add_members_purple.svg" alt="Add Members"
         class="channel-header__add-icon channel-header__add-icon--hover" />
     </button>
+
+    <button class="channel-header__add-btn channel-header__add-btn--mobile" (click)="openMembersList()">
+      <img src="app-icons/add-members.svg" alt="Add Members"
+        class="channel-header__add-icon channel-header__add-icon--default" />
+      <img src="app-icons/add_members_purple.svg" alt="Add Members"
+        class="channel-header__add-icon channel-header__add-icon--hover" />
+    </button>
+
   </div>
   }
 </div>
 
-<app-edit-channel #editChannel></app-edit-channel>
+<app-edit-channel #editChannel [channelMembers]="channelMembers()" [currentUserId]="currentUserId()"></app-edit-channel>
 
 <dialog #membersDialog class="members-dialog" (click)="onBackdropClick($event)">
   @if (!showAddMembersView()) {
