@@ -130,6 +130,13 @@
     &:hover:not(:has(.header__profile:hover)) {
       background-color: $pastel-purple-bg;
       color: $midtone-purple-three;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      height: 56px;
+      width: 56px;
+      padding: 0;
 
       .header__user-name {
         color: $midtone-purple-three;
