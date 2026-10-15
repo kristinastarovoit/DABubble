@@ -244,19 +244,22 @@
             </div>
             <div class="input-wrapper">
               <input
-                #inputName
                 class="input"
                 type="text"
                 [value]="currentUser()?.name"
-                (keydown.enter)="saveProfileChanges(inputName.value)"
+                (input)="onNameInput($event)"
+                (keydown.enter)="saveProfileChanges(nameInput())"
               />
+              @if (nameError()) {
+                <span class="error-msg">{{ nameError() }}</span>
+              }
             </div>
           </div>
           <div class="header__profile-button-wrapper">
             <button class="button button--dismiss" (click)="cancelUserProfileEdit()">
               Dismiss
             </button>
-            <button class="button button--submit" (click)="saveProfileChanges(inputName.value)">
+            <button class="button button--submit" (click)="saveProfileChanges(nameInput())">
               Save
             </button>
           </div>

@@ -32,6 +32,7 @@ export class Header {
   searchResults = this.searchService.results;
   showSearchResults = computed(() => this.searchService.isQueryValid() && this.isSearchOpen());
   isSearchOpen = signal(false);
+  nameError = signal('');
 
   /** The profile of the currently signed-in user, or `undefined` while loading or logged out. */
   currentUser = computed(() =>
@@ -99,15 +100,16 @@ export class Header {
     this.isUserProfileOpen.set(false);
   }
 
-  /** Opens the user-profile editing-menu. */
   editUserProfile() {
     this.selectedAvatar.set(this.currentUser()?.avatar ?? '');
+    this.nameInput.set(this.currentUser()?.name ?? '');
+    this.nameError.set('');
     this.isEditingUser.set(true);
   }
 
-  /** Closes the user-profile editing-menu. */
   cancelUserProfileEdit() {
     this.selectedAvatar.set('');
+    this.nameError.set('');
     this.isEditingUser.set(false);
   }
 
@@ -126,7 +128,7 @@ export class Header {
     if (!currentUser) return;
 
     const trimmedName = newName.trim();
-    if (trimmedName === '') return;
+    if (!this.validateName(trimmedName)) return;
 
     const nameChanged = trimmedName !== currentUser.name;
     const avatarChanged =
@@ -250,5 +252,23 @@ export class Header {
   async openUserResult(user: UserModel): Promise<void> {
     await this.dmService.openDmWith(user.uid);
     this.resetSearch();
+  }
+
+  nameInput = signal('');
+
+  onNameInput(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.nameInput.set(value);
+    this.validateName(value);
+  }
+
+  private validateName(value: string): boolean {
+    const trimmed = value.trim();
+    const parts = trimmed.split(/\s+/).filter(Boolean);
+    const onlyLetters = /^[\p{L}'-]+$/u;
+    const isValid = parts.length >= 2 && parts.every((p) => onlyLetters.test(p));
+
+    this.nameError.set(isValid ? '' : 'Please enter your first and last name.');
+    return isValid;
   }
 }
