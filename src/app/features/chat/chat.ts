@@ -45,6 +45,13 @@ export class Chat {
     });
   }
 
+  /** Closes the overlaid thread when focus returns to the chat composer. */
+  onComposerFocus(): void {
+    if (window.matchMedia('(min-width: 901px) and (max-width: 1350px)').matches) {
+      this.threadService.close();
+    }
+  }
+
   /** Opens the active channel's member list. */
   // openMemberList(): void {
   //   this.memberListRequested.emit();

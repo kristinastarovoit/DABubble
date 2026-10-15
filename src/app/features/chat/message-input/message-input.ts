@@ -64,6 +64,9 @@ export class MessageInput {
   /** Emits a trimmed message when it is submitted. */
   send = output<string>();
 
+  /** Emits when the message textarea receives focus. */
+  composerFocused = output<void>();
+
   /** The curated set of emojis offered by the picker. */
   protected readonly curatedEmojis = CURATED_EMOJIS;
 

@@ -197,9 +197,22 @@
   left: 12px;
 }
 
+@media (max-width: 1350px) and (min-width: 901px) {
+  .thread {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    bottom: 25px;
+    z-index: 10;
+    width: min(400px, calc(100% - 40px));
+    max-width: none;
+    min-height: 0;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  }
+}
+
 @media (max-width: 650px) {
   .thread {
-
     &__header,
     &__content {
       padding: 12px;
