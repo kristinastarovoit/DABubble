@@ -8,6 +8,7 @@ import { LegalNotice } from './features/legal/legal-notice/legal-notice';
 import { PrivacyPolicy } from './features/legal/privacy-policy/privacy-policy';
 import { Dashboard } from './shared/components/dashboard/dashboard';
 import { Chat } from './features/chat/chat';
+import { authGuard } from './shared/services/auth.guard';
 export const routes: Routes = [
   {
     path: '',
@@ -22,7 +23,7 @@ export const routes: Routes = [
       { path: 'privacy-policy', component: PrivacyPolicy },
     ],
   },
-  { path: 'dashboard', component: Dashboard },
-  { path: 'channels/:channelId', component: Chat },
-  { path: 'dms/:dmId', component: Chat },
+  { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
+  { path: 'channels/:channelId', component: Chat, canActivate: [authGuard] },
+  { path: 'dms/:dmId', component: Chat, canActivate: [authGuard] },
 ];

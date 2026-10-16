@@ -1,4 +1,4 @@
-import { Service, inject, signal } from '@angular/core';
+import { Service, effect, inject, signal } from '@angular/core';
 import {
   Auth,
   createUserWithEmailAndPassword,
@@ -23,10 +23,25 @@ export class AuthService {
 
   /** UID of the currently authenticated user, or `undefined` when logged out. */
   currentUserId = signal<string | undefined>(undefined);
+  isAuthReady = signal(false);
 
   constructor() {
     onAuthStateChanged(this.auth, (user) => {
       this.currentUserId.set(user?.uid);
+      this.isAuthReady.set(true);
+    });
+  }
+
+  waitUntilReady(): Promise<void> {
+    if (this.isAuthReady()) return Promise.resolve();
+
+    return new Promise((resolve) => {
+      const ref = effect(() => {
+        if (this.isAuthReady()) {
+          ref.destroy();
+          resolve();
+        }
+      });
     });
   }
 
