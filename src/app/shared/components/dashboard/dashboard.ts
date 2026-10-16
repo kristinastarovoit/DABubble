@@ -4,8 +4,8 @@ import { Header } from '../../../layout/header/header';
 import { Chat } from '../../../features/chat/chat';
 import { Thread } from '../../../features/thread/thread';
 import { Sidebar } from '../../../layout/sidebar/sidebar';
-import { Presence } from '../../services/presence';
 
+/** Arranges the application header, sidebar, chat, and thread views. */
 @Component({
   imports: [Header, Chat, Thread, Sidebar],
   selector: 'app-dashboard',
@@ -13,17 +13,22 @@ import { Presence } from '../../services/presence';
   templateUrl: './dashboard.html',
 })
 export class Dashboard {
+  /** Controls the active thread panel. */
   private threadService = inject(ThreadService);
-  private presenceService = inject(Presence);
 
+  /** Whether the sidebar is open. */
   sidebarOpen = signal(true);
+
+  /** Whether the thread panel is open. */
   threadOpen = signal(true);
 
+  /** Whether the sidebar is open, as reported by the sidebar component. */
   isSidebarOpen = true;
 
   /** Mobile only: whether the chat view (instead of the sidebar) is shown. */
   mobileChatOpen = signal(false);
 
+  /** Adds the mobile chat-open host class when the chat view is active. */
   @HostBinding('class.mobile-chat-open') get chatOpenClass(): boolean {
     return this.mobileChatOpen();
   }
@@ -34,6 +39,7 @@ export class Dashboard {
     this.mobileChatOpen.set(false);
   }
 
+  /** Updates the sidebar state when the sidebar component toggles it. */
   onSidebarToggled(isOpen: boolean): void {
     this.isSidebarOpen = isOpen;
   }

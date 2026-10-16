@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth';
 import { UserService } from '../../shared/services/users';
@@ -13,6 +13,7 @@ import { UserModel } from '../../shared/model/user.model';
 import { ThreadService } from '../../shared/services/thread-service';
 import { Message } from '../../shared/interfaces/message';
 
+/** Displays the app header, global search, and user profile controls. */
 @Component({
   imports: [FormsModule],
   selector: 'app-header',
@@ -20,18 +21,43 @@ import { Message } from '../../shared/interfaces/message';
   templateUrl: './header.html',
 })
 export class Header {
+  /** Provides authentication state and logout operations. */
   private authService = inject(AuthService);
+
+  /** Provides workspace user profiles. */
   private userService = inject(UserService);
+
+  /** Navigates between application routes. */
   private router = inject(Router);
+
+  /** Provides global message and user search. */
   private searchService = inject(SearchService);
+
+  /** Navigates to a message selected from search results. */
   private navigationService = inject(MessageNavigationService);
+
+  /** Provides channel selection and message operations. */
   private channelService = inject(ChannelService);
+
+  /** Provides direct-message conversations and message operations. */
   private dmService = inject(DmService);
+
+  /** Opens threads selected from search results. */
   private threadService = inject(ThreadService);
+
+  /** Provides live presence state and updates. */
   presenceService = inject(Presence);
+
+  /** Search results currently returned by the search service. */
   searchResults = this.searchService.results;
+
+  /** Whether valid search results should be shown while search is open. */
   showSearchResults = computed(() => this.searchService.isQueryValid() && this.isSearchOpen());
+
+  /** Whether the global search results panel is open. */
   isSearchOpen = signal(false);
+
+  /** Validation error displayed for the profile name field. */
   nameError = signal('');
 
   /** The profile of the currently signed-in user, or `undefined` while loading or logged out. */
@@ -57,20 +83,28 @@ export class Header {
   /** Whether the profile card is in edit mode. */
   isEditingUser = signal(false);
 
+  /** Path of the avatar selected while editing the profile. */
   selectedAvatar = signal('');
 
+  /** Channel message results from the global search. */
   channelMessageResult = computed(() =>
     this.searchResults().messages.filter((r) => r.source === 'channel'),
   );
 
+  /** Direct-message results from the global search. */
   dmMessageResult = computed(() => this.searchResults().messages.filter((r) => r.source === 'dm'));
 
+  /** Thread reply results from the global search. */
   threadMessageResult = computed(() =>
     this.searchResults().messages.filter(
       (r) => r.source === 'channel-thread' || r.source === 'dm-thread',
     ),
   );
 
+  /** Current value of the profile name input. */
+  nameInput = signal('');
+
+  /** Avatar image paths available for profile selection. */
   protected readonly avatar = [
     'app-icons/avatar_1.svg',
     'app-icons/avatar_2.svg',
@@ -100,6 +134,7 @@ export class Header {
     this.isUserProfileOpen.set(false);
   }
 
+  /** Initializes the profile-editing fields with the current user's values. */
   editUserProfile() {
     this.selectedAvatar.set(this.currentUser()?.avatar ?? '');
     this.nameInput.set(this.currentUser()?.name ?? '');
@@ -107,12 +142,18 @@ export class Header {
     this.isEditingUser.set(true);
   }
 
+  /** Discards profile edits and exits edit mode. */
   cancelUserProfileEdit() {
     this.selectedAvatar.set('');
     this.nameError.set('');
     this.isEditingUser.set(false);
   }
 
+  /**
+   * Selects an avatar for the current profile edit.
+   *
+   * @param avatar The path of the selected avatar image.
+   */
   selectAvatar(avatar: string) {
     this.selectedAvatar.set(avatar);
   }
@@ -145,10 +186,12 @@ export class Header {
     this.isSearchOpen.set(true);
   }
 
+  /** Closes the global search results panel. */
   closeSearchResult() {
     this.isSearchOpen.set(false);
   }
 
+  /** Sets the user offline, performs the appropriate logout cleanup, and navigates to login. */
   async logout(): Promise<void> {
     void this.presenceService.goOffline().catch((error) => {
       console.error('Failed to set presence offline during logout.', error);
@@ -162,7 +205,11 @@ export class Header {
     await this.router.navigateByUrl('/login');
   }
 
-  /** Removes a guest's content and channel memberships, then deletes their account. */
+  /**
+   * Removes a guest's content and channel memberships, then deletes their account.
+   *
+   * @param uid The guest user's ID.
+   */
   private async deleteGuestAccount(uid: string): Promise<void> {
     try {
       await Promise.all([this.channelService.deleteGuestMessages(uid), this.dmService.deleteGuestMessages(uid)]);
@@ -178,11 +225,21 @@ export class Header {
     await this.authService.deleteCurrentUser();
   }
 
+  /**
+   * Opens the channel selected from search results and clears the search.
+   *
+   * @param channel The channel selected by the user.
+   */
   openChannelResult(channel: Channel): void {
     this.channelService.selectChannel(channel.id);
     this.resetSearch();
   }
 
+  /**
+   * Opens the selected message or thread result and clears the search.
+   *
+   * @param result The message search result selected by the user.
+   */
   openMessageResult(result: MessageSearchResult): void {
     if (!result.message.id) return;
 
@@ -197,12 +254,18 @@ export class Header {
     this.resetSearch();
   }
 
+  /** Clears the search query, results, and open results panel. */
   private resetSearch(): void {
     this.searchService.clear();
     this.searchQuery = '';
     this.closeSearchResult();
   }
 
+  /**
+   * Opens the thread containing the selected thread-reply search result.
+   *
+   * @param result The thread-reply search result to open.
+   */
   private async openThreadResult(result: MessageSearchResult): Promise<void> {
     if (!result.parentMessageId) return;
     const isChannel = result.source === 'channel-thread';
@@ -218,7 +281,14 @@ export class Header {
     });
   }
 
-  /** Resolves once with the current value of a channel or DM message, then unsubscribes. */
+  /**
+   * Resolves once with the current value of a channel or DM message, then unsubscribes.
+   *
+   * @param service Channel or DM service used to subscribe to the message.
+   * @param conversationId The channel or direct-message conversation ID.
+   * @param messageId The ID of the message to fetch.
+   * @returns The message when received, or `null` if the listener provides no message.
+   */
   private fetchMessageOnce(
     service: { getMessage: ChannelService['getMessage'] },
     conversationId: string,
@@ -232,25 +302,36 @@ export class Header {
     });
   }
 
+  /** Reopens search results on focus when the current query is valid. */
   onSearchFocus(): void {
     if (this.searchService.isQueryValid()) {
       this.isSearchOpen.set(true);
     }
   }
 
+  /**
+   * Opens a direct message with the user selected from search results.
+   *
+   * @param user The user selected by the search.
+   */
   async openUserResult(user: UserModel): Promise<void> {
     await this.dmService.openDmWith(user.uid);
     this.resetSearch();
   }
 
-  nameInput = signal('');
-
+  /** Updates the profile name field and validates its current value. */
   onNameInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.nameInput.set(value);
     this.validateName(value);
   }
 
+  /**
+   * Validates that a profile name contains at least two parts made of letters, apostrophes, or hyphens.
+   *
+   * @param value The name value to validate.
+   * @returns Whether the trimmed name is valid.
+   */
   private validateName(value: string): boolean {
     const trimmed = value.trim();
     const parts = trimmed.split(/\s+/).filter(Boolean);

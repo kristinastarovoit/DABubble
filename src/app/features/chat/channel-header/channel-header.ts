@@ -25,11 +25,13 @@ import { UserModel } from '../../../shared/model/user.model';
 import { Presence } from '../../../shared/services/presence';
 import { resolveMemberToAdd } from '../../../shared/utilities/member-lookup.utils';
 
+/** A selectable channel, contact, or email match shown in the recipient search. */
 type RecipientSuggestion =
   | { type: 'channel'; id: string; name: string }
   | { type: 'user'; id: string; name: string; avatar: string }
   | { type: 'email'; id: string; email: string };
 
+/** Displays the active channel header and its member and recipient dialogs. */
 @Component({
   imports: [CommonModule, FormsModule, EditChannel, UsercardDialog],
   selector: 'app-channel-header',
@@ -61,7 +63,70 @@ export class ChannelHeader {
   /** Fixed position and size of the recipient suggestions dropdown, kept within the viewport. */
   recipientSuggestionsPosition = { top: 0, left: 0, width: 0, maxHeight: 240 };
 
+  /** User currently selected for a member-related action, if any. */
   selectedUser = signal<UserModel | undefined>(undefined);
+
+  /** Reference to the channel-settings dialog. */
+  @ViewChild('editChannel') private editChannel!: EditChannel;
+
+  /** Reference to the container holding avatars + add-button, used to position the dialog. */
+  @ViewChild('metaRef') private metaRef!: ElementRef<HTMLDivElement>;
+
+  /** Reference to the members / add-members dialog. */
+  @ViewChild('membersDialog') private membersDialog!: ElementRef<HTMLDialogElement>;
+
+  /** Reference to the member search input used to anchor the suggestions. */
+  @ViewChild('memberSearchInput') private memberSearchInput!: ElementRef<HTMLInputElement>;
+
+  /** Controls which view is shown inside the members dialog. */
+  showAddMembersView = signal(false);
+
+  /** Text entered in the "Enter name" field. */
+  addMemberQuery = '';
+
+  /** Validation or persistence error shown in the add-members view. */
+  addMemberError = '';
+
+  /** Controls visibility of the separate member suggestions dropdown. */
+  showMemberSuggestions = signal(false);
+
+  /** Fixed position and width of the suggestions dropdown. */
+  suggestionsPosition = { top: 0, left: 0, width: 0 };
+
+  /** Provides the available channels and their messages. */
+  channelService = inject(ChannelService);
+
+  /** Provides all workspace users. */
+  userService = inject(UserService);
+
+  /** Provides the live presence state for workspace members. */
+  presenceService = inject(Presence);
+
+  /** Identifier of the currently selected channel. */
+  channelId = computed(() => this.channelService.activeChannelId());
+
+  /** The channel matching the currently selected channel ID. */
+  activeChannel = computed(() =>
+    this.channelService.channels().find((channel) => channel.id === this.channelId()),
+  );
+
+  /** Full user objects of the current channel's members. */
+  channelMembers = computed(() => {
+    const memberIds = this.activeChannel()?.memberIds ?? [];
+    return this.userService.users().filter((user) => memberIds.includes(user.uid));
+  });
+
+  /** Firebase Auth instance. */
+  private auth = inject(FIREBASE_AUTH);
+
+  /** UID of the currently logged-in user. */
+  currentUserId = computed(() => this.auth.currentUser?.uid ?? '');
+
+  /** Messages belonging to the currently selected channel. */
+  messages = signal<Message[]>([]);
+
+  /** Unsubscribes from the current message listener when the channel changes. */
+  private currentUnsubscribe: (() => void) | undefined;
 
   /**
    * Channels, contacts, and matching contact email addresses for the current recipient query.
@@ -84,6 +149,12 @@ export class ChannelHeader {
     return [...channelMatches, ...userMatches];
   }
 
+  /**
+   * Finds channels whose names contain the current recipient query.
+   *
+   * @param query The normalized query to match against channel names.
+   * @returns Matching channels as recipient suggestions.
+   */
   private matchingChannelSuggestions(query: string): RecipientSuggestion[] {
     return this.channelService
       .channels()
@@ -91,6 +162,12 @@ export class ChannelHeader {
       .map((channel) => ({ type: 'channel' as const, id: channel.id, name: channel.name }));
   }
 
+  /**
+   * Finds contacts other than the current user that match the recipient query.
+   *
+   * @param query The normalized query to match against contact names and email addresses.
+   * @returns Matching contacts as user or email suggestions.
+   */
   private matchingContactSuggestions(query: string): RecipientSuggestion[] {
     const currentUserId = this.authService.currentUserId();
     return this.dmService
@@ -111,6 +188,7 @@ export class ChannelHeader {
     return matches;
   }
 
+  /** Determines whether the recipient query targets channels, users, or both. */
   private get recipientSearchMode(): 'channel' | 'user' | 'mixed' {
     const raw = this.recipientQuery.trim();
     if (raw.startsWith('#')) return 'channel';
@@ -149,33 +227,6 @@ export class ChannelHeader {
       await this.dmService.openDmWith(suggestion.id);
     }
   }
-
-  /** Reference to the channel-settings dialog. */
-  @ViewChild('editChannel') private editChannel!: EditChannel;
-
-  /** Reference to the container holding avatars + add-button, used to position the dialog. */
-  @ViewChild('metaRef') private metaRef!: ElementRef<HTMLDivElement>;
-
-  /** Reference to the members / add-members dialog. */
-  @ViewChild('membersDialog') private membersDialog!: ElementRef<HTMLDialogElement>;
-
-  /** Reference to the member search input used to anchor the suggestions. */
-  @ViewChild('memberSearchInput') private memberSearchInput!: ElementRef<HTMLInputElement>;
-
-  /** Controls which view is shown inside the members dialog. */
-  showAddMembersView = signal(false);
-
-  /** Text entered in the "Enter name" field. */
-  addMemberQuery = '';
-
-  /** Validation or persistence error shown in the add-members view. */
-  addMemberError = '';
-
-  /** Controls visibility of the separate member suggestions dropdown. */
-  showMemberSuggestions = signal(false);
-
-  /** Fixed position and width of the suggestions dropdown. */
-  suggestionsPosition = { top: 0, left: 0, width: 0 };
 
   /** Users matching the current query that are not channel members yet. */
   get memberSuggestions() {
@@ -289,10 +340,12 @@ export class ChannelHeader {
     this.resetAddMemberState();
   }
 
+  /** Stores an error message for display in the add-member view. */
   private failAddMember(message: string): void {
     this.addMemberError = message;
   }
 
+  /** Clears the add-member form and returns the dialog to its member-list view. */
   private resetAddMemberState(): void {
     this.addMemberQuery = '';
     this.addMemberError = '';
@@ -310,41 +363,6 @@ export class ChannelHeader {
       return false;
     }
   }
-
-  /** Provides the available channels and their messages. */
-  channelService = inject(ChannelService);
-
-  /** Provides all workspace users. */
-  userService = inject(UserService);
-
-  /** Provides the live presence state for workspace members. */
-  presenceService = inject(Presence);
-
-  /** Identifier of the currently selected channel. */
-  channelId = computed(() => this.channelService.activeChannelId());
-
-  /** The channel matching the currently selected channel ID. */
-  activeChannel = computed(() =>
-    this.channelService.channels().find((channel) => channel.id === this.channelId()),
-  );
-
-  /** Full user objects of the current channel's members. */
-  channelMembers = computed(() => {
-    const memberIds = this.activeChannel()?.memberIds ?? [];
-    return this.userService.users().filter((user) => memberIds.includes(user.uid));
-  });
-
-  /** Firebase Auth instance. */
-  private auth = inject(FIREBASE_AUTH);
-
-  /** UID of the currently logged-in user. */
-  currentUserId = computed(() => this.auth.currentUser?.uid ?? '');
-
-  /** Messages belonging to the currently selected channel. */
-  messages = signal<Message[]>([]);
-
-  /** Unsubscribes from the current message listener when the channel changes. */
-  private currentUnsubscribe: (() => void) | undefined;
 
   /** Creates the message listener for the active channel. */
   constructor() {

@@ -117,7 +117,6 @@ export class Sidebar {
     isSelf: boolean;
     dm: Dm | null;
   }): Promise<void> {
-    console.log('clicked', partner);
     const currentUserId = this.authService.currentUserId();
     if (!currentUserId) return;
 

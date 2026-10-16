@@ -1,30 +1,6 @@
 import { signal } from '@angular/core';
 import { Auth } from 'firebase/auth';
-import {
-  CollectionReference,
-  DocumentData,
-  DocumentReference,
-  Firestore,
-  Query,
-  QueryDocumentSnapshot,
-  WriteBatch,
-  addDoc,
-  arrayRemove,
-  arrayUnion,
-  collection,
-  deleteField,
-  doc,
-  getDoc,
-  getDocs,
-  increment,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  updateDoc,
-  where,
-  writeBatch,
-} from 'firebase/firestore';
+import { CollectionReference, DocumentData, DocumentReference, Firestore, Query, QueryDocumentSnapshot, WriteBatch, addDoc, arrayRemove, arrayUnion, collection, deleteField, doc, getDoc, getDocs, increment, onSnapshot, orderBy, query, serverTimestamp, updateDoc, where, writeBatch} from 'firebase/firestore';
 import { Channel } from '../interfaces/channel';
 import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';

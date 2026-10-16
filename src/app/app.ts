@@ -1,8 +1,4 @@
 import { Component, signal } from '@angular/core';
-import { Header } from './layout/header/header';
-import { Sidebar } from './layout/sidebar/sidebar';
-import { Chat } from './features/chat/chat';
-import { Thread } from './features/thread/thread';
 import { RouterOutlet } from '@angular/router';
 
 @Component({

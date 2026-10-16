@@ -1,13 +1,4 @@
-import {
-  Component,
-  computed,
-  ElementRef,
-  HostListener,
-  inject,
-  input,
-  output,
-  signal,
-} from '@angular/core';
+import { Component, computed, ElementRef, HostListener, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MessageReaction } from '../../../shared/interfaces/message';
 import { UserService } from '../../../shared/services/users';
@@ -44,19 +35,6 @@ export class ReactionBar {
   /** Emoji of the chip currently being hovered, or null if none. */
   hoveredEmoji = signal<string | null>(null);
 
-  /** Toggles the selected emoji reaction and collapses the bar back to its default view. */
-  toggle(emoji: string): void {
-    this.reactionToggled.emit(emoji);
-    this.showAll.set(false);
-  }
-
-  /** Builds just the name portion of the tooltip (e.g. "Sofia Müller" or "Sofia Müller und Du"). */
-  tooltipNameFor(reaction: MessageReaction): string {
-    return reactionTooltipName(reaction.userIds, this.currentUserId(), (uid) =>
-      this.userService.getUserName(uid),
-    );
-  }
-
   /** Whether all reactions are shown, or just the first MAX_VISIBLE_REACTIONS. */
   showAll = signal(false);
 
@@ -71,6 +49,19 @@ export class ReactionBar {
     const max = this.maxVisible();
     return total > max ? total - max : 0;
   });
+
+  /** Toggles the selected emoji reaction and collapses the bar back to its default view. */
+  toggle(emoji: string): void {
+    this.reactionToggled.emit(emoji);
+    this.showAll.set(false);
+  }
+
+  /** Builds just the name portion of the tooltip (e.g. "Sofia Müller" or "Sofia Müller und Du"). */
+  tooltipNameFor(reaction: MessageReaction): string {
+    return reactionTooltipName(reaction.userIds, this.currentUserId(), (uid) =>
+      this.userService.getUserName(uid),
+    );
+  }
 
   /** Expands the reaction list to show all reactions. */
   expandAll(): void {

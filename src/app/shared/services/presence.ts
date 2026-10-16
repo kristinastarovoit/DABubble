@@ -3,15 +3,22 @@ import { FIREBASE_DATABASE } from '../../app.config';
 import { AuthService } from './auth';
 import { onDisconnect, onValue, ref, serverTimestamp, set } from 'firebase/database';
 
+/** Possible online-presence states stored for a user. */
 type PresenceState = 'online' | 'offline';
 
+/** Tracks users' realtime online presence and updates the current user's status. */
 @Service()
 export class Presence {
+  /** Realtime Database instance used to read and write presence data. */
   private database = inject(FIREBASE_DATABASE);
+
+  /** Provides the currently authenticated user's ID. */
   private authService = inject(AuthService);
 
+  /** Locally cached presence state, keyed by user ID. */
   private presenceByUid = signal<Record<string, PresenceState>>({});
 
+  /** Starts global presence synchronization and registers the current user's presence. */
   constructor() {
     this.syncGlobalPresence();
     this.registerOwnPresenceOnConnect();
@@ -60,6 +67,13 @@ export class Presence {
     }
   }
 
+  /**
+   * Determines whether a user is online, falling back to a supplied status if uncached.
+   *
+   * @param uid The user's ID, if available.
+   * @param fallbackStatus The status to use when no realtime status is cached.
+   * @returns Whether the user is online.
+   */
   isOnline(uid: string | undefined, fallbackStatus?: string): boolean {
     if (!uid) return false;
     const presence = this.presenceByUid()[uid];
@@ -67,6 +81,7 @@ export class Presence {
     return fallbackStatus === 'online';
   }
 
+  /** Marks the currently authenticated user offline in the database and local cache. */
   async goOffline(): Promise<void> {
     const uid = this.authService.currentUserId();
     if (!uid) return;

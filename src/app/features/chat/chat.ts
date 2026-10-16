@@ -1,15 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-  inject,
-  input,
-  computed,
-  signal,
-  effect,
-  ViewChild,
-} from '@angular/core';
+import { Component, inject, computed, signal, effect, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChannelHeader } from './channel-header/channel-header';
 import { MessageList } from './message-list/message-list';
@@ -40,24 +29,6 @@ export class Chat {
 
   @ViewChild('messageInput') private messageInputRef?: MessageInput;
 
-  openThread(message: Message): void {
-    this.threadService.open(message, {
-      channelId: this.channelId(),
-      dmId: this.dmId(),
-    });
-  }
-
-  /** Closes the overlaid thread when focus returns to the chat composer. */
-  onComposerFocus(): void {
-    if (window.matchMedia('(min-width: 901px) and (max-width: 1350px)').matches) {
-      this.threadService.close();
-    }
-  }
-
-  /** Opens the active channel's member list. */
-  // openMemberList(): void {
-  //   this.memberListRequested.emit();
-  // }
 
   /** Provides channel data and channel message listeners. */
   private channelService = inject(ChannelService);
@@ -127,6 +98,25 @@ export class Chat {
     return this.resolveIntroContact(dm, currentUserId);
   });
 
+  /**
+   * Opens the thread for a message in the currently active channel or direct message.
+   *
+   * @param message The message whose thread should be opened.
+   */
+  openThread(message: Message): void {
+    this.threadService.open(message, {
+      channelId: this.channelId(),
+      dmId: this.dmId(),
+    });
+  }
+
+  /** Closes the overlaid thread when focus returns to the chat composer. */
+  onComposerFocus(): void {
+    if (window.matchMedia('(min-width: 901px) and (max-width: 1350px)').matches) {
+      this.threadService.close();
+    }
+  }
+
   /** Resolves the intro contact for a DM: the partner, or the user themself for a self-DM. */
   private resolveIntroContact(
     dm: Dm,
@@ -173,6 +163,11 @@ export class Chat {
     this.currentUnsubscribe?.();
   }
 
+  /**
+   * Sends a message to the active direct message or, if the user is a member, channel.
+   *
+   * @param text The message text to send.
+   */
   onSend(text: string): void {
     const uid = this.authService.currentUserId();
     if (!uid) return;

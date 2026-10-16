@@ -1,13 +1,4 @@
-import {
-  afterNextRender,
-  Component,
-  DestroyRef,
-  ElementRef,
-  inject,
-  input,
-  output,
-  viewChild,
-} from '@angular/core';
+import { afterNextRender, Component, DestroyRef, ElementRef, inject, input, output, viewChild} from '@angular/core';
 
 /** Duration of the logo symbol sliding in from the right. */
 const ENTER_MS = 800;

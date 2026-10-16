@@ -1,39 +1,13 @@
 import { Injector, Service, inject, signal } from '@angular/core';
 import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../../app.config';
 import { Channel } from '../interfaces/channel';
-import {
-  DocumentReference,
-  DocumentData,
-  QuerySnapshot,
-  collection,
-  onSnapshot,
-  addDoc,
-  doc,
-  updateDoc,
-  deleteDoc,
-  arrayUnion,
-  arrayRemove,
-  query,
-  where,
-  getDocs,
-  serverTimestamp,
-} from 'firebase/firestore';
+import { DocumentReference, DocumentData, QuerySnapshot, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { NewMessageService } from './new-message-service';
 import { DmService } from './dm-service';
-import {
-  addReaction,
-  addThreadReply,
-  deleteGuestContent,
-  editOwnMessageText,
-  pruneGuestFromChannels,
-  removeReaction,
-  subscribeToMessage,
-  subscribeToMessages,
-  subscribeToThreadReplies,
-} from '../utilities/conversation-firestore.utils';
+import { addReaction, addThreadReply, deleteGuestContent, editOwnMessageText, pruneGuestFromChannels, removeReaction, subscribeToMessage, subscribeToMessages, subscribeToThreadReplies } from '../utilities/conversation-firestore.utils';
 
 @Service()
 /** Provides Firestore operations and reactive channel data for the current user. */
@@ -46,6 +20,10 @@ export class ChannelService {
   /** The channels in which the currently authenticated user is a member. */
   channels = signal<Channel[]>([]);
   activeChannelId = signal<string | undefined>(undefined);
+
+  constructor() {
+    onAuthStateChanged(this.auth, (user) => this.syncChannelsForAuthUser(user));
+  }
 
   selectChannel(channelId: string): void {
     this.activeChannelId.set(channelId);
@@ -63,10 +41,6 @@ export class ChannelService {
     threadId: string,
   ): DocumentReference {
     return doc(this.db, 'channels', channelId, 'messages', messageId, 'thread', threadId);
-  }
-
-  constructor() {
-    onAuthStateChanged(this.auth, (user) => this.syncChannelsForAuthUser(user));
   }
 
   /** Subscribes to all channels while signed in, and clears them when signed out. */

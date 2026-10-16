@@ -1,38 +1,25 @@
 import { Service, effect, inject, signal } from '@angular/core';
-import {
-  collection,
-  doc,
-  getDoc,
-  updateDoc,
-  onSnapshot,
-  serverTimestamp,
-  setDoc,
-  deleteDoc,
-  query,
-  collectionGroup,
-  where,
-  getDocs,
-  writeBatch,
-  arrayUnion,
-  QuerySnapshot,
-  DocumentData,
-  WriteBatch,
-} from 'firebase/firestore';
-
+import { collection, doc, getDoc, updateDoc, onSnapshot, serverTimestamp, setDoc, deleteDoc, query, collectionGroup, where, getDocs, writeBatch, arrayUnion, QuerySnapshot, DocumentData, WriteBatch} from 'firebase/firestore';
 import { FIREBASE_FIRESTORE } from '../../app.config';
 import { UserModel } from '../model/user.model';
 import { AuthService } from './auth';
 
-@Service()
 /** Provides Firestore operations and reactive access to workspace users. */
+@Service()
 export class UserService {
+  /** Firestore instance used for user and channel operations. */
   private firestore = inject(FIREBASE_FIRESTORE);
+
+  /** Provides the current authentication state. */
   private authService = inject(AuthService);
+
+  /** Unsubscribes from the current users collection listener. */
   private unsubscribeUsers: (() => void) | undefined;
 
   /** All users in the workspace, kept in sync with Firestore. */
   users = signal<UserModel[]>([]);
 
+  /** Starts and cleans up the users collection listener as authentication changes. */
   constructor() {
     effect(() => this.syncUsersForCurrentAuth());
   }
@@ -101,6 +88,12 @@ export class UserService {
     return this.users().find((user) => user.uid === uid)?.name ?? 'Unbekannt';
   }
 
+  /**
+   * Updates a user's display name in Firestore.
+   *
+   * @param userId The ID of the user to update.
+   * @param name The new display name.
+   */
   async editUserName(userId: string, name: string) {
     const usersRef = doc(this.firestore, 'users', userId);
     await updateDoc(usersRef, {
@@ -108,6 +101,12 @@ export class UserService {
     });
   }
 
+  /**
+   * Updates a user's avatar in Firestore.
+   *
+   * @param userId The ID of the user to update.
+   * @param avatar The new avatar URL or path.
+   */
   async editUserAvatar(userId: string, avatar: string) {
     const userRef = doc(this.firestore, 'users', userId);
     await updateDoc(userRef, {
@@ -115,6 +114,11 @@ export class UserService {
     });
   }
 
+  /**
+   * Deletes a user's profile document from Firestore.
+   *
+   * @param userId The ID of the user whose profile should be deleted.
+   */
   async deleteUserProfile(userId: string) {
     await deleteDoc(doc(this.firestore, 'users', userId));
   }
@@ -144,6 +148,7 @@ export class UserService {
     }
   }
 
+  /** Commits a batch that deletes the user's authored content. */
   private async commitCleanupBatch(batch: WriteBatch): Promise<void> {
     try {
       await batch.commit();

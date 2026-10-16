@@ -1,13 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  HostListener,
-  inject,
-  input,
-  output,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { Component, ElementRef, HostListener, inject, input, output, signal, viewChild} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CURATED_EMOJIS } from '../../../shared/utilities/emoji-set';
 
@@ -42,18 +33,6 @@ export class ReactionPicker {
   /** Whether the extended emoji panel is currently open. */
   showFullPicker = signal(false);
 
-  /** Opens or closes the extended emoji panel. */
-  toggleFullPicker(event: MouseEvent): void {
-    event.stopPropagation();
-    this.showFullPicker.update((open) => !open);
-  }
-
-  /** Selects an emoji from the extended panel and closes it. */
-  selectFromFullPicker(emoji: string): void {
-    this.reactionSelected.emit(emoji);
-    this.showFullPicker.set(false);
-  }
-
   /** Whether the current user is the author of this message and can edit it. */
   isOwnMessage = input(false);
 
@@ -69,6 +48,32 @@ export class ReactionPicker {
 
   /** Whether the "more actions" menu should open leftward because it would otherwise overflow the viewport. */
   menuFlipped = signal(false);
+
+  /** The curated set of emojis shown in the extended picker panel. */
+  protected readonly curatedEmojis = CURATED_EMOJIS;
+
+  /** Closes any open popover when clicking anywhere outside the component. */
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.elementRef.nativeElement.contains(event.target as Node)) {
+      return;
+    }
+    this.showFullPicker.set(false);
+    this.showMoreMenu.set(false);
+    this.menuFlipped.set(false);
+  }
+
+  /** Opens or closes the extended emoji panel. */
+  toggleFullPicker(event: MouseEvent): void {
+    event.stopPropagation();
+    this.showFullPicker.update((open) => !open);
+  }
+
+  /** Selects an emoji from the extended panel and closes it. */
+  selectFromFullPicker(emoji: string): void {
+    this.reactionSelected.emit(emoji);
+    this.showFullPicker.set(false);
+  }
 
   /** Opens or closes the "more actions" menu, checking afterwards whether it fits the viewport. */
   toggleMoreMenu(event: MouseEvent): void {
@@ -117,20 +122,6 @@ export class ReactionPicker {
   /** Handles the "Edit message" menu entry and closes the menu. */
   onEditMessage(): void {
     this.moreActionsRequested.emit();
-    this.showMoreMenu.set(false);
-    this.menuFlipped.set(false);
-  }
-
-  /** The curated set of emojis shown in the extended picker panel. */
-  protected readonly curatedEmojis = CURATED_EMOJIS;
-
-  /** Closes any open popover when clicking anywhere outside the component. */
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    if (this.elementRef.nativeElement.contains(event.target as Node)) {
-      return;
-    }
-    this.showFullPicker.set(false);
     this.showMoreMenu.set(false);
     this.menuFlipped.set(false);
   }

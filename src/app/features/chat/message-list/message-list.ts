@@ -1,14 +1,4 @@
-import {
-  Component,
-  afterRenderEffect,
-  computed,
-  ElementRef,
-  inject,
-  input,
-  output,
-  signal,
-  viewChild,
-} from '@angular/core';
+import {Component, afterRenderEffect, computed, ElementRef, inject, input, output, signal, viewChild} from '@angular/core';
 import { toMessageReactions } from '../../../shared/utilities/reactions.utils';
 import { ReactionPicker } from '../reaction-picker/reaction-picker';
 import { CommonModule, DatePipe } from '@angular/common';
@@ -41,17 +31,6 @@ export class MessageList {
   /** Whether the emoji picker panel is currently open for the message being edited. */
   showEmojiPicker = signal(false);
 
-  /** Opens or closes the emoji picker panel. */
-  toggleEmojiPicker(): void {
-    this.showEmojiPicker.update((open) => !open);
-  }
-
-  /** Appends the chosen emoji to the edit draft and closes the picker. */
-  selectEmoji(emoji: string): void {
-    this.editText.set(this.editText() + emoji);
-    this.showEmojiPicker.set(false);
-  }
-
   private userService = inject(UserService);
   private navigationService = inject(MessageNavigationService);
   private dmService = inject(DmService);
@@ -81,6 +60,14 @@ export class MessageList {
   /** The current inline edit text for the active message. */
   editText = signal('');
 
+  /** Resolves the reactions for a message, including the current user's own state. */
+  protected messageReactions(message: Message): MessageReaction[] {
+    return toMessageReactions(message.reactions, this.currentUserId());
+  }
+
+  /** The identifier of the message currently hovered by the pointer. */
+  hoveredMessageId = signal<string | null>(null);
+
   private messageListElement = viewChild<ElementRef<HTMLDivElement>>('messageList');
   private shouldAutoScroll = true;
   private previousScrollKey: string | undefined;
@@ -88,6 +75,17 @@ export class MessageList {
 
   constructor() {
     afterRenderEffect(() => this.syncScrollOnRender());
+  }
+
+  /** Opens or closes the emoji picker panel. */
+  toggleEmojiPicker(): void {
+    this.showEmojiPicker.update((open) => !open);
+  }
+
+  /** Appends the chosen emoji to the edit draft and closes the picker. */
+  selectEmoji(emoji: string): void {
+    this.editText.set(this.editText() + emoji);
+    this.showEmojiPicker.set(false);
   }
 
   /** Follows new messages or jumps to a pending navigation target after each render. */
@@ -156,14 +154,6 @@ export class MessageList {
   onReactionToggled(message: Message, emoji: string): void {
     this.reactionToggled.emit({ message, emoji });
   }
-
-  /** Resolves the reactions for a message, including the current user's own state. */
-  protected messageReactions(message: Message): MessageReaction[] {
-    return toMessageReactions(message.reactions, this.currentUserId());
-  }
-
-  /** The identifier of the message currently hovered by the pointer. */
-  hoveredMessageId = signal<string | null>(null);
 
   /** Returns the display name for the given sender ID. */
   getSenderName(senderId: string): string {

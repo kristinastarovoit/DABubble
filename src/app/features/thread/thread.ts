@@ -1,13 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  afterRenderEffect,
-  computed,
-  effect,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { Component, ElementRef, afterRenderEffect, computed, effect, inject, signal, viewChild} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MessageInput } from '../chat/message-input/message-input';
 import { ReactionBar } from '../chat/reaction-bar/reaction-bar';
@@ -25,6 +16,7 @@ import { MentionHighlightPipe } from '../../shared/utilities/mention-highlight.p
 import { CURATED_EMOJIS } from '../../shared/utilities/emoji-set';
 import { toggleReaction } from '../../shared/utilities/reaction-toggle.utils';
 
+/** Displays a message thread, its replies, and related actions. */
 @Component({
   imports: [CommonModule, MessageInput, ReactionBar, ReactionPicker, UsercardDialog, MentionHighlightPipe],
   selector: 'app-thread',
@@ -55,17 +47,6 @@ export class Thread {
 
   /** Whether the emoji picker panel is currently open for the message being edited. */
   showEmojiPicker = signal(false);
-
-  /** Opens or closes the emoji picker panel. */
-  toggleEmojiPicker(): void {
-    this.showEmojiPicker.update((open) => !open);
-  }
-
-  /** Appends the chosen emoji to the edit draft and closes the picker. */
-  selectEmoji(emoji: string): void {
-    this.editText.set(this.editText() + emoji);
-    this.showEmojiPicker.set(false);
-  }
 
   /** The thread currently opened via ThreadService, shared with Chat. */
   activeThread = this.threadService.activeThread;
@@ -124,6 +105,17 @@ export class Thread {
     this.autoScrollOnThreadChange();
   }
 
+  /** Opens or closes the emoji picker panel. */
+  toggleEmojiPicker(): void {
+    this.showEmojiPicker.update((open) => !open);
+  }
+
+  /** Appends the chosen emoji to the edit draft and closes the picker. */
+  selectEmoji(emoji: string): void {
+    this.editText.set(this.editText() + emoji);
+    this.showEmojiPicker.set(false);
+  }
+  
   /** Re-subscribes to the open thread's parent message and replies whenever it changes. */
   private subscribeToActiveThread(): void {
     effect(() => {
@@ -235,6 +227,13 @@ export class Thread {
     this.editText.set('');
   }
 
+  /**
+   * Persists an edit to the thread's parent message in its channel or direct message.
+   *
+   * @param thread The active thread containing the parent message.
+   * @param messageId The ID of the parent message to update.
+   * @param text The updated message text.
+   */
   private async saveParentEdit(thread: ActiveThread, messageId: string, text: string): Promise<void> {
     if (thread.channelId) {
       await this.channelService.editChannelMessage(thread.channelId, messageId, text);
@@ -244,6 +243,14 @@ export class Thread {
     this.editingParentMessage.set(false);
   }
 
+  /**
+   * Persists an edit to a reply in the active thread's channel or direct message.
+   *
+   * @param thread The active thread containing the reply.
+   * @param messageId The ID of the parent message.
+   * @param replyId The ID of the reply to update.
+   * @param text The updated reply text.
+   */
   private async saveReplyEdit(
     thread: ActiveThread,
     messageId: string,

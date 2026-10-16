@@ -1,18 +1,7 @@
 import { Injector, Service, computed, effect, inject, signal } from '@angular/core';
 import { FIREBASE_AUTH, FIREBASE_FIRESTORE } from '../../app.config';
 import { Dm } from '../interfaces/dm';
-import {
-  collection,
-  onSnapshot,
-  addDoc,
-  doc,
-  updateDoc,
-  serverTimestamp,
-  query,
-  where,
-  getDoc,
-  setDoc,
-} from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, doc, updateDoc, serverTimestamp, query, where, getDoc, setDoc } from 'firebase/firestore';
 import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
 import { UserModel } from '../model/user.model';
@@ -20,16 +9,7 @@ import { UserService } from './users';
 import { AuthService } from './auth';
 import { NewMessageService } from './new-message-service';
 import { ChannelService } from './channel-service';
-import {
-  addReaction,
-  addThreadReply,
-  deleteGuestContent,
-  editOwnMessageText,
-  removeReaction,
-  subscribeToMessage,
-  subscribeToMessages,
-  subscribeToThreadReplies,
-} from '../utilities/conversation-firestore.utils';
+import { addReaction, addThreadReply, deleteGuestContent, editOwnMessageText, removeReaction, subscribeToMessage, subscribeToMessages, subscribeToThreadReplies } from '../utilities/conversation-firestore.utils';
 
 @Service()
 /** Provides Firestore operations and reactive direct-message data. */
@@ -45,6 +25,10 @@ export class DmService {
   dms = signal<Dm[]>([]);
   /** Identifier of the currently active direct-message conversation, or `undefined` if none is selected. */
   activeDmId = signal<string | undefined>(undefined);
+
+  constructor() {
+    effect((onCleanup) => this.subscribeToOwnDms(onCleanup));
+  }
 
   /** Sets the active direct-message conversation.
    *
@@ -69,10 +53,6 @@ export class DmService {
         lastMessageAt: serverTimestamp(),
       });
     }
-  }
-
-  constructor() {
-    effect((onCleanup) => this.subscribeToOwnDms(onCleanup));
   }
 
   /** Ensures the self-DM exists, then subscribes to every DM the user is a member of. */

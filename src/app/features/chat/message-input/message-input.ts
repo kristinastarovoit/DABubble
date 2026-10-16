@@ -1,16 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-  signal,
-  computed,
-  output,
-  inject,
-  ElementRef,
-  ViewChild,
-  HostListener,
-} from '@angular/core';
+import { Component, Input, signal, computed, output, inject, ElementRef, ViewChild, HostListener} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CURATED_EMOJIS } from '../../../shared/utilities/emoji-set';
@@ -73,6 +61,18 @@ export class MessageInput {
   /** Whether the emoji picker panel is currently open. */
   showEmojiPicker = signal(false);
 
+  /** Which trigger character opened the mention dropdown, if any. */
+  mentionTrigger = signal<'@' | '#' | null>(null);
+
+  /** Index in the draft text where the current trigger character starts. */
+  private mentionStartIndex = signal<number | null>(null);
+
+  /** Text typed after the trigger character, used to filter the mention options. */
+  private mentionQuery = signal('');
+
+  /** Index of the currently highlighted mention option. */
+  activeMentionIndex = signal(0);
+
   /** Opens or closes the emoji picker panel. */
   toggleEmojiPicker(): void {
     this.showEmojiPicker.update((open) => !open);
@@ -107,18 +107,6 @@ export class MessageInput {
       this.closeMentionDropdown();
     }
   }
-
-  /** Which trigger character opened the mention dropdown, if any. */
-  mentionTrigger = signal<'@' | '#' | null>(null);
-
-  /** Index in the draft text where the current trigger character starts. */
-  private mentionStartIndex = signal<number | null>(null);
-
-  /** Text typed after the trigger character, used to filter the mention options. */
-  private mentionQuery = signal('');
-
-  /** Index of the currently highlighted mention option. */
-  activeMentionIndex = signal(0);
 
   /** All users, excluding the currently logged-in one, as mention options. */
   private userMentionOptions = computed<MentionOption[]>(() => {
@@ -261,12 +249,10 @@ export class MessageInput {
   /** Sends the trimmed message text. */
   sendMessage(): void {
     if (this.disabled) return;
-
     const value = this.text().trim();
     if (!value) {
       return;
     }
-
     this.send.emit(value);
     this.text.set('');
     this.closeMentionDropdown();

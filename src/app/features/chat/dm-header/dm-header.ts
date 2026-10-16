@@ -1,5 +1,4 @@
-import { Component, input, ViewChild, ElementRef, inject } from '@angular/core';
-import { User } from '../../../shared/interfaces/user';
+import { Component, input, inject } from '@angular/core';
 import { UserModel } from '../../../shared/model/user.model';
 import { Presence } from '../../../shared/services/presence';
 import { UsercardDialog } from '../../../shared/components/usercard-dialog/usercard-dialog';
