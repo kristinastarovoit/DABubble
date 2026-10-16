@@ -69,14 +69,14 @@ export class UserService {
     await this.joinDefaultChannel(uid);
   }
 
-  /** Adds a newly created user to the default "Allgemeines" channel, if it exists. */
+  /** Adds a newly created user to the default "Code Review" channel, if it exists. */
   private async joinDefaultChannel(uid: string): Promise<void> {
     const channelsRef = collection(this.firestore, 'channels');
-    const q = query(channelsRef, where('name', '==', 'Allgemeines'));
+    const q = query(channelsRef, where('name', '==', 'Code Review'));
     const snapshot = await getDocs(q);
 
     if (snapshot.empty) {
-      console.warn('[UserService] Default channel "Allgemeines" not found; skipping auto-join.');
+      console.warn('[UserService] Default channel "Code Review" not found; skipping auto-join.');
       return;
     }
 

@@ -91,7 +91,7 @@ export class ChannelService {
     const channels = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Channel);
     this.channels.set(channels);
     if (this.initialChannelSelected || channels.length === 0) return;
-    const general = channels.find((c) => c.name === 'Allgemeines') ?? channels[0];
+    const general = channels.find((c) => c.name === 'Code Review') ?? channels[0];
     this.selectChannel(general.id);
     this.initialChannelSelected = true;
   }

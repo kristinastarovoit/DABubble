@@ -194,6 +194,38 @@
   }
 }
 
+.thread .edit-message-input__wrapper {
+  width: 100%;
+  min-width: 222px;
+}
+
+.thread .edit-message-input__button-wrapper {
+  gap: 8px;
+}
+
+.thread .edit-message-input__button-wrapper .button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  gap: 0;
+
+  .button__icon {
+    display: block;
+  }
+
+  .button__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
 .thread__picker {
   position: absolute;
   top: -16px;
