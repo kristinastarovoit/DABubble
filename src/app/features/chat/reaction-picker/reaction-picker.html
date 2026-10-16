@@ -72,7 +72,11 @@
       </button>
 
       @if (showMoreMenu()) {
-        <div class="reaction-picker__more-menu">
+        <div
+          class="reaction-picker__more-menu"
+          [class.reaction-picker__more-menu--flip]="menuFlipped()"
+          #moreMenuRef
+        >
           <button type="button" class="reaction-picker__more-menu-item" (click)="onEditMessage()">
             Edit message
           </button>

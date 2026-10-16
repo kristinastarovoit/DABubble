@@ -11,7 +11,6 @@ import {
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ChannelService } from '../../../shared/services/channel-service';
-import { DmService } from '../../../shared/services/dm-service';
 import { AuthService } from '../../../shared/services/auth';
 import { UserModel } from '../../../shared/model/user.model';
 import { UserService } from '../../../shared/services/users';
@@ -39,9 +38,6 @@ export class CreateChannel {
 
   /** Provides the available channels and channel selection state. */
   channelService = inject(ChannelService);
-
-  /** Provides direct-message data, used as the source of "contacts". */
-  private dmService = inject(DmService);
 
   /** Provides reactive authentication state. */
   private authService = inject(AuthService);
@@ -151,19 +147,11 @@ export class CreateChannel {
   /** Creates the channel with the chosen members and closes both dialogs. */
   async createChannel(): Promise<void> {
     this.membersError.set('');
-
-    const currentUserId = this.authService.currentUserId();
     const memberIds =
       this.memberOption() === 'all'
         ? this.contactUsers().map((user) => user.uid)
         : this.selectedMembers().map((user) => user.uid);
-
-    const channelId = await this.channelService.addChannel(
-      this.name.trim(),
-      this.description.trim(),
-      memberIds,
-    );
-
+    const channelId = await this.channelService.addChannel(this.name.trim(), this.description.trim(), memberIds);
     if (!channelId) {
       this.membersError.set('A channel with this name already exists.');
       return;

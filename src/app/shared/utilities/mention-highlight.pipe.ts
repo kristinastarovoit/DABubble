@@ -30,12 +30,9 @@ export class MentionHighlightPipe implements PipeTransform {
       // Longest names first so e.g. "Max Mustermann" wins over "Max".
       .sort((a, b) => b.length - a.length)
       .map((name) => escapeHtml(name));
-
     if (names.length === 0) return this.sanitizer.bypassSecurityTrustHtml(escaped);
-
     const pattern = new RegExp(`([@#])(${names.map((name) => escapeRegExp(name)).join('|')})`, 'g');
     const highlighted = escaped.replace(pattern, '<strong>$1$2</strong>');
-
     return this.sanitizer.bypassSecurityTrustHtml(highlighted);
   }
 }

@@ -75,41 +75,34 @@ export class Intro {
    */
   private async play() {
     const logo = this.logo().nativeElement;
+    const word = this.word().nativeElement;
     if (typeof logo.animate !== 'function') return this.finish();
+    const { centered, unit, left } = this.layoutLogo(logo);
+    const enterFrames = [{ opacity: 1, transform: `translateX(${(innerWidth - left) / unit}px)` }, { opacity: 1, transform: 'translateX(0)' }];
+    await this.animate(this.mark().nativeElement, enterFrames, { duration: ENTER_MS, easing: EASE });
+    if (this.stopped) return;
+    const wipeFrames = [{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }];
+    await this.animate(word, wipeFrames, { duration: WIPE_MS, easing: 'ease-out' });
+    if (this.stopped) return;
+    await new Promise((resolve) => setTimeout(resolve, HOLD_MS));
+    if (this.stopped) return;
+    await this.flyToHeader(logo, word, centered);
+    this.finish();
+  }
 
+  /** Sizes and centers the logo over the target, returning the values later steps need. */
+  private layoutLogo(logo: HTMLElement): { scale: number; left: number; centered: string; unit: number } {
     const size = this.target().getBoundingClientRect();
     const scale = Math.min(innerWidth * 0.8, 520) / size.width;
     const left = (innerWidth - size.width * scale) / 2;
     const centered = `translate(${left}px, ${(innerHeight - size.height * scale) / 2}px) scale(${scale})`;
-    Object.assign(logo.style, {
-      width: `${size.width}px`,
-      height: `${size.height}px`,
-      transform: centered,
-    });
-
+    Object.assign(logo.style, { width: `${size.width}px`, height: `${size.height}px`, transform: centered });
     const unit = Math.min(size.width / LOGO_WIDTH, size.height / LOGO_HEIGHT) * scale;
-    const fromRight = (innerWidth - left) / unit;
-    await this.animate(
-      this.mark().nativeElement,
-      [
-        { opacity: 1, transform: `translateX(${fromRight}px)` },
-        { opacity: 1, transform: 'translateX(0)' },
-      ],
-      { duration: ENTER_MS, easing: EASE },
-    );
-    if (this.stopped) return;
+    return { scale, left, centered, unit };
+  }
 
-    const word = this.word().nativeElement;
-    await this.animate(
-      word,
-      [{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }],
-      { duration: WIPE_MS, easing: 'ease-out' },
-    );
-    if (this.stopped) return;
-
-    await new Promise((resolve) => setTimeout(resolve, HOLD_MS));
-    if (this.stopped) return;
-
+  /** Flies the logo and wordmark to the header position while fading out the backdrop. */
+  private async flyToHeader(logo: HTMLElement, word: SVGGElement, centered: string): Promise<void> {
     const to = this.target().getBoundingClientRect();
     const options = { duration: FLY_MS, easing: EASE };
     await Promise.all([
@@ -121,6 +114,5 @@ export class Intro {
       this.animate(word, [{ fill: '#ffffff' }, { fill: '#000000' }], options),
       this.animate(this.backdrop().nativeElement, [{ opacity: 1 }, { opacity: 0 }], options),
     ]);
-    this.finish();
   }
 }

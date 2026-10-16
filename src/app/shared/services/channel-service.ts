@@ -2,6 +2,9 @@ import { Injector, Service, inject, signal } from '@angular/core';
 import { FIREBASE_FIRESTORE, FIREBASE_AUTH } from '../../app.config';
 import { Channel } from '../interfaces/channel';
 import {
+  DocumentReference,
+  DocumentData,
+  QuerySnapshot,
   collection,
   onSnapshot,
   addDoc,
@@ -10,23 +13,27 @@ import {
   deleteDoc,
   arrayUnion,
   arrayRemove,
-  serverTimestamp,
-  increment,
   query,
   where,
   getDocs,
-  queryEqual,
-  getDoc,
-  deleteField,
-  orderBy,
-  writeBatch,
-  DocumentReference,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { NewMessageService } from './new-message-service';
 import { DmService } from './dm-service';
+import {
+  addReaction,
+  addThreadReply,
+  deleteGuestContent,
+  editOwnMessageText,
+  pruneGuestFromChannels,
+  removeReaction,
+  subscribeToMessage,
+  subscribeToMessages,
+  subscribeToThreadReplies,
+} from '../utilities/conversation-firestore.utils';
 
 @Service()
 /** Provides Firestore operations and reactive channel data for the current user. */
@@ -49,34 +56,44 @@ export class ChannelService {
   private unsubscribeChannels?: () => void;
   private initialChannelSelected = false;
 
+  /** Builds the document reference of a thread reply within a channel message. */
+  private threadMessageRef(
+    channelId: string,
+    messageId: string,
+    threadId: string,
+  ): DocumentReference {
+    return doc(this.db, 'channels', channelId, 'messages', messageId, 'thread', threadId);
+  }
+
   constructor() {
-    onAuthStateChanged(this.auth, (user) => {
-      this.unsubscribeChannels?.();
-      this.unsubscribeChannels = undefined;
+    onAuthStateChanged(this.auth, (user) => this.syncChannelsForAuthUser(user));
+  }
 
-      if (!user) {
-        this.channels.set([]);
-        this.activeChannelId.set(undefined);
-        this.initialChannelSelected = false;
-        return;
-      }
+  /** Subscribes to all channels while signed in, and clears them when signed out. */
+  private syncChannelsForAuthUser(user: User | null): void {
+    this.unsubscribeChannels?.();
+    this.unsubscribeChannels = undefined;
+    if (!user) {
+      this.channels.set([]);
+      this.activeChannelId.set(undefined);
+      this.initialChannelSelected = false;
+      return;
+    }
+    this.unsubscribeChannels = onSnapshot(
+      collection(this.db, 'channels'),
+      (snapshot) => this.applyChannelsSnapshot(snapshot),
+      (err) => console.error('[Channels-Listener]', err.code, err.message),
+    );
+  }
 
-      const channelsRef = collection(this.db, 'channels');
-      this.unsubscribeChannels = onSnapshot(
-        channelsRef,
-        (snapshot) => {
-          const channels = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Channel);
-          this.channels.set(channels);
-
-          if (!this.initialChannelSelected && channels.length > 0) {
-            const general = channels.find((c) => c.name === 'Allgemeines') ?? channels[0];
-            this.selectChannel(general.id);
-            this.initialChannelSelected = true;
-          }
-        },
-        (err) => console.error('[Channels-Listener]', err.code, err.message),
-      );
-    });
+  /** Stores the latest channels and auto-selects a default one on first load. */
+  private applyChannelsSnapshot(snapshot: QuerySnapshot<DocumentData>): void {
+    const channels = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Channel);
+    this.channels.set(channels);
+    if (this.initialChannelSelected || channels.length === 0) return;
+    const general = channels.find((c) => c.name === 'Allgemeines') ?? channels[0];
+    this.selectChannel(general.id);
+    this.initialChannelSelected = true;
   }
 
   /** Checks whether a channel with the given name already exists.
@@ -106,26 +123,18 @@ export class ChannelService {
     memberIds: string[] = [],
   ): Promise<string | undefined> {
     const user = this.auth.currentUser?.uid;
-
     if (!user) return undefined;
+    if (await this.channelNameExists(name)) return undefined;
 
-    const channelsRef = collection(this.db, 'channels');
-    const q = query(channelsRef, where('name', '==', name));
-    const snapshot = await getDocs(q);
-
-    if (!snapshot.empty) return undefined;
-
-    const docRef = await addDoc(channelsRef, {
+    const docRef = await addDoc(collection(this.db, 'channels'), {
       name,
       description,
       createdBy: user,
       memberIds: Array.from(new Set([user, ...memberIds])),
     });
-
     return docRef.id;
   }
 
-  // noch anpassen, je nachdem welcher channel gerade offen ist / ob einer offen ist
   /** Adds one or more users to a channel without removing existing members.
    *
    * @param memberIds The user IDs to add to the channel.
@@ -136,7 +145,6 @@ export class ChannelService {
     await updateDoc(channelRef, {
       memberIds: arrayUnion(...memberIds),
     });
-    console.log('User for channel written with ID: ', channelRef.id);
   }
 
   /** Updates the name of an existing channel.
@@ -176,19 +184,7 @@ export class ChannelService {
     await updateDoc(channelRef, {
       memberIds: arrayRemove(user),
     });
-    console.log('User in channel removed with ID: ', channelRef.id);
   }
-
-  // To delete an entire collection or subcollection in Cloud Firestore,
-  // retrieve (read) all the documents within the collection or subcollection and delete them.
-  // This process incurs both read and delete costs. If you have larger collections, you may
-  // want to delete the documents in smaller batches to avoid out-of-memory errors. Repeat the
-  // process until you've deleted the entire collection or subcollection.
-
-  // Deleting a collection requires coordinating an unbounded number of individual delete requests.
-  // If you need to delete entire collections, do so only from a trusted server environment.
-  // While it is possible to delete a collection from a mobile/web client, doing so has negative
-  // security and performance implications.
 
   /** Permanently deletes a channel document from Firestore.
    *
@@ -209,12 +205,11 @@ export class ChannelService {
     messageText: string,
     senderId: string,
   ): Promise<void> {
-    const messageRef = await addDoc(collection(this.db, 'channels', channelId, 'messages'), {
+    await addDoc(collection(this.db, 'channels', channelId, 'messages'), {
       createdAt: serverTimestamp(),
       senderId: senderId,
       text: messageText,
     });
-    console.log('message in channel written with ID: ', messageRef.id);
   }
 
   /** Adds a reply to a channel message and increments its thread count.
@@ -230,20 +225,7 @@ export class ChannelService {
     threadMessage: string,
     senderId: string,
   ): Promise<void> {
-    const threadMessageRef = await addDoc(
-      collection(this.db, 'channels', channelId, 'messages', messageId, 'thread'),
-      {
-        text: threadMessage,
-        senderId: senderId,
-        createdAt: serverTimestamp(),
-      },
-    );
-    console.log('Thread message written with ID: ', threadMessageRef.id);
-
-    const threadRef = doc(this.db, 'channels', channelId, 'messages', messageId);
-    await updateDoc(threadRef, {
-      threadCount: increment(1),
-    });
+    await addThreadReply(this.db, 'channels', channelId, messageId, threadMessage, senderId);
   }
 
   /** Adds a user's reaction to a channel message.
@@ -260,9 +242,7 @@ export class ChannelService {
     userId: string,
   ): Promise<void> {
     const messageRef = doc(this.db, 'channels', channelId, 'messages', messageId);
-    await updateDoc(messageRef, {
-      [`reactions.${reaction}`]: arrayUnion(userId),
-    });
+    await addReaction(messageRef, reaction, userId);
   }
 
   /** Adds a user's reaction to a channel thread reply.
@@ -280,18 +260,7 @@ export class ChannelService {
     userId: string,
     threadId: string,
   ): Promise<void> {
-    const messageRef = doc(
-      this.db,
-      'channels',
-      channelId,
-      'messages',
-      messageId,
-      'thread',
-      threadId,
-    );
-    await updateDoc(messageRef, {
-      [`reactions.${reaction}`]: arrayUnion(userId),
-    });
+    await addReaction(this.threadMessageRef(channelId, messageId, threadId), reaction, userId);
   }
 
   /** Removes a user's reaction from a channel message.
@@ -308,19 +277,7 @@ export class ChannelService {
     userId: string,
   ): Promise<void> {
     const messageRef = doc(this.db, 'channels', channelId, 'messages', messageId);
-    const snapshot = await getDoc(messageRef);
-    const currentUserIds: string[] = snapshot.data()?.['reactions']?.[reaction] ?? [];
-    const remaining = currentUserIds.filter((id) => id !== userId);
-
-    if (remaining.length === 0) {
-      await updateDoc(messageRef, {
-        [`reactions.${reaction}`]: deleteField(),
-      });
-    } else {
-      await updateDoc(messageRef, {
-        [`reactions.${reaction}`]: arrayRemove(userId),
-      });
-    }
+    await removeReaction(messageRef, reaction, userId);
   }
 
   /** Removes a user's reaction from a channel thread reply.
@@ -338,31 +295,9 @@ export class ChannelService {
     userId: string,
     threadId: string,
   ): Promise<void> {
-    const messageRef = doc(
-      this.db,
-      'channels',
-      channelId,
-      'messages',
-      messageId,
-      'thread',
-      threadId,
-    );
-    const snapshot = await getDoc(messageRef);
-    const currentUserIds: string[] = snapshot.data()?.['reactions']?.[reaction] ?? [];
-    const remaining = currentUserIds.filter((id) => id !== userId);
-
-    if (remaining.length === 0) {
-      await updateDoc(messageRef, {
-        [`reactions.${reaction}`]: deleteField(),
-      });
-    } else {
-      await updateDoc(messageRef, {
-        [`reactions.${reaction}`]: arrayRemove(userId),
-      });
-    }
+    await removeReaction(this.threadMessageRef(channelId, messageId, threadId), reaction, userId);
   }
 
-  // unsubscribe in ngondestroy in der component
   /** Subscribes to all messages in a channel.
    *
    * @param channelId The ID of the channel whose messages should be observed.
@@ -372,56 +307,23 @@ export class ChannelService {
     channelId: string,
     onMessages?: (messages: Message[]) => void,
   ): { messages: ReturnType<typeof signal<Message[]>>; unsubscribe: () => void } {
-    const messages = signal<Message[]>([]);
-    const messagesRef = query(
-      collection(this.db, 'channels', channelId, 'messages'),
-      orderBy('createdAt', 'asc'),
-    );
-    const unsubscribe = onSnapshot(
-      messagesRef,
-      (snapshot) => {
-        const channelMessages = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Message),
-        }));
-        messages.set(channelMessages);
-        onMessages?.(channelMessages);
-      },
-      (err) => {
-        if (err.code !== 'permission-denied') {
-          console.error('[Channel-Messages-Listener]', err.code, err.message);
-        }
-      },
-    );
-    return { messages, unsubscribe };
+    return subscribeToMessages(this.db, 'channels', channelId, onMessages);
   }
 
+  /** Subscribes to a single message in a channel.
+   *
+   * @param channelId The ID of the channel containing the message.
+   * @param messageId The ID of the message to observe.
+   * @returns A signal containing the message and a function that removes the listener.
+   */
   getMessage(
     channelId: string,
     messageId: string,
     onMessage?: (message: Message | null) => void,
   ): { message: ReturnType<typeof signal<Message | null>>; unsubscribe: () => void } {
-    const message = signal<Message | null>(null);
-    const messageRef = doc(this.db, 'channels', channelId, 'messages', messageId);
-    const unsubscribe = onSnapshot(
-      messageRef,
-      (snapshot) => {
-        const value = snapshot.exists()
-          ? { id: snapshot.id, ...(snapshot.data() as Message) }
-          : null;
-        message.set(value);
-        onMessage?.(value);
-      },
-      (err) => {
-        if (err.code !== 'permission-denied') {
-          console.error('[Channel-Messages-Listener]', err.code, err.message);
-        }
-      },
-    );
-    return { message, unsubscribe };
+    return subscribeToMessage(this.db, 'channels', channelId, messageId, onMessage);
   }
 
-  // unsubscribe in ngondestroy in der component
   /** Subscribes to all thread replies for a channel message.
    *
    * @param channelId The ID of the channel containing the message.
@@ -433,28 +335,7 @@ export class ChannelService {
     messageId: string,
     onThreadMessages?: (threadMessages: ThreadMessage[]) => void,
   ): { threadMessage: ReturnType<typeof signal<ThreadMessage[]>>; unsubscribe: () => void } {
-    const threadMessage = signal<ThreadMessage[]>([]);
-    const threadRef = query(
-      collection(this.db, 'channels', channelId, 'messages', messageId, 'thread'),
-      orderBy('createdAt', 'asc'),
-    );
-    const unsubscribe = onSnapshot(
-      threadRef,
-      (snapshot) => {
-        const threadMessages = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as ThreadMessage),
-        }));
-        threadMessage.set(threadMessages);
-        onThreadMessages?.(threadMessages);
-      },
-      (err) => {
-        if (err.code !== 'permission-denied') {
-          console.error('[Channel-Messages-Listener]', err.code, err.message);
-        }
-      },
-    );
-    return { threadMessage, unsubscribe };
+    return subscribeToThreadReplies(this.db, 'channels', channelId, messageId, onThreadMessages);
   }
 
   /** Updates the text of a channel message, if the signed-in user is its sender.
@@ -464,20 +345,9 @@ export class ChannelService {
    * @param messageId The ID of the message to edit.
    * @param text The new message text.
    */
-  async editChannelMessage(channelId: string, messageId: string, text: string) {
-    const user = this.auth.currentUser?.uid;
-    if (!user) {
-      return;
-    }
-    const channelRef = doc(this.db, 'channels', channelId, 'messages', messageId);
-    const snapshot = await getDoc(channelRef);
-    const message = snapshot.data() as Message;
-    if (message?.senderId !== user) {
-      return;
-    }
-    await updateDoc(channelRef, {
-      text: text,
-    });
+  async editChannelMessage(channelId: string, messageId: string, text: string): Promise<void> {
+    const messageRef = doc(this.db, 'channels', channelId, 'messages', messageId);
+    await editOwnMessageText(this.auth, messageRef, text);
   }
 
   /** Updates the text of a channel thread reply, if the signed-in user is its sender.
@@ -487,149 +357,33 @@ export class ChannelService {
    * @param threadId The ID of the thread reply to edit.
    * @param text The new reply text.
    */
-  async editThreadMessage(channelId: string, messageId: string, threadId: string, text: string) {
-    const user = this.auth.currentUser?.uid;
-    if (!user) {
-      return;
-    }
-
-    const threadRef = doc(
-      this.db,
-      'channels',
-      channelId,
-      'messages',
-      messageId,
-      'thread',
-      threadId,
-    );
-    const snapshot = await getDoc(threadRef);
-    const threadMessage = snapshot.data() as ThreadMessage;
-
-    if (threadMessage?.senderId !== user) {
-      return;
-    }
-
-    await updateDoc(threadRef, {
-      text: text,
-    });
-  }
-
-  /** Builds the field updates needed to remove a departing guest's uid from a
-   * reactions map. Returns an empty object if there's nothing to remove. */
-  private buildReactionRemovalUpdates(
-    reactions: Record<string, string[]> | undefined,
-    senderId: string,
-  ): Record<string, unknown> {
-    const updates: Record<string, unknown> = {};
-    if (!reactions) return updates;
-
-    for (const [emoji, userIds] of Object.entries(reactions)) {
-      if (!userIds.includes(senderId)) continue;
-      const remaining = userIds.filter((id) => id !== senderId);
-      updates[`reactions.${emoji}`] =
-        remaining.length === 0 ? deleteField() : arrayRemove(senderId);
-    }
-
-    return updates;
+  async editThreadMessage(
+    channelId: string,
+    messageId: string,
+    threadId: string,
+    text: string,
+  ): Promise<void> {
+    const threadRef = this.threadMessageRef(channelId, messageId, threadId);
+    await editOwnMessageText(this.auth, threadRef, text);
   }
 
   /** Deletes every message and thread reply authored by the given user, across all
    * channels; strips their reactions from everyone else's messages/replies; and
    * decrements each parent message's threadCount by the number of its thread
-   * replies that were deleted. */
+   * replies that were deleted.
+   *
+   * @param senderId The UID of the departing guest.
+   */
   async deleteGuestMessages(senderId: string): Promise<void> {
-    const channelsSnapshot = await getDocs(collection(this.db, 'channels'));
-    const batch = writeBatch(this.db);
-    let hasWrites = false;
-
-    for (const channelDoc of channelsSnapshot.docs) {
-      const messagesRef = collection(this.db, 'channels', channelDoc.id, 'messages');
-      const allMessages = await getDocs(messagesRef);
-
-      for (const messageDoc of allMessages.docs) {
-        const message = messageDoc.data() as Message;
-        const isOwnMessage = message.senderId === senderId;
-        let deletedReplyCount = 0;
-
-        if (message.threadCount && message.threadCount > 0) {
-          const threadRef = collection(
-            this.db,
-            'channels',
-            channelDoc.id,
-            'messages',
-            messageDoc.id,
-            'thread',
-          );
-          const allThreadReplies = await getDocs(threadRef);
-
-          for (const threadDoc of allThreadReplies.docs) {
-            const reply = threadDoc.data() as ThreadMessage;
-
-            if (reply.senderId === senderId) {
-              batch.delete(threadDoc.ref);
-              deletedReplyCount++;
-              hasWrites = true;
-            } else {
-              const replyUpdates = this.buildReactionRemovalUpdates(reply.reactions, senderId);
-              if (Object.keys(replyUpdates).length > 0) {
-                batch.update(threadDoc.ref, replyUpdates);
-                hasWrites = true;
-              }
-            }
-          }
-        }
-
-        if (isOwnMessage) {
-          batch.delete(messageDoc.ref);
-          hasWrites = true;
-        } else {
-          const messageUpdates = this.buildReactionRemovalUpdates(message.reactions, senderId);
-          if (deletedReplyCount > 0) {
-            messageUpdates['threadCount'] = increment(-deletedReplyCount);
-          }
-          if (Object.keys(messageUpdates).length > 0) {
-            batch.update(messageDoc.ref, messageUpdates);
-            hasWrites = true;
-          }
-        }
-      }
-    }
-
-    if (hasWrites) {
-      await batch.commit();
-    }
+    await deleteGuestContent(this.db, 'channels', senderId, { filterByMembership: false });
   }
 
+  /** Removes the given user from every channel they're a member of, deleting
+   * channels they created outright and channels left with no members.
+   *
+   * @param uid The UID of the departing guest.
+   */
   async removeGuestFromChannels(uid: string): Promise<void> {
-    const channelsSnapshot = await getDocs(
-      query(collection(this.db, 'channels'), where('memberIds', 'array-contains', uid)),
-    );
-
-    const batch = writeBatch(this.db);
-    let hasWrites = false;
-
-    for (const channelDoc of channelsSnapshot.docs) {
-      const channel = channelDoc.data() as Channel;
-
-      if (channel.createdBy === uid) {
-        // Guest's own channel: delete it entirely, regardless of other members.
-        batch.delete(channelDoc.ref);
-        hasWrites = true;
-        continue;
-      }
-
-      const remainingMembers = channel.memberIds.filter((memberId) => memberId !== uid);
-
-      if (remainingMembers.length === 0) {
-        batch.delete(channelDoc.ref);
-      } else {
-        batch.update(channelDoc.ref, { memberIds: remainingMembers });
-      }
-      hasWrites = true;
-    }
-
-    if (hasWrites) {
-      await batch.commit();
-    }
+    await pruneGuestFromChannels(this.db, uid);
   }
 }

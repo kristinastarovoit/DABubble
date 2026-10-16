@@ -14,6 +14,9 @@ import {
   getDocs,
   writeBatch,
   arrayUnion,
+  QuerySnapshot,
+  DocumentData,
+  WriteBatch,
 } from 'firebase/firestore';
 
 import { FIREBASE_FIRESTORE } from '../../app.config';
@@ -31,21 +34,21 @@ export class UserService {
   users = signal<UserModel[]>([]);
 
   constructor() {
-    effect(() => {
-      const isLoggedIn = this.authService.currentUserId();
+    effect(() => this.syncUsersForCurrentAuth());
+  }
 
-      this.unsubscribeUsers?.();
-      this.unsubscribeUsers = undefined;
-
-      if (!isLoggedIn) {
-        this.users.set([]);
-        return;
-      }
-
-      const usersRef = collection(this.firestore, 'users');
-      this.unsubscribeUsers = onSnapshot(usersRef, (snapshot) => {
-        this.users.set(snapshot.docs.map((doc) => doc.data() as UserModel));
-      });
+  /** Subscribes to the `users` collection while signed in, and clears it otherwise. */
+  private syncUsersForCurrentAuth(): void {
+    const isLoggedIn = this.authService.currentUserId();
+    this.unsubscribeUsers?.();
+    this.unsubscribeUsers = undefined;
+    if (!isLoggedIn) {
+      this.users.set([]);
+      return;
+    }
+    const usersRef = collection(this.firestore, 'users');
+    this.unsubscribeUsers = onSnapshot(usersRef, (snapshot) => {
+      this.users.set(snapshot.docs.map((doc) => doc.data() as UserModel));
     });
   }
 
@@ -58,16 +61,7 @@ export class UserService {
    * @returns A promise that resolves once the profile has been written.
    */
   async createUserProfile(uid: string, name: string, email: string, avatar: string) {
-    const user: UserModel = {
-      uid,
-      name,
-      email,
-      avatar,
-      status: 'online',
-      channels: [],
-      createdAt: serverTimestamp(),
-    };
-
+    const user: UserModel = { uid, name, email, avatar, status: 'online', channels: [], createdAt: serverTimestamp() };
     await setDoc(doc(this.firestore, 'users', uid), user);
 
     this.users.update((users) => (users.some((u) => u.uid === uid) ? users : [...users, user]));
@@ -128,46 +122,31 @@ export class UserService {
   /** Deletes every message and thread reply authored by the given user,
    * across all channels and direct-message conversations. */
   async deleteAllContentBySender(senderId: string): Promise<void> {
-    const messagesQuery = query(
-      collectionGroup(this.firestore, 'messages'),
-      where('senderId', '==', senderId),
-    );
-    const threadQuery = query(
-      collectionGroup(this.firestore, 'thread'),
-      where('senderId', '==', senderId),
-    );
-
-    let messagesSnapshot;
-    try {
-      messagesSnapshot = await getDocs(messagesQuery);
-      console.log('[Cleanup] messages found:', messagesSnapshot.size);
-    } catch (error) {
-      console.error('[Cleanup] messages query failed', error);
-      throw error;
-    }
-
-    let threadSnapshot;
-    try {
-      threadSnapshot = await getDocs(threadQuery);
-      console.log('[Cleanup] thread replies found:', threadSnapshot.size);
-    } catch (error) {
-      console.error('[Cleanup] thread query failed', error);
-      throw error;
-    }
-
+    const messagesSnapshot = await this.queryContentBySender('messages', senderId);
+    const threadSnapshot = await this.queryContentBySender('thread', senderId);
     const batch = writeBatch(this.firestore);
-    messagesSnapshot.docs.forEach((d) => {
-      console.log('[Cleanup] deleting message at', d.ref.path);
-      batch.delete(d.ref);
-    });
-    threadSnapshot.docs.forEach((d) => {
-      console.log('[Cleanup] deleting thread reply at', d.ref.path);
-      batch.delete(d.ref);
-    });
+    messagesSnapshot.docs.forEach((d) => batch.delete(d.ref));
+    threadSnapshot.docs.forEach((d) => batch.delete(d.ref));
+    await this.commitCleanupBatch(batch);
+  }
 
+  /** Finds every document in the given collection group authored by `senderId`. */
+  private async queryContentBySender(
+    collectionId: string,
+    senderId: string,
+  ): Promise<QuerySnapshot<DocumentData>> {
+    const q = query(collectionGroup(this.firestore, collectionId), where('senderId', '==', senderId));
+    try {
+      return await getDocs(q);
+    } catch (error) {
+      console.error(`[Cleanup] ${collectionId} query failed`, error);
+      throw error;
+    }
+  }
+
+  private async commitCleanupBatch(batch: WriteBatch): Promise<void> {
     try {
       await batch.commit();
-      console.log('[Cleanup] batch committed successfully');
     } catch (error) {
       console.error('[Cleanup] batch commit failed', error);
       throw error;

@@ -25,16 +25,13 @@ export function reactionTooltipName(
   const others = userIds.filter((id) => id !== currentUserId);
   const iReacted = userIds.includes(currentUserId);
   const firstName = getUserName(others[0] ?? currentUserId);
-
   if (userIds.length === 1) {
     return iReacted ? 'You' : firstName;
   }
-
   const remaining = others.length - 1;
   if (iReacted) {
     return remaining === 0 ? `${firstName} and you` : `${firstName}, you and +${remaining} `;
   }
-
   return remaining === 0
     ? `${firstName} and ${getUserName(others[1])}`
     : `${firstName} and +${remaining}`;

@@ -22,12 +22,10 @@ export class PasswordReset implements OnInit {
 
   async ngOnInit() {
     this.oobCode = this.route.snapshot.queryParamMap.get('oobCode') ?? '';
-
     if (!this.oobCode) {
       this.isVerifying.set(false);
       return;
     }
-
     try {
       await this.authService.verifyResetCode(this.oobCode);
       this.isCodeValid.set(true);

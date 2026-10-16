@@ -212,14 +212,11 @@ export class MessageInput {
     const trigger = this.mentionTrigger();
     const startIndex = this.mentionStartIndex();
     if (!trigger || startIndex === null) return;
-
     const value = this.text();
     const endIndex = startIndex + 1 + this.mentionQuery().length;
     const insertion = `${trigger}${option.label} `;
-
     this.text.set(value.slice(0, startIndex) + insertion + value.slice(endIndex));
     this.closeMentionDropdown();
-
     const textarea = this.textareaRef?.nativeElement;
     const caret = startIndex + insertion.length;
     queueMicrotask(() => textarea?.setSelectionRange(caret, caret));
@@ -229,29 +226,25 @@ export class MessageInput {
   /** Handles keyboard navigation within the mention dropdown. */
   onMentionKeydown(event: KeyboardEvent): boolean {
     if (!this.showMentionDropdown()) return false;
+    const handled = this.handleMentionKey(event.key);
+    if (handled) event.preventDefault();
+    return handled;
+  }
 
+  /** Runs the action bound to a mention-dropdown key, if any, and reports whether it fired. */
+  private handleMentionKey(key: string): boolean {
     const options = this.mentionOptions();
-    switch (event.key) {
-      case 'ArrowDown':
-        event.preventDefault();
-        this.activeMentionIndex.update((index) => (index + 1) % options.length);
-        return true;
-      case 'ArrowUp':
-        event.preventDefault();
-        this.activeMentionIndex.update((index) => (index - 1 + options.length) % options.length);
-        return true;
-      case 'Enter':
-      case 'Tab':
-        event.preventDefault();
-        this.selectMentionOption(options[this.activeMentionIndex()]);
-        return true;
-      case 'Escape':
-        event.preventDefault();
-        this.closeMentionDropdown();
-        return true;
-      default:
-        return false;
-    }
+    const actions: Record<string, () => void> = {
+      ArrowDown: () => this.activeMentionIndex.update((i) => (i + 1) % options.length),
+      ArrowUp: () => this.activeMentionIndex.update((i) => (i - 1 + options.length) % options.length),
+      Enter: () => this.selectMentionOption(options[this.activeMentionIndex()]),
+      Tab: () => this.selectMentionOption(options[this.activeMentionIndex()]),
+      Escape: () => this.closeMentionDropdown(),
+    };
+    const action = actions[key];
+    if (!action) return false;
+    action();
+    return true;
   }
 
   /** Handles keydown events, delegating to mention navigation or sending the message. */

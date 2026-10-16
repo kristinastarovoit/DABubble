@@ -24,18 +24,13 @@ export class PasswordRecovery {
   protected wasSent = signal(false);
   protected errorMessage = signal<string | null>(null);
 
-  protected async onSubmit() {
+  protected async onSubmit(): Promise<void> {
     if (this.recoveryForm().invalid()) return;
-
     this.isSubmitting.set(true);
-
     try {
       await this.authService.resetPassword(this.model().email);
-      this.wasSent.set(true);
     } catch (error) {
-      if ((error as { code?: string }).code === 'auth/user-not-found') {
-        this.wasSent.set(true);
-      } else {
+      if ((error as { code?: string }).code !== 'auth/user-not-found') {
         this.errorMessage.set('Something went wrong. Please try again later.');
       }
     } finally {

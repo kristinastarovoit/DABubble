@@ -23,6 +23,7 @@ import { EditChannel } from '../edit-channel/edit-channel';
 import { UsercardDialog } from "../../../shared/components/usercard-dialog/usercard-dialog";
 import { UserModel } from '../../../shared/model/user.model';
 import { Presence } from '../../../shared/services/presence';
+import { resolveMemberToAdd } from '../../../shared/utilities/member-lookup.utils';
 
 type RecipientSuggestion =
   | { type: 'channel'; id: string; name: string }
@@ -78,43 +79,36 @@ export class ChannelHeader {
     // Without a prefix, an empty query yields no suggestions; with a prefix, it lists everything.
     if (mode === 'mixed' && !query) return [];
 
-    const currentUserId = this.authService.currentUserId();
-
-    const channelMatches =
-      mode === 'user'
-        ? []
-        : this.channelService
-          .channels()
-          .filter((channel) => channel.name.toLowerCase().includes(query))
-          .map((channel) => ({ type: 'channel' as const, id: channel.id, name: channel.name }));
-
-    const userMatches =
-      mode === 'channel'
-        ? []
-        : this.dmService
-          .dmPartners()
-          .filter((partner) => partner.user.uid !== currentUserId)
-          .flatMap((partner): RecipientSuggestion[] => {
-            const matches: RecipientSuggestion[] = [];
-            if (partner.user.name.toLowerCase().includes(query)) {
-              matches.push({
-                type: 'user',
-                id: partner.user.uid,
-                name: partner.user.name,
-                avatar: partner.user.avatar,
-              });
-            }
-            if (partner.user.email.toLowerCase().includes(query)) {
-              matches.push({
-                type: 'email',
-                id: partner.user.uid,
-                email: partner.user.email,
-              });
-            }
-            return matches;
-          });
-
+    const channelMatches = mode === 'user' ? [] : this.matchingChannelSuggestions(query);
+    const userMatches = mode === 'channel' ? [] : this.matchingContactSuggestions(query);
     return [...channelMatches, ...userMatches];
+  }
+
+  private matchingChannelSuggestions(query: string): RecipientSuggestion[] {
+    return this.channelService
+      .channels()
+      .filter((channel) => channel.name.toLowerCase().includes(query))
+      .map((channel) => ({ type: 'channel' as const, id: channel.id, name: channel.name }));
+  }
+
+  private matchingContactSuggestions(query: string): RecipientSuggestion[] {
+    const currentUserId = this.authService.currentUserId();
+    return this.dmService
+      .dmPartners()
+      .filter((partner) => partner.user.uid !== currentUserId)
+      .flatMap((partner) => this.contactSuggestionsFor(partner.user, query));
+  }
+
+  /** Builds the name- and/or email-matched suggestions for a single contact. */
+  private contactSuggestionsFor(user: UserModel, query: string): RecipientSuggestion[] {
+    const matches: RecipientSuggestion[] = [];
+    if (user.name.toLowerCase().includes(query)) {
+      matches.push({ type: 'user', id: user.uid, name: user.name, avatar: user.avatar });
+    }
+    if (user.email.toLowerCase().includes(query)) {
+      matches.push({ type: 'email', id: user.uid, email: user.email });
+    }
+    return matches;
   }
 
   private get recipientSearchMode(): 'channel' | 'user' | 'mixed' {
@@ -151,18 +145,8 @@ export class ChannelHeader {
 
     if (suggestion.type === 'channel') {
       this.channelService.selectChannel(suggestion.id);
-      return;
-    }
-
-    const currentUserId = this.authService.currentUserId();
-    if (!currentUserId) return;
-
-    const partner = this.dmService.dmPartners().find((p) => p.user.uid === suggestion.id);
-    if (partner?.dm) {
-      this.dmService.selectDm(partner.dm.id);
     } else {
-      const dmId = await this.dmService.addDm([currentUserId, suggestion.id]);
-      this.dmService.selectDm(dmId);
+      await this.dmService.openDmWith(suggestion.id);
     }
   }
 
@@ -264,25 +248,22 @@ export class ChannelHeader {
   onMemberQueryChange(): void {
     const query = this.addMemberQuery.trim();
     this.showMemberSuggestions.set(Boolean(query));
-
     if (!query) {
       this.addMemberError = '';
       return;
     }
-
     if (!this.memberSuggestions.length) {
       this.addMemberError = 'No matching members found.';
       return;
     }
-
     this.addMemberError = '';
+    this.positionMemberSuggestions();
+  }
 
+  /** Positions the member-suggestions dropdown directly below the search input. */
+  private positionMemberSuggestions(): void {
     const rect = this.memberSearchInput.nativeElement.getBoundingClientRect();
-    this.suggestionsPosition = {
-      top: rect.bottom + 4,
-      left: rect.left,
-      width: rect.width,
-    };
+    this.suggestionsPosition = { top: rect.bottom + 4, left: rect.left, width: rect.width };
   }
 
   /** Selects a user from the live search results. */
@@ -295,42 +276,39 @@ export class ChannelHeader {
   /** Adds the entered user to the active channel. */
   async addMember(): Promise<void> {
     const query = this.addMemberQuery.trim();
-    if (!query) return;
-
     this.addMemberError = '';
-
+    if (!query) return;
     const channelId = this.channelId();
     const activeChannel = this.activeChannel();
-    if (!channelId || !activeChannel) {
-      this.addMemberError = 'No active channel selected.';
-      return;
-    }
+    if (!channelId || !activeChannel) return this.failAddMember('No active channel selected.');
 
-    const matchedUser = this.userService
-      .users()
-      .find((user) => user.name.toLowerCase() === query.toLowerCase());
+    const result = resolveMemberToAdd(query, this.userService.users(), activeChannel.memberIds);
+    if ('errorMessage' in result) return this.failAddMember(result.errorMessage);
 
-    if (!matchedUser) {
-      this.addMemberError = 'No member with this name was found.';
-      return;
-    }
+    if (!(await this.tryAddMember(result.user.uid, channelId))) return;
+    this.resetAddMemberState();
+  }
 
-    if (activeChannel.memberIds.includes(matchedUser.uid)) {
-      this.addMemberError = 'This user is already a member of this channel.';
-      return;
-    }
+  private failAddMember(message: string): void {
+    this.addMemberError = message;
+  }
 
-    try {
-      await this.channelService.addMembersToChannel([matchedUser.uid], channelId);
-    } catch {
-      this.addMemberError = 'Member could not be added. Please try again.';
-      return;
-    }
-
+  private resetAddMemberState(): void {
     this.addMemberQuery = '';
     this.addMemberError = '';
     this.showMemberSuggestions.set(false);
     this.showAddMembersView.set(false);
+  }
+
+  /** Adds the given user to the channel, reporting failure via `addMemberError`. */
+  private async tryAddMember(uid: string, channelId: string): Promise<boolean> {
+    try {
+      await this.channelService.addMembersToChannel([uid], channelId);
+      return true;
+    } catch {
+      this.addMemberError = 'Member could not be added. Please try again.';
+      return false;
+    }
   }
 
   /** Provides the available channels and their messages. */
@@ -385,22 +363,13 @@ export class ChannelHeader {
   }
 
   /**
- * Opens the direct-message conversation with the given user and closes the members dialog.
- * Creates the conversation first if none exists yet.
- * Does nothing if nobody is signed in.
- *
- * @param user The user selected in the member list to start or continue a DM with.
- */
-  async openDmWithUser(user: UserModel) {
-    const userId = this.authService.currentUserId();
-    if (!userId) return;
-    const partner = this.dmService.dmPartners().find((p) => p.user.uid === user.uid);
-    if (partner?.dm) {
-      this.dmService.selectDm(partner.dm.id);
-    } else {
-      const dmId = await this.dmService.addDm([userId, user.uid]);
-      this.dmService.selectDm(dmId);
-    }
+   * Opens the direct-message conversation with the given user and closes the members dialog.
+   * Creates the conversation first if none exists yet.
+   *
+   * @param user The user selected in the member list to start or continue a DM with.
+   */
+  async openDmWithUser(user: UserModel): Promise<void> {
+    await this.dmService.openDmWith(user.uid);
     this.channelService.activeChannelId.set(undefined);
     this.closeDialog();
   }

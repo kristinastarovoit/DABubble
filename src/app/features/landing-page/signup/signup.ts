@@ -92,29 +92,25 @@ export class Signup {
     this.selectedAvatar.set(avatar);
   }
 
-  async finishSignup() {
+  async finishSignup(): Promise<void> {
     if (!this.selectedAvatar()) {
       this.errorMessage.set('Please choose an avatar.');
       return;
     }
+    submit(this.signupForm, () => this.createAccount());
+  }
 
-    submit(this.signupForm, async () => {
-      const { name, email, password } = this.model();
-      this.errorMessage.set('');
-
-      try {
-        const credential = await this.authService.signup(email, password);
-        await this.userService.createUserProfile(
-          credential.user.uid,
-          name,
-          email,
-          this.selectedAvatar(),
-        );
-        this.accountCreated.set(true);
-      } catch (err) {
-        console.error('Signup error:', err);
-        this.errorMessage.set('Registration failed. Please try again.');
-      }
-    });
+  /** Creates the Firebase account and user profile for the current form values. */
+  private async createAccount(): Promise<void> {
+    const { name, email, password } = this.model();
+    this.errorMessage.set('');
+    try {
+      const credential = await this.authService.signup(email, password);
+      await this.userService.createUserProfile(credential.user.uid, name, email, this.selectedAvatar());
+      this.accountCreated.set(true);
+    } catch (err) {
+      console.error('Signup error:', err);
+      this.errorMessage.set('Registration failed. Please try again.');
+    }
   }
 }

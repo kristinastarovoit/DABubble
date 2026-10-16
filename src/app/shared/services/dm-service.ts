@@ -8,25 +8,28 @@ import {
   doc,
   updateDoc,
   serverTimestamp,
-  increment,
-  arrayUnion,
-  arrayRemove,
   query,
   where,
   getDoc,
   setDoc,
-  deleteField,
-  orderBy,
-  getDocs,
-  writeBatch,
-  DocumentReference,
 } from 'firebase/firestore';
 import { Message } from '../interfaces/message';
 import { ThreadMessage } from '../interfaces/thread';
+import { UserModel } from '../model/user.model';
 import { UserService } from './users';
 import { AuthService } from './auth';
 import { NewMessageService } from './new-message-service';
 import { ChannelService } from './channel-service';
+import {
+  addReaction,
+  addThreadReply,
+  deleteGuestContent,
+  editOwnMessageText,
+  removeReaction,
+  subscribeToMessage,
+  subscribeToMessages,
+  subscribeToThreadReplies,
+} from '../utilities/conversation-firestore.utils';
 
 @Service()
 /** Provides Firestore operations and reactive direct-message data. */
@@ -69,34 +72,32 @@ export class DmService {
   }
 
   constructor() {
-    effect((onCleanup) => {
-      const userId = this.authService.currentUserId();
-      if (!userId) {
-        this.dms.set([]);
-        this.activeDmId.set(undefined);
-        return;
-      }
+    effect((onCleanup) => this.subscribeToOwnDms(onCleanup));
+  }
 
-      let unsubscribe: (() => void) | undefined;
-      let cancelled = false;
-
-      this.ensureSelfDm(userId).then(() => {
-        if (cancelled) return;
-        const q = query(collection(this.db, 'dms'), where('memberIds', 'array-contains', userId));
-        unsubscribe = onSnapshot(
-          q,
-          (snapshot) => {
-            this.dms.set(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Dm));
-          },
-          (err) => console.error('[DM-Listener]', err.code, err.message),
-        );
-      });
-
-      onCleanup(() => {
-        cancelled = true;
-        unsubscribe?.();
-      });
+  /** Ensures the self-DM exists, then subscribes to every DM the user is a member of. */
+  private subscribeToOwnDms(onCleanup: (fn: () => void) => void): void {
+    const userId = this.authService.currentUserId();
+    if (!userId) {
+      this.dms.set([]);
+      this.activeDmId.set(undefined);
+      return;
+    }
+    let unsubscribe: (() => void) | undefined;
+    let cancelled = false;
+    this.ensureSelfDm(userId).then(() => {
+      if (!cancelled) unsubscribe = this.listenToOwnDms(userId);
     });
+    onCleanup(() => { cancelled = true; unsubscribe?.(); });
+  }
+
+  private listenToOwnDms(userId: string): () => void {
+    const q = query(collection(this.db, 'dms'), where('memberIds', 'array-contains', userId));
+    return onSnapshot(
+      q,
+      (snapshot) => this.dms.set(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Dm)),
+      (err) => console.error('[DM-Listener]', err.code, err.message),
+    );
   }
 
   /** Subscribes to all messages in a direct-message conversation.
@@ -108,50 +109,21 @@ export class DmService {
     dmId: string,
     onMessages?: (messages: Message[]) => void,
   ): { messages: ReturnType<typeof signal<Message[]>>; unsubscribe: () => void } {
-    const messages = signal<Message[]>([]);
-    const messagesRef = query(
-      collection(this.db, 'dms', dmId, 'messages'),
-      orderBy('createdAt', 'asc'),
-    );
-    const unsubscribe = onSnapshot(
-      messagesRef,
-      (snapshot) => {
-        const dmMessages = snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Message) }));
-        messages.set(dmMessages);
-        onMessages?.(dmMessages);
-      },
-      (err) => {
-        if (err.code !== 'permission-denied') {
-          console.error('[Channel-Messages-Listener]', err.code, err.message);
-        }
-      },
-    );
-    return { messages, unsubscribe };
+    return subscribeToMessages(this.db, 'dms', dmId, onMessages);
   }
 
+  /** Subscribes to a single message in a direct-message conversation.
+   *
+   * @param dmId The ID of the direct-message conversation.
+   * @param messageId The ID of the message to observe.
+   * @returns A signal containing the message and a function that removes the listener.
+   */
   getMessage(
     dmId: string,
     messageId: string,
     onMessage?: (message: Message | null) => void,
   ): { message: ReturnType<typeof signal<Message | null>>; unsubscribe: () => void } {
-    const message = signal<Message | null>(null);
-    const messageRef = doc(this.db, 'dms', dmId, 'messages', messageId);
-    const unsubscribe = onSnapshot(
-      messageRef,
-      (snapshot) => {
-        const value = snapshot.exists()
-          ? { id: snapshot.id, ...(snapshot.data() as Message) }
-          : null;
-        message.set(value);
-        onMessage?.(value);
-      },
-      (err) => {
-        if (err.code !== 'permission-denied') {
-          console.error('[Channel-Messages-Listener]', err.code, err.message);
-        }
-      },
-    );
-    return { message, unsubscribe };
+    return subscribeToMessage(this.db, 'dms', dmId, messageId, onMessage);
   }
 
   /** Subscribes to all thread replies for a direct message.
@@ -165,28 +137,7 @@ export class DmService {
     messageId: string,
     onThreadMessages?: (threadMessages: ThreadMessage[]) => void,
   ): { threadMessage: ReturnType<typeof signal<ThreadMessage[]>>; unsubscribe: () => void } {
-    const threadMessage = signal<ThreadMessage[]>([]);
-    const threadRef = query(
-      collection(this.db, 'dms', dmId, 'messages', messageId, 'thread'),
-      orderBy('createdAt', 'asc'),
-    );
-    const unsubscribe = onSnapshot(
-      threadRef,
-      (snapshot) => {
-        const threadMessages = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as ThreadMessage),
-        }));
-        threadMessage.set(threadMessages);
-        onThreadMessages?.(threadMessages);
-      },
-      (err) => {
-        if (err.code !== 'permission-denied') {
-          console.error('[Channel-Messages-Listener]', err.code, err.message);
-        }
-      },
-    );
-    return { threadMessage, unsubscribe };
+    return subscribeToThreadReplies(this.db, 'dms', dmId, messageId, onThreadMessages);
   }
 
   /** Creates a direct-message conversation for the specified users.
@@ -208,18 +159,16 @@ export class DmService {
    * @param senderId The ID of the user sending the message.
    */
   async addMessageToDm(dmId: string, messageText: string, senderId: string): Promise<void> {
-    const messageRef = await addDoc(collection(this.db, 'dms', dmId, 'messages'), {
+    await addDoc(collection(this.db, 'dms', dmId, 'messages'), {
       createdAt: serverTimestamp(),
       senderId: senderId,
       text: messageText,
     });
-    console.log('message written with ID: ', messageRef.id);
 
     const dmRef = doc(this.db, 'dms', dmId);
     await updateDoc(dmRef, {
       lastMessageAt: serverTimestamp(),
     });
-    console.log('DM written with ID: ', dmRef.id);
   }
 
   /** Adds a reply to a direct message and increments its thread count.
@@ -235,19 +184,7 @@ export class DmService {
     threadMessage: string,
     senderId: string,
   ): Promise<void> {
-    const threadMessageRef = await addDoc(
-      collection(this.db, 'dms', dmId, 'messages', messageId, 'thread'),
-      {
-        text: threadMessage,
-        senderId: senderId,
-        createdAt: serverTimestamp(),
-      },
-    );
-    console.log('Thread message written with ID: ', threadMessageRef.id);
-    const threadRef = doc(this.db, 'dms', dmId, 'messages', messageId);
-    await updateDoc(threadRef, {
-      threadCount: increment(1),
-    });
+    await addThreadReply(this.db, 'dms', dmId, messageId, threadMessage, senderId);
   }
 
   /** Adds a user's reaction to a direct message.
@@ -264,9 +201,7 @@ export class DmService {
     userId: string,
   ): Promise<void> {
     const messageRef = doc(this.db, 'dms', dmId, 'messages', messageId);
-    await updateDoc(messageRef, {
-      [`reactions.${reaction}`]: arrayUnion(userId),
-    });
+    await addReaction(messageRef, reaction, userId);
   }
 
   /** Adds a user's reaction to a direct-message thread reply.
@@ -285,9 +220,7 @@ export class DmService {
     threadId: string,
   ): Promise<void> {
     const messageRef = doc(this.db, 'dms', dmId, 'messages', messageId, 'thread', threadId);
-    await updateDoc(messageRef, {
-      [`reactions.${reaction}`]: arrayUnion(userId),
-    });
+    await addReaction(messageRef, reaction, userId);
   }
 
   /** Removes a user's reaction from a direct message.
@@ -304,19 +237,7 @@ export class DmService {
     userId: string,
   ): Promise<void> {
     const messageRef = doc(this.db, 'dms', dmId, 'messages', messageId);
-    const snapshot = await getDoc(messageRef);
-    const currentUserIds: string[] = snapshot.data()?.['reactions']?.[reaction] ?? [];
-    const remaining = currentUserIds.filter((id) => id !== userId);
-
-    if (remaining.length === 0) {
-      await updateDoc(messageRef, {
-        [`reactions.${reaction}`]: deleteField(),
-      });
-    } else {
-      await updateDoc(messageRef, {
-        [`reactions.${reaction}`]: arrayRemove(userId),
-      });
-    }
+    await removeReaction(messageRef, reaction, userId);
   }
 
   /** Removes a user's reaction from a direct-message thread reply.
@@ -335,19 +256,7 @@ export class DmService {
     threadId: string,
   ): Promise<void> {
     const messageRef = doc(this.db, 'dms', dmId, 'messages', messageId, 'thread', threadId);
-    const snapshot = await getDoc(messageRef);
-    const currentUserIds: string[] = snapshot.data()?.['reactions']?.[reaction] ?? [];
-    const remaining = currentUserIds.filter((id) => id !== userId);
-
-    if (remaining.length === 0) {
-      await updateDoc(messageRef, {
-        [`reactions.${reaction}`]: deleteField(),
-      });
-    } else {
-      await updateDoc(messageRef, {
-        [`reactions.${reaction}`]: arrayRemove(userId),
-      });
-    }
+    await removeReaction(messageRef, reaction, userId);
   }
 
   /** All workspace users eligible for direct messaging, each paired with their existing DM
@@ -356,22 +265,24 @@ export class DmService {
    */
   dmPartners = computed(() => {
     const currentUserId = this.authService.currentUserId();
-    const allUsers = this.userService.users();
     const dms = this.dms();
-
-    return allUsers
+    return this.userService
+      .users()
       .filter((user) => user.name !== 'Guest' || user.uid === currentUserId)
-      .map((user) => {
-        const isSelf = user.uid === currentUserId;
-        const existingDm = dms.find((dm) =>
-          isSelf
-            ? dm.memberIds.length === 1 && dm.memberIds[0] === currentUserId
-            : dm.memberIds.includes(currentUserId!) && dm.memberIds.includes(user.uid),
-        );
-        return { user, isSelf, dm: existingDm ?? null };
-      })
+      .map((user) => this.toDmPartner(user, dms, currentUserId))
       .sort((a, b) => a.user.name.localeCompare(b.user.name, 'de'));
   });
+
+  /** Pairs a user with their existing DM (if any) and whether they are the signed-in user. */
+  private toDmPartner(user: UserModel, dms: Dm[], currentUserId: string | undefined) {
+    const isSelf = user.uid === currentUserId;
+    const existingDm = dms.find((dm) =>
+      isSelf
+        ? dm.memberIds.length === 1 && dm.memberIds[0] === currentUserId
+        : dm.memberIds.includes(currentUserId!) && dm.memberIds.includes(user.uid),
+    );
+    return { user, isSelf, dm: existingDm ?? null };
+  }
 
   /** Updates the text of a direct message, if the signed-in user is its sender.
    * Does nothing if no user is logged in, or if the user is not the sender.
@@ -380,20 +291,9 @@ export class DmService {
    * @param messageId The ID of the message to edit.
    * @param text The new message text.
    */
-  async editDmMessage(dmId: string, messageId: string, text: string) {
-    const user = this.auth.currentUser?.uid;
-    if (!user) {
-      return;
-    }
+  async editDmMessage(dmId: string, messageId: string, text: string): Promise<void> {
     const messageRef = doc(this.db, 'dms', dmId, 'messages', messageId);
-    const snapshot = await getDoc(messageRef);
-    const message = snapshot.data() as Message;
-    if (message?.senderId !== user) {
-      return;
-    }
-    await updateDoc(messageRef, {
-      text: text,
-    });
+    await editOwnMessageText(this.auth, messageRef, text);
   }
 
   /** Updates the text of a direct-message thread reply, if the signed-in user is its sender.
@@ -403,25 +303,21 @@ export class DmService {
    * @param threadId The ID of the thread reply to edit.
    * @param text The new reply text.
    */
-  async editThreadMessage(dmId: string, messageId: string, threadId: string, text: string) {
-    const user = this.auth.currentUser?.uid;
-    if (!user) {
-      return;
-    }
-
+  async editThreadMessage(
+    dmId: string,
+    messageId: string,
+    threadId: string,
+    text: string,
+  ): Promise<void> {
     const threadRef = doc(this.db, 'dms', dmId, 'messages', messageId, 'thread', threadId);
-    const snapshot = await getDoc(threadRef);
-    const threadMessage = snapshot.data() as ThreadMessage;
-
-    if (threadMessage?.senderId !== user) {
-      return;
-    }
-
-    await updateDoc(threadRef, {
-      text: text,
-    });
+    await editOwnMessageText(this.auth, threadRef, text);
   }
 
+  /** Opens the direct-message conversation with the given user, creating a self-DM
+   * or a new conversation first if none exists yet.
+   *
+   * @param partnerId The UID of the user to open a direct message with.
+   */
   async openDmWith(partnerId: string): Promise<void> {
     const currentUserId = this.authService.currentUserId();
     if (!currentUserId) return;
@@ -439,90 +335,14 @@ export class DmService {
     this.selectDm(dmId);
   }
 
-  /** Builds the field updates needed to remove a departing guest's uid from a
-   * reactions map. Returns an empty object if there's nothing to remove. */
-  private buildReactionRemovalUpdates(
-    reactions: Record<string, string[]> | undefined,
-    senderId: string,
-  ): Record<string, unknown> {
-    const updates: Record<string, unknown> = {};
-    if (!reactions) return updates;
-
-    for (const [emoji, userIds] of Object.entries(reactions)) {
-      if (!userIds.includes(senderId)) continue;
-      const remaining = userIds.filter((id) => id !== senderId);
-      updates[`reactions.${emoji}`] =
-        remaining.length === 0 ? deleteField() : arrayRemove(senderId);
-    }
-
-    return updates;
-  }
   /** Deletes every message and thread reply authored by the given user, across all
    * DMs they're part of; strips their reactions from everyone else's messages/replies;
    * and decrements each parent message's threadCount by the number of its thread
-   * replies that were deleted. */
+   * replies that were deleted.
+   *
+   * @param senderId The UID of the departing guest.
+   */
   async deleteGuestMessages(senderId: string): Promise<void> {
-    const dmsSnapshot = await getDocs(
-      query(collection(this.db, 'dms'), where('memberIds', 'array-contains', senderId)),
-    );
-    const batch = writeBatch(this.db);
-    let hasWrites = false;
-
-    for (const dmDoc of dmsSnapshot.docs) {
-      const messagesRef = collection(this.db, 'dms', dmDoc.id, 'messages');
-      const allMessages = await getDocs(messagesRef);
-
-      for (const messageDoc of allMessages.docs) {
-        const message = messageDoc.data() as Message;
-        const isOwnMessage = message.senderId === senderId;
-        let deletedReplyCount = 0;
-
-        if (message.threadCount && message.threadCount > 0) {
-          const threadRef = collection(
-            this.db,
-            'dms',
-            dmDoc.id,
-            'messages',
-            messageDoc.id,
-            'thread',
-          );
-          const allThreadReplies = await getDocs(threadRef);
-
-          for (const threadDoc of allThreadReplies.docs) {
-            const reply = threadDoc.data() as ThreadMessage;
-
-            if (reply.senderId === senderId) {
-              batch.delete(threadDoc.ref);
-              deletedReplyCount++;
-              hasWrites = true;
-            } else {
-              const replyUpdates = this.buildReactionRemovalUpdates(reply.reactions, senderId);
-              if (Object.keys(replyUpdates).length > 0) {
-                batch.update(threadDoc.ref, replyUpdates);
-                hasWrites = true;
-              }
-            }
-          }
-        }
-
-        if (isOwnMessage) {
-          batch.delete(messageDoc.ref);
-          hasWrites = true;
-        } else {
-          const messageUpdates = this.buildReactionRemovalUpdates(message.reactions, senderId);
-          if (deletedReplyCount > 0) {
-            messageUpdates['threadCount'] = increment(-deletedReplyCount);
-          }
-          if (Object.keys(messageUpdates).length > 0) {
-            batch.update(messageDoc.ref, messageUpdates);
-            hasWrites = true;
-          }
-        }
-      }
-    }
-
-    if (hasWrites) {
-      await batch.commit();
-    }
+    await deleteGuestContent(this.db, 'dms', senderId, { filterByMembership: true });
   }
 }

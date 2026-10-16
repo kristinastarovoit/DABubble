@@ -4,9 +4,9 @@ import { ChannelService } from '../../../shared/services/channel-service';
 import { UserService } from '../../../shared/services/users';
 import { UserModel } from '../../../shared/model/user.model';
 import { DmService } from '../../../shared/services/dm-service';
-import { AuthService } from '../../../shared/services/auth';
 import { UsercardDialog } from '../../../shared/components/usercard-dialog/usercard-dialog';
 import { Presence } from '../../../shared/services/presence';
+import { resolveMemberToAdd } from '../../../shared/utilities/member-lookup.utils';
 
 @Component({
   imports: [FormsModule, UsercardDialog],
@@ -20,9 +20,6 @@ export class EditChannel {
 
   /** Provides direct-message lookup and creation. */
   private dmService = inject(DmService);
-
-  /** Provides the currently authenticated user. */
-  private authService = inject(AuthService);
 
   /** Provides the live presence state for channel members. */
   presenceService = inject(Presence);
@@ -117,16 +114,8 @@ export class EditChannel {
    * Clears the active channel after selecting the direct message.
    * @param user The user to message.
    */
-  async openDmWithUser(user: UserModel) {
-    const userId = this.authService.currentUserId();
-    if (!userId) return;
-    const partner = this.dmService.dmPartners().find((p) => p.user.uid === user.uid);
-    if (partner?.dm) {
-      this.dmService.selectDm(partner.dm.id);
-    } else {
-      const dmId = await this.dmService.addDm([userId, user.uid]);
-      this.dmService.selectDm(dmId);
-    }
+  async openDmWithUser(user: UserModel): Promise<void> {
+    await this.dmService.openDmWith(user.uid);
     this.channelService.activeChannelId.set(undefined);
   }
 
@@ -157,38 +146,33 @@ export class EditChannel {
   async addMember(): Promise<void> {
     const query = this.addMemberQuery().trim();
     if (!query) return;
-
     const channelId = this.channelId();
     const channel = this.activeChannel();
-    if (!channelId || !channel) {
-      this.addMemberError.set('No active channel selected.');
-      return;
-    }
+    if (!channelId || !channel) return this.failAddMember('No active channel selected.');
 
-    const member = this.userService
-      .users()
-      .find((user) => user.name.toLowerCase() === query.toLowerCase());
-    if (!member) {
-      this.addMemberError.set('No member with this name was found.');
-      return;
-    }
+    const result = resolveMemberToAdd(query, this.userService.users(), channel.memberIds);
+    if ('errorMessage' in result) return this.failAddMember(result.errorMessage);
 
-    if (channel.memberIds.includes(member.uid)) {
-      this.addMemberError.set('This user is already a member of this channel.');
-      return;
-    }
-
-    try {
-      await this.channelService.addMembersToChannel([member.uid], channelId);
-    } catch (error) {
-      console.error('Failed to add member to channel.', error);
-      this.addMemberError.set('Member could not be added. Please try again.');
-      return;
-    }
-
+    if (!(await this.tryAddMember(result.user.uid, channelId))) return;
     this.addMemberQuery.set('');
     this.addMemberError.set('');
     this.showAddMembers.set(false);
+  }
+
+  private failAddMember(message: string): void {
+    this.addMemberError.set(message);
+  }
+
+  /** Adds the given user to the channel, reporting failure via `addMemberError`. */
+  private async tryAddMember(uid: string, channelId: string): Promise<boolean> {
+    try {
+      await this.channelService.addMembersToChannel([uid], channelId);
+      return true;
+    } catch (error) {
+      console.error('Failed to add member to channel.', error);
+      this.addMemberError.set('Member could not be added. Please try again.');
+      return false;
+    }
   }
 
   /** Enters edit mode for the channel name. */

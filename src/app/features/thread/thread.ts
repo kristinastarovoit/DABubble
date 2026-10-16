@@ -23,6 +23,7 @@ import { UserModel } from '../../shared/model/user.model';
 import { UsercardDialog } from '../../shared/components/usercard-dialog/usercard-dialog';
 import { MentionHighlightPipe } from '../../shared/utilities/mention-highlight.pipe';
 import { CURATED_EMOJIS } from '../../shared/utilities/emoji-set';
+import { toggleReaction } from '../../shared/utilities/reaction-toggle.utils';
 
 @Component({
   imports: [CommonModule, MessageInput, ReactionBar, ReactionPicker, UsercardDialog, MentionHighlightPipe],
@@ -119,48 +120,43 @@ export class Thread {
 
   /** Subscribes to the live thread data and keeps the scroll position at the bottom. */
   constructor() {
+    this.subscribeToActiveThread();
+    this.autoScrollOnThreadChange();
+  }
+
+  /** Re-subscribes to the open thread's parent message and replies whenever it changes. */
+  private subscribeToActiveThread(): void {
     effect(() => {
       this.currentThreadUnsubscribe?.();
-      this.currentThreadUnsubscribe = undefined;
       this.currentMessageUnsubscribe?.();
-      this.currentMessageUnsubscribe = undefined;
-
       const thread = this.activeThread();
       const messageId = thread?.message.id;
       this.replies.set([]);
       this.livingParentMessage.set(null);
-
       if (thread?.channelId && messageId) {
-        const { unsubscribe: unsubscribeThread } = this.channelService.getThreads(
-          thread.channelId,
-          messageId,
-          (threadMessages) => this.replies.set(threadMessages),
-        );
-        this.currentThreadUnsubscribe = unsubscribeThread;
-
-        const { unsubscribe: unsubscribeMessage } = this.channelService.getMessage(
-          thread.channelId,
-          messageId,
-          (message) => this.livingParentMessage.set(message),
-        );
-        this.currentMessageUnsubscribe = unsubscribeMessage;
+        this.subscribeThreadAndMessage(this.channelService, thread.channelId, messageId);
       } else if (thread?.dmId && messageId) {
-        const { unsubscribe: unsubscribeThread } = this.dmService.getThreads(
-          thread.dmId,
-          messageId,
-          (threadMessages) => this.replies.set(threadMessages),
-        );
-        this.currentThreadUnsubscribe = unsubscribeThread;
-
-        const { unsubscribe: unsubscribeMessage } = this.dmService.getMessage(
-          thread.dmId,
-          messageId,
-          (message) => this.livingParentMessage.set(message),
-        );
-        this.currentMessageUnsubscribe = unsubscribeMessage;
+        this.subscribeThreadAndMessage(this.dmService, thread.dmId, messageId);
       }
     });
+  }
 
+  /** Starts the replies and parent-message listeners for one channel or DM conversation. */
+  private subscribeThreadAndMessage(
+    service: { getThreads: ChannelService['getThreads']; getMessage: ChannelService['getMessage'] },
+    conversationId: string,
+    messageId: string,
+  ): void {
+    this.currentThreadUnsubscribe = service.getThreads(conversationId, messageId, (t) =>
+      this.replies.set(t),
+    ).unsubscribe;
+    this.currentMessageUnsubscribe = service.getMessage(conversationId, messageId, (m) =>
+      this.livingParentMessage.set(m),
+    ).unsubscribe;
+  }
+
+  /** Keeps the thread panel scrolled to the bottom as new replies render in. */
+  private autoScrollOnThreadChange(): void {
     afterRenderEffect(() => {
       const thread = this.activeThread();
       this.replies();
@@ -169,14 +165,10 @@ export class Thread {
         this.previousThread = null;
         return;
       }
-
       const isNewThread = thread !== this.previousThread;
       this.previousThread = thread;
       if (isNewThread) this.shouldAutoScroll = true;
-
-      if (isNewThread || this.shouldAutoScroll) {
-        element.scrollTop = element.scrollHeight;
-      }
+      if (isNewThread || this.shouldAutoScroll) element.scrollTop = element.scrollHeight;
     });
   }
 
@@ -221,42 +213,49 @@ export class Thread {
   /** Saves the current inline edit for either the parent message or a reply. */
   async saveEditedMessage(): Promise<void> {
     const thread = this.activeThread();
-    const uid = this.currentUserId();
-    const parentMessage = this.parentMessage();
     const messageId = thread?.message.id;
     const text = this.editText().trim();
-
-    if (!thread || !messageId || !uid || !text) {
-      this.editingParentMessage.set(false);
-      this.editingReplyId.set(null);
-      this.editText.set('');
-      return;
-    }
+    const uid = this.currentUserId();
+    if (!thread || !messageId || !uid || !text) return this.resetEditState();
 
     if (this.editingParentMessage()) {
-      if (thread.channelId) {
-        await this.channelService.editChannelMessage(thread.channelId, messageId, text);
-      } else if (thread.dmId) {
-        await this.dmService.editDmMessage(thread.dmId, messageId, text);
-      }
-      this.editingParentMessage.set(false);
+      await this.saveParentEdit(thread, messageId, text);
     } else {
       const replyId = this.editingReplyId();
-      if (!replyId) {
-        this.editingReplyId.set(null);
-        this.editText.set('');
-        return;
-      }
-
-      if (thread.channelId) {
-        await this.channelService.editThreadMessage(thread.channelId, messageId, replyId, text);
-      } else if (thread.dmId) {
-        await this.dmService.editThreadMessage(thread.dmId, messageId, replyId, text);
-      }
-      this.editingReplyId.set(null);
+      if (!replyId) return this.resetEditState();
+      await this.saveReplyEdit(thread, messageId, replyId, text);
     }
-
     this.editText.set('');
+  }
+
+  /** Clears the inline-edit state without persisting anything. */
+  private resetEditState(): void {
+    this.editingParentMessage.set(false);
+    this.editingReplyId.set(null);
+    this.editText.set('');
+  }
+
+  private async saveParentEdit(thread: ActiveThread, messageId: string, text: string): Promise<void> {
+    if (thread.channelId) {
+      await this.channelService.editChannelMessage(thread.channelId, messageId, text);
+    } else if (thread.dmId) {
+      await this.dmService.editDmMessage(thread.dmId, messageId, text);
+    }
+    this.editingParentMessage.set(false);
+  }
+
+  private async saveReplyEdit(
+    thread: ActiveThread,
+    messageId: string,
+    replyId: string,
+    text: string,
+  ): Promise<void> {
+    if (thread.channelId) {
+      await this.channelService.editThreadMessage(thread.channelId, messageId, replyId, text);
+    } else if (thread.dmId) {
+      await this.dmService.editThreadMessage(thread.dmId, messageId, replyId, text);
+    }
+    this.editingReplyId.set(null);
   }
 
   /** Sends a reply to the currently open thread. */
@@ -280,48 +279,14 @@ export class Thread {
     const uid = this.currentUserId();
     const messageId = thread?.message.id;
     const replyId = reply.id;
-
     if (!thread || !messageId || !replyId || !uid) return;
-
     const alreadyReacted = reply.reactions?.[emoji]?.includes(uid) ?? false;
-
-    if (thread.channelId) {
-      if (alreadyReacted) {
-        await this.channelService.removeReactionFromThreadMessage(
-          thread.channelId,
-          messageId,
-          emoji,
-          uid,
-          replyId,
-        );
-      } else {
-        await this.channelService.addReactionToThreadMessage(
-          thread.channelId,
-          messageId,
-          emoji,
-          uid,
-          replyId,
-        );
-      }
-    } else if (thread.dmId) {
-      if (alreadyReacted) {
-        await this.dmService.removeReactionFromDmThreadMessage(
-          thread.dmId,
-          messageId,
-          emoji,
-          uid,
-          replyId,
-        );
-      } else {
-        await this.dmService.addReactionToDmThreadMessage(
-          thread.dmId,
-          messageId,
-          emoji,
-          uid,
-          replyId,
-        );
-      }
-    }
+    await toggleReaction(thread.channelId, thread.dmId, alreadyReacted, {
+      channelAdd: (channelId) => this.channelService.addReactionToThreadMessage(channelId, messageId, emoji, uid, replyId),
+      channelRemove: (channelId) => this.channelService.removeReactionFromThreadMessage(channelId, messageId, emoji, uid, replyId),
+      dmAdd: (dmId) => this.dmService.addReactionToDmThreadMessage(dmId, messageId, emoji, uid, replyId),
+      dmRemove: (dmId) => this.dmService.removeReactionFromDmThreadMessage(dmId, messageId, emoji, uid, replyId),
+    });
   }
 
   /** Toggles a reaction on the thread's parent message. */
@@ -330,34 +295,14 @@ export class Thread {
     const uid = this.currentUserId();
     const messageId = thread?.message.id;
     const parentMessage = this.parentMessage();
-
     if (!thread || !messageId || !uid || !parentMessage) return;
-
     const alreadyReacted = parentMessage.reactions?.[emoji]?.includes(uid) ?? false;
-
-    if (thread.channelId) {
-      if (alreadyReacted) {
-        await this.channelService.removeReactionFromChannelMessage(
-          thread.channelId,
-          messageId,
-          emoji,
-          uid,
-        );
-      } else {
-        await this.channelService.addReactionToChannelMessage(
-          thread.channelId,
-          messageId,
-          emoji,
-          uid,
-        );
-      }
-    } else if (thread.dmId) {
-      if (alreadyReacted) {
-        await this.dmService.removeReactionFromDmMessage(thread.dmId, messageId, emoji, uid);
-      } else {
-        await this.dmService.addReactionToDmMessage(thread.dmId, messageId, emoji, uid);
-      }
-    }
+    await toggleReaction(thread.channelId, thread.dmId, alreadyReacted, {
+      channelAdd: (channelId) => this.channelService.addReactionToChannelMessage(channelId, messageId, emoji, uid),
+      channelRemove: (channelId) => this.channelService.removeReactionFromChannelMessage(channelId, messageId, emoji, uid),
+      dmAdd: (dmId) => this.dmService.addReactionToDmMessage(dmId, messageId, emoji, uid),
+      dmRemove: (dmId) => this.dmService.removeReactionFromDmMessage(dmId, messageId, emoji, uid),
+    });
   }
 
   /** Converts a Firestore reaction map for the reaction bar. */

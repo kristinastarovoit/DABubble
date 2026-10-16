@@ -1,4 +1,13 @@
-import { Component, ElementRef, HostListener, inject, input, output, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CURATED_EMOJIS } from '../../../shared/utilities/emoji-set';
 
@@ -14,6 +23,9 @@ const QUICK_REACTIONS = ['✅', '👍'] as const;
 export class ReactionPicker {
   /** Reference to the host element to detect clicks outside the picker. */
   private elementRef = inject(ElementRef<HTMLElement>);
+
+  /** Reference to the "more actions" menu element, used to detect viewport overflow. */
+  private moreMenuRef = viewChild<ElementRef<HTMLElement>>('moreMenuRef');
 
   /** The fixed quick-reaction emojis. */
   protected readonly quickReactions = QUICK_REACTIONS;
@@ -55,16 +67,58 @@ export class ReactionPicker {
   /** Whether the "more actions" menu (Edit message, ...) is currently open. */
   showMoreMenu = signal(false);
 
-  /** Opens or closes the "more actions" menu. */
+  /** Whether the "more actions" menu should open leftward because it would otherwise overflow the viewport. */
+  menuFlipped = signal(false);
+
+  /** Opens or closes the "more actions" menu, checking afterwards whether it fits the viewport. */
   toggleMoreMenu(event: MouseEvent): void {
     event.stopPropagation();
     this.showMoreMenu.update((open) => !open);
+
+    if (this.showMoreMenu()) {
+      // Menu just opened — wait a tick for it to render, then measure it.
+      setTimeout(() => this.checkMenuPosition());
+    } else {
+      this.menuFlipped.set(false);
+    }
+  }
+
+  /** Flips the "more actions" menu to open leftward if it overflows its visible container. */
+  private checkMenuPosition(): void {
+    const el = this.moreMenuRef()?.nativeElement;
+    if (!el) {
+      return;
+    }
+    const rect = el.getBoundingClientRect();
+    const boundary = this.getClippingBoundaryRight(el);
+    this.menuFlipped.set(rect.right > boundary);
+  }
+
+  /**
+   * Finds the right edge of the nearest ancestor that actually clips its content
+   * (overflow hidden/auto/scroll on either axis) — e.g. the resizable chat panel —
+   * falling back to the viewport width if none is found.
+   */
+  private getClippingBoundaryRight(el: HTMLElement): number {
+    let node: HTMLElement | null = el.parentElement;
+    while (node) {
+      const style = getComputedStyle(node);
+      if (
+        /(auto|scroll|hidden)/.test(style.overflowX) ||
+        /(auto|scroll|hidden)/.test(style.overflowY)
+      ) {
+        return node.getBoundingClientRect().right;
+      }
+      node = node.parentElement;
+    }
+    return window.innerWidth;
   }
 
   /** Handles the "Edit message" menu entry and closes the menu. */
   onEditMessage(): void {
     this.moreActionsRequested.emit();
     this.showMoreMenu.set(false);
+    this.menuFlipped.set(false);
   }
 
   /** The curated set of emojis shown in the extended picker panel. */
@@ -78,5 +132,6 @@ export class ReactionPicker {
     }
     this.showFullPicker.set(false);
     this.showMoreMenu.set(false);
+    this.menuFlipped.set(false);
   }
 }

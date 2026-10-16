@@ -123,24 +123,19 @@ export class Header {
    *
    * @param newName The raw value from the name input; it is trimmed before use.
    */
-  async saveProfileChanges(newName: string) {
+  async saveProfileChanges(newName: string): Promise<void> {
     const currentUser = this.currentUser();
     if (!currentUser) return;
-
     const trimmedName = newName.trim();
     if (!this.validateName(trimmedName)) return;
 
-    const nameChanged = trimmedName !== currentUser.name;
-    const avatarChanged =
-      this.selectedAvatar() !== currentUser.avatar && this.selectedAvatar() !== '';
-
-    if (nameChanged) {
+    if (trimmedName !== currentUser.name) {
       await this.userService.editUserName(currentUser.uid, trimmedName);
     }
-    if (avatarChanged) {
-      await this.userService.editUserAvatar(currentUser.uid, this.selectedAvatar());
+    const avatar = this.selectedAvatar();
+    if (avatar && avatar !== currentUser.avatar) {
+      await this.userService.editUserAvatar(currentUser.uid, avatar);
     }
-
     this.isEditingUser.set(false);
   }
 
@@ -158,33 +153,29 @@ export class Header {
     void this.presenceService.goOffline().catch((error) => {
       console.error('Failed to set presence offline during logout.', error);
     });
-
     const currentUser = this.currentUser();
-    const isGuest = this.authService.isCurrentUserAnonymous;
-
-    if (isGuest && currentUser) {
-      try {
-        await Promise.all([
-          this.channelService.deleteGuestMessages(currentUser.uid),
-          this.dmService.deleteGuestMessages(currentUser.uid),
-        ]);
-      } catch (error) {
-        console.error('Failed to delete guest messages during logout.', error);
-      }
-
-      try {
-        await this.channelService.removeGuestFromChannels(currentUser.uid);
-      } catch (error) {
-        console.error('Failed to remove guest from channels during logout.', error);
-      }
-
-      await this.userService.deleteUserProfile(currentUser.uid);
-      await this.authService.deleteCurrentUser();
+    if (this.authService.isCurrentUserAnonymous && currentUser) {
+      await this.deleteGuestAccount(currentUser.uid);
     } else {
       await this.authService.logout();
     }
-
     await this.router.navigateByUrl('/login');
+  }
+
+  /** Removes a guest's content and channel memberships, then deletes their account. */
+  private async deleteGuestAccount(uid: string): Promise<void> {
+    try {
+      await Promise.all([this.channelService.deleteGuestMessages(uid), this.dmService.deleteGuestMessages(uid)]);
+    } catch (error) {
+      console.error('Failed to delete guest messages during logout.', error);
+    }
+    try {
+      await this.channelService.removeGuestFromChannels(uid);
+    } catch (error) {
+      console.error('Failed to remove guest from channels during logout.', error);
+    }
+    await this.userService.deleteUserProfile(uid);
+    await this.authService.deleteCurrentUser();
   }
 
   openChannelResult(channel: Channel): void {
@@ -214,32 +205,30 @@ export class Header {
 
   private async openThreadResult(result: MessageSearchResult): Promise<void> {
     if (!result.parentMessageId) return;
-
     const isChannel = result.source === 'channel-thread';
     const service = isChannel ? this.channelService : this.dmService;
-
-    const parentMessage = await new Promise<Message | null>((resolve) => {
-      const { unsubscribe } = service.getMessage(
-        result.conversationId,
-        result.parentMessageId!,
-        (message) => {
-          unsubscribe();
-          resolve(message);
-        },
-      );
-    });
-
+    const parentMessage = await this.fetchMessageOnce(service, result.conversationId, result.parentMessageId);
     if (!parentMessage) return;
 
-    if (isChannel) {
-      this.channelService.selectChannel(result.conversationId);
-    } else {
-      this.dmService.selectDm(result.conversationId);
-    }
-
+    if (isChannel) this.channelService.selectChannel(result.conversationId);
+    else this.dmService.selectDm(result.conversationId);
     this.threadService.open(parentMessage, {
       channelId: isChannel ? result.conversationId : undefined,
       dmId: isChannel ? undefined : result.conversationId,
+    });
+  }
+
+  /** Resolves once with the current value of a channel or DM message, then unsubscribes. */
+  private fetchMessageOnce(
+    service: { getMessage: ChannelService['getMessage'] },
+    conversationId: string,
+    messageId: string,
+  ): Promise<Message | null> {
+    return new Promise((resolve) => {
+      const { unsubscribe } = service.getMessage(conversationId, messageId, (message) => {
+        unsubscribe();
+        resolve(message);
+      });
     });
   }
 

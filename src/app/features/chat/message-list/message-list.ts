@@ -87,35 +87,35 @@ export class MessageList {
   private hasRendered = false;
 
   constructor() {
-    afterRenderEffect(() => {
-      this.messages();
-      const scrollKey = this.scrollKey();
-      const element = this.messageListElement()?.nativeElement;
-      if (!element) return;
+    afterRenderEffect(() => this.syncScrollOnRender());
+  }
 
-      const isNewConversation = !this.hasRendered || scrollKey !== this.previousScrollKey;
-      this.hasRendered = true;
-      this.previousScrollKey = scrollKey;
+  /** Follows new messages or jumps to a pending navigation target after each render. */
+  private syncScrollOnRender(): void {
+    this.messages();
+    const scrollKey = this.scrollKey();
+    const element = this.messageListElement()?.nativeElement;
+    if (!element) return;
+    const isNewConversation = !this.hasRendered || scrollKey !== this.previousScrollKey;
+    this.hasRendered = true;
+    this.previousScrollKey = scrollKey;
+    if (isNewConversation) this.shouldAutoScroll = true;
+    if (this.scrollToPendingTarget(element)) return;
+    if (this.shouldAutoScroll) element.scrollTop = element.scrollHeight;
+  }
 
-      if (isNewConversation) this.shouldAutoScroll = true;
-
-      const targetMessageId = this.navigationService.pendingMessageId();
-      const targetElement = targetMessageId
-        ? element.querySelector<HTMLElement>(`#message-${targetMessageId}`)
-        : null;
-
-      if (targetElement) {
-        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        targetElement.classList.add('message-list__item--highlighted');
-        (setTimeout(() => targetElement.classList.remove('message-list__item--highlighted'), 2000),
-          this.navigationService.pendingMessageId.set(undefined));
-        return;
-      }
-
-      if (this.shouldAutoScroll) {
-        element.scrollTop = element.scrollHeight;
-      }
-    });
+  /** Scrolls to and briefly highlights the pending navigation target, if any. */
+  private scrollToPendingTarget(container: HTMLDivElement): boolean {
+    const targetMessageId = this.navigationService.pendingMessageId();
+    const targetElement = targetMessageId
+      ? container.querySelector<HTMLElement>(`#message-${targetMessageId}`)
+      : null;
+    if (!targetElement) return false;
+    targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    targetElement.classList.add('message-list__item--highlighted');
+    setTimeout(() => targetElement.classList.remove('message-list__item--highlighted'), 2000);
+    this.navigationService.pendingMessageId.set(undefined);
+    return true;
   }
 
   /** Tracks whether the reader is close enough to the bottom to follow new messages. */
@@ -134,32 +134,23 @@ export class MessageList {
   /** Groups messages by their calendar date. */
   groupedMessages = computed<MessageGroup[]>(() => {
     const groups = new Map<string, MessageGroup>();
-
     for (const message of this.messages()) {
-      if (!message.createdAt) {
-        continue;
-      }
-      const date = message.createdAt.toDate();
-      const key = date.toISOString().slice(0, 10);
-      let group = groups.get(key);
-
-      if (!group) {
-        group = {
-          dateLabel: date.toLocaleDateString('en-EN', {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-          }),
-          messages: [],
-        };
-        groups.set(key, group);
-      }
-
-      group.messages.push(message);
+      if (!message.createdAt) continue;
+      this.addToDateGroup(groups, message);
     }
-
     return Array.from(groups.values());
   });
+
+  /** Adds a message to the group for its calendar date, creating the group if needed. */
+  private addToDateGroup(groups: Map<string, MessageGroup>, message: Message): void {
+    const date = message.createdAt!.toDate();
+    const key = date.toISOString().slice(0, 10);
+    if (!groups.has(key)) {
+      const dateLabel = date.toLocaleDateString('en-EN', { weekday: 'long', month: 'long', day: 'numeric' });
+      groups.set(key, { dateLabel, messages: [] });
+    }
+    groups.get(key)!.messages.push(message);
+  }
 
   /** Emits a changed reaction for a message. */
   onReactionToggled(message: Message, emoji: string): void {

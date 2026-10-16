@@ -73,26 +73,19 @@ export class SearchService {
 
   private async runSearch(rawQuery: string): Promise<void> {
     const { mode, term } = this.parseQuery(rawQuery);
-    const needle = term.toLowerCase();
+    this.results.set(await this.collectResults(mode, term.toLowerCase()));
+  }
 
-    let channels: Channel[] = [];
-    let users: UserModel[] = [];
-    let messages: MessageSearchResult[] = [];
+  /** Runs the search for the given mode and returns the resulting channels/users/messages. */
+  private async collectResults(mode: SearchMode, needle: string): Promise<SearchResults> {
+    if (mode === 'users') return { ...EMPTY_RESULTS, users: this.searchUsers(needle) };
+    if (mode === 'channels') return { ...EMPTY_RESULTS, channels: this.searchChannels(needle) };
 
-    if (mode === 'users') {
-      users = this.searchUsers(needle);
-    } else if (mode === 'channels') {
-      channels = this.searchChannels(needle);
-    } else {
-      channels = this.searchChannels(needle);
-      const [channelAndDmMessages, threadMessages] = await Promise.all([
-        this.searchMessages(needle),
-        this.searchThreads(needle),
-      ]);
-      messages = [...channelAndDmMessages, ...threadMessages];
-    }
-
-    this.results.set({ channels, users, messages });
+    const [messages, threadMessages] = await Promise.all([
+      this.searchMessages(needle),
+      this.searchThreads(needle),
+    ]);
+    return { channels: this.searchChannels(needle), users: [], messages: [...messages, ...threadMessages] };
   }
 
   private searchChannels(needle: string): Channel[] {
@@ -105,77 +98,71 @@ export class SearchService {
 
   private async searchMessages(needle: string): Promise<MessageSearchResult[]> {
     const currentUserId = this.authService.currentUserId();
-
     const channelSearches = this.channelService
       .channels()
-      .map((channel) =>
-        getDocs(collection(this.firestore, 'channels', channel.id, 'messages')).then((snapshot) =>
-          snapshot.docs.map((doc) =>
-            this.toMessageResult(doc, 'channel', channel.id, channel.name),
-          ),
-        ),
-      );
-
+      .map((channel) => this.fetchConversationMessages('channels', channel.id, 'channel', channel.name));
     const dmSearches = this.dmService
       .dms()
       .map((dm) =>
-        getDocs(collection(this.firestore, 'dms', dm.id, 'messages')).then((snapshot) =>
-          snapshot.docs.map((doc) =>
-            this.toMessageResult(doc, 'dm', dm.id, this.getDmPartnerName(dm.id, currentUserId)),
-          ),
-        ),
+        this.fetchConversationMessages('dms', dm.id, 'dm', this.getDmPartnerName(dm.id, currentUserId)),
       );
-
     const results = await Promise.all([...channelSearches, ...dmSearches]);
-
     return results.flat().filter(({ message }) => message.text.toLowerCase().includes(needle));
+  }
+
+  /** Fetches and converts all messages of a single channel or DM conversation. */
+  private async fetchConversationMessages(
+    root: 'channels' | 'dms',
+    conversationId: string,
+    source: 'channel' | 'dm',
+    conversationName: string,
+  ): Promise<MessageSearchResult[]> {
+    const snapshot = await getDocs(collection(this.firestore, root, conversationId, 'messages'));
+    return snapshot.docs.map((doc) => this.toMessageResult(doc, source, conversationId, conversationName));
   }
 
   private async searchThreads(needle: string): Promise<MessageSearchResult[]> {
     const currentUserId = this.authService.currentUserId();
-
-    const channelThreadSearches = this.channelService.channels().map(async (channel) => {
-      const messagesSnapshot = await getDocs(
-        collection(this.firestore, 'channels', channel.id, 'messages'),
-      );
-      const threadFetches = messagesSnapshot.docs
-        .filter((messageDoc) => (messageDoc.data() as Message).threadCount)
-        .map((messageDoc) =>
-          getDocs(
-            collection(this.firestore, 'channels', channel.id, 'messages', messageDoc.id, 'thread'),
-          ).then((threadSnapshot) =>
-            threadSnapshot.docs.map((doc) =>
-              this.toMessageResult(doc, 'channel-thread', channel.id, channel.name, messageDoc.id),
-            ),
-          ),
-        );
-      return (await Promise.all(threadFetches)).flat();
-    });
-
-    const dmThreadSearches = this.dmService.dms().map(async (dm) => {
-      const messagesSnapshot = await getDocs(collection(this.firestore, 'dms', dm.id, 'messages'));
-      const threadFetches = messagesSnapshot.docs
-        .filter((messageDoc) => (messageDoc.data() as Message).threadCount)
-        .map((messageDoc) =>
-          getDocs(
-            collection(this.firestore, 'dms', dm.id, 'messages', messageDoc.id, 'thread'),
-          ).then((threadSnapshot) =>
-            threadSnapshot.docs.map((doc) =>
-              this.toMessageResult(
-                doc,
-                'dm-thread',
-                dm.id,
-                this.getDmPartnerName(dm.id, currentUserId),
-                messageDoc.id,
-              ),
-            ),
-          ),
-        );
-      return (await Promise.all(threadFetches)).flat();
-    });
-
+    const channelThreadSearches = this.channelService.channels().map((channel) =>
+      this.fetchConversationThreadResults('channels', channel.id, 'channel-thread', channel.name),
+    );
+    const dmThreadSearches = this.dmService.dms().map((dm) =>
+      this.fetchConversationThreadResults('dms', dm.id, 'dm-thread', this.getDmPartnerName(dm.id, currentUserId)),
+    );
     const results = await Promise.all([...channelThreadSearches, ...dmThreadSearches]);
     return results.flat().filter(({ message }) => message.text.toLowerCase().includes(needle));
+  }
+
+  /** Fetches thread replies of every message with a thread in one channel or DM conversation. */
+  private async fetchConversationThreadResults(
+    root: 'channels' | 'dms',
+    conversationId: string,
+    source: 'channel-thread' | 'dm-thread',
+    conversationName: string,
+  ): Promise<MessageSearchResult[]> {
+    const messagesSnapshot = await getDocs(collection(this.firestore, root, conversationId, 'messages'));
+    const threadFetches = messagesSnapshot.docs
+      .filter((messageDoc) => (messageDoc.data() as Message).threadCount)
+      .map((messageDoc) =>
+        this.fetchThreadReplies(root, conversationId, messageDoc.id, source, conversationName),
+      );
+    return (await Promise.all(threadFetches)).flat();
+  }
+
+  /** Fetches and converts the thread replies of a single message. */
+  private async fetchThreadReplies(
+    root: 'channels' | 'dms',
+    conversationId: string,
+    messageId: string,
+    source: 'channel-thread' | 'dm-thread',
+    conversationName: string,
+  ): Promise<MessageSearchResult[]> {
+    const threadSnapshot = await getDocs(
+      collection(this.firestore, root, conversationId, 'messages', messageId, 'thread'),
+    );
+    return threadSnapshot.docs.map((doc) =>
+      this.toMessageResult(doc, source, conversationId, conversationName, messageId),
+    );
   }
 
   private toMessageResult(

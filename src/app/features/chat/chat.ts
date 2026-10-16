@@ -25,6 +25,8 @@ import { NewMessageService } from '../../shared/services/new-message-service';
 import { ThreadService } from '../../shared/services/thread-service';
 import { UsercardDialog } from '../../shared/components/usercard-dialog/usercard-dialog';
 import { UserModel } from '../../shared/model/user.model';
+import { Dm } from '../../shared/interfaces/dm';
+import { toggleReaction } from '../../shared/utilities/reaction-toggle.utils';
 
 @Component({
   imports: [CommonModule, ChannelHeader, MessageInput, MessageList, DmHeader, UsercardDialog],
@@ -122,47 +124,48 @@ export class Chat {
     const dm = this.dmService.dms().find((dm) => dm.id === this.dmId());
     const currentUserId = this.authService.currentUserId();
     if (!dm || !currentUserId) return undefined;
+    return this.resolveIntroContact(dm, currentUserId);
+  });
 
+  /** Resolves the intro contact for a DM: the partner, or the user themself for a self-DM. */
+  private resolveIntroContact(
+    dm: Dm,
+    currentUserId: string,
+  ): { user: UserModel; isSelf: boolean } | undefined {
     const partnerId = dm.memberIds.find((memberId) => memberId !== currentUserId);
     if (partnerId) {
       const user = this.userService.users().find((candidate) => candidate.uid === partnerId);
       return user ? { user, isSelf: false } : undefined;
     }
-
     if (dm.memberIds.length === 1 && dm.memberIds[0] === currentUserId) {
       const user = this.userService.users().find((candidate) => candidate.uid === currentUserId);
       return user ? { user, isSelf: true } : undefined;
     }
-
     return undefined;
-  });
+  }
 
   /** Creates a reactive listener for the currently selected conversation. */
   constructor() {
     effect(() => {
       this.currentUnsubscribe?.();
-
-      const channelId = this.channelId();
-      const dmId = this.dmId();
-      console.log('[Chat-Effect]', { channelId, dmId });
-      queueMicrotask(() => this.messageInputRef?.focusInput());
       this.messages.set([]);
       this.messagesLoaded.set(false);
-
-      if (dmId) {
-        const { unsubscribe } = this.dmService.getMessages(dmId, (messages) => {
-          this.messages.set(messages);
-          this.messagesLoaded.set(true);
-        });
-        this.currentUnsubscribe = unsubscribe;
-      } else if (channelId) {
-        const { unsubscribe } = this.channelService.getMessages(channelId, (messages) => {
-          this.messages.set(messages);
-          this.messagesLoaded.set(true);
-        });
-        this.currentUnsubscribe = unsubscribe;
-      }
+      queueMicrotask(() => this.messageInputRef?.focusInput());
+      this.currentUnsubscribe = this.subscribeToActiveConversation();
     });
+  }
+
+  /** Starts the message listener for whichever conversation (DM takes priority) is active. */
+  private subscribeToActiveConversation(): (() => void) | undefined {
+    const channelId = this.channelId();
+    const dmId = this.dmId();
+    const onMessages = (messages: Message[]) => {
+      this.messages.set(messages);
+      this.messagesLoaded.set(true);
+    };
+    if (dmId) return this.dmService.getMessages(dmId, onMessages).unsubscribe;
+    if (channelId) return this.channelService.getMessages(channelId, onMessages).unsubscribe;
+    return undefined;
   }
 
   /** Removes the active Firestore message listener. */
@@ -170,42 +173,29 @@ export class Chat {
     this.currentUnsubscribe?.();
   }
 
-  onSend(text: string) {
+  onSend(text: string): void {
     const uid = this.authService.currentUserId();
-    if (!uid) {
-      return;
-    }
-
+    if (!uid) return;
     const channelId = this.channelId();
     const dmId = this.dmId();
-
     if (dmId) {
       this.dmService.addMessageToDm(dmId, text, uid);
-    } else if (channelId) {
-      if (!this.isChannelMember()) {
-        return;
-      }
+    } else if (channelId && this.isChannelMember()) {
       this.channelService.addMessageToChannel(channelId, text, uid);
     }
   }
 
   /** Saves inline-edited text to the active channel or DM conversation. */
-  onEditSaved(event: { message: Message; text: string }) {
+  onEditSaved(event: { message: Message; text: string }): void {
     const uid = this.authService.currentUserId();
-    if (!uid) {
-      return;
-    }
-    if (!event.message.id) {
-      return;
-    }
-
+    const messageId = event.message.id;
+    if (!uid || !messageId) return;
     const channelId = this.channelId();
     const dmId = this.dmId();
-
     if (dmId) {
-      this.dmService.editDmMessage(dmId, event.message.id, event.text);
+      this.dmService.editDmMessage(dmId, messageId, event.text);
     } else if (channelId) {
-      this.channelService.editChannelMessage(channelId, event.message.id, event.text);
+      this.channelService.editChannelMessage(channelId, messageId, event.text);
     }
   }
 
@@ -213,28 +203,13 @@ export class Chat {
   async onReactionToggled({ message, emoji }: { message: Message; emoji: string }): Promise<void> {
     const uid = this.uid();
     if (!uid || !message.id) return;
-
+    const messageId = message.id;
     const alreadyReacted = message.reactions?.[emoji]?.includes(uid) ?? false;
-    const channelId = this.channelId();
-    const dmId = this.dmId();
-
-    if (channelId) {
-      if (alreadyReacted) {
-        await this.channelService.removeReactionFromChannelMessage(
-          channelId,
-          message.id,
-          emoji,
-          uid,
-        );
-      } else {
-        await this.channelService.addReactionToChannelMessage(channelId, message.id, emoji, uid);
-      }
-    } else if (dmId) {
-      if (alreadyReacted) {
-        await this.dmService.removeReactionFromDmMessage(dmId, message.id, emoji, uid);
-      } else {
-        await this.dmService.addReactionToDmMessage(dmId, message.id, emoji, uid);
-      }
-    }
+    await toggleReaction(this.channelId(), this.dmId(), alreadyReacted, {
+      channelAdd: (channelId) => this.channelService.addReactionToChannelMessage(channelId, messageId, emoji, uid),
+      channelRemove: (channelId) => this.channelService.removeReactionFromChannelMessage(channelId, messageId, emoji, uid),
+      dmAdd: (dmId) => this.dmService.addReactionToDmMessage(dmId, messageId, emoji, uid),
+      dmRemove: (dmId) => this.dmService.removeReactionFromDmMessage(dmId, messageId, emoji, uid),
+    });
   }
 }

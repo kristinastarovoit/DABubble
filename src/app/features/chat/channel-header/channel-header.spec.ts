@@ -16,6 +16,7 @@ describe('ChannelHeader', () => {
     dmPartners: ReturnType<typeof vi.fn>;
     selectDm: ReturnType<typeof vi.fn>;
     addDm: ReturnType<typeof vi.fn>;
+    openDmWith: ReturnType<typeof vi.fn>;
   };
   const currentUserId = 'current-user';
   const contacts = [
@@ -40,10 +41,21 @@ describe('ChannelHeader', () => {
   ];
 
   beforeEach(async () => {
+    const selectDmMock = vi.fn();
+    const addDmMock = vi.fn().mockResolvedValue('new-dm');
     dmService = {
       dmPartners: vi.fn(() => contacts),
-      selectDm: vi.fn(),
-      addDm: vi.fn().mockResolvedValue('new-dm'),
+      selectDm: selectDmMock,
+      addDm: addDmMock,
+      openDmWith: vi.fn(async (partnerId: string) => {
+        const partner = contacts.find((c) => c.user.uid === partnerId);
+        if (partner?.dm) {
+          selectDmMock(partner.dm.id);
+        } else {
+          const dmId = await addDmMock([currentUserId, partnerId]);
+          selectDmMock(dmId);
+        }
+      }),
     };
 
     await TestBed.configureTestingModule({

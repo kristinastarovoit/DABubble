@@ -13,6 +13,12 @@ export class Presence {
   private presenceByUid = signal<Record<string, PresenceState>>({});
 
   constructor() {
+    this.syncGlobalPresence();
+    this.registerOwnPresenceOnConnect();
+  }
+
+  /** Mirrors everyone's online/offline status from the database into `presenceByUid`. */
+  private syncGlobalPresence(): void {
     const statusRef = ref(this.database, 'status');
     onValue(statusRef, (snapshot) => {
       const raw = (snapshot.val() ?? {}) as Record<string, { state?: PresenceState }>;
@@ -22,42 +28,36 @@ export class Presence {
       }
       this.presenceByUid.set(next);
     });
+  }
 
+  /** Registers the signed-in user's own presence (with an offline fallback) each time the
+   * realtime database reports a (re)connect. */
+  private registerOwnPresenceOnConnect(): void {
     effect((onCleanup) => {
       const uid = this.authService.currentUserId();
       if (!uid) return;
-
-      const myStatusRef = ref(this.database, `status/${uid}`);
-      const connectedRef = ref(this.database, '.info/connected');
-
-      const unsubscribeConnected = onValue(connectedRef, (snapshot) => {
-        if (snapshot.val() !== true) return;
-
-        onDisconnect(myStatusRef)
-          .set({
-            state: 'offline' satisfies PresenceState,
-            lastChanged: serverTimestamp(),
-          })
-          .then(() => {
-            return set(myStatusRef, {
-              state: 'online' satisfies PresenceState,
-              lastChanged: serverTimestamp(),
-            });
-          })
-          .then(() => {
-            // Optimistic local update: don't rely solely on the global listener
-            // picking up our own write, which can lag after a reconnect.
-            this.presenceByUid.update((current) => ({ ...current, [uid]: 'online' }));
-          })
-          .catch((error) => {
-            console.error('[Presence] failed to register presence', error);
-          });
+      const unsubscribeConnected = onValue(ref(this.database, '.info/connected'), (snapshot) => {
+        if (snapshot.val() === true) this.registerPresence(uid);
       });
-
-      onCleanup(() => {
-        unsubscribeConnected();
-      });
+      onCleanup(() => unsubscribeConnected());
     });
+  }
+
+  /** Marks the user offline-on-disconnect, then online now, and updates the local cache. */
+  private async registerPresence(uid: string): Promise<void> {
+    const myStatusRef = ref(this.database, `status/${uid}`);
+    try {
+      await onDisconnect(myStatusRef).set({
+        state: 'offline' satisfies PresenceState,
+        lastChanged: serverTimestamp(),
+      });
+      await set(myStatusRef, { state: 'online' satisfies PresenceState, lastChanged: serverTimestamp() });
+      // Optimistic local update: don't rely solely on the global listener picking up
+      // our own write, which can lag after a reconnect.
+      this.presenceByUid.update((current) => ({ ...current, [uid]: 'online' }));
+    } catch (error) {
+      console.error('[Presence] failed to register presence', error);
+    }
   }
 
   isOnline(uid: string | undefined, fallbackStatus?: string): boolean {
