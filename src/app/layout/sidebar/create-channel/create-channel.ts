@@ -53,13 +53,13 @@ export class CreateChannel {
   );
 
   /** The channel that was active when channel creation started — the source for "all
-   * contacts". Falls back to "Allgemeines" if no channel was active. */
+   * contacts". Falls back to "Code Review" if no channel was active. */
   private sourceChannel = computed(() => {
     const channels = this.channelService.channels();
     const activeId = this.channelService.activeChannelId();
     return (
       channels.find((channel) => channel.id === activeId) ??
-      channels.find((channel) => channel.name === 'Allgemeines')
+      channels.find((channel) => channel.name === 'Code Review')
     );
   });
 
