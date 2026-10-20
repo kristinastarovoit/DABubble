@@ -1,25 +1,27 @@
-<header>
-  <a routerLink="/login" aria-label="Back to login">
-    <img
-      #logo
-      src="/app-icons/dabubble-logo.svg"
-      alt="DABubble logo"
-      [style.visibility]="showIntro() ? 'hidden' : null"
-    />
-  </a>
-</header>
-@if (isLoginPage()) {
-  <div class="signup">
-    <p>New to DABubble?</p>
-    <a routerLink="/signup">Create account</a>
-  </div>
-}
-<main>
-  <router-outlet></router-outlet>
-</main>
-<footer>
-  <a routerLink="/legal-notice">Legal Notice</a><a routerLink="/privacy-policy">Privacy Policy</a>
-</footer>
-@if (showIntro()) {
-  <app-intro [target]="logo" (finished)="showIntro.set(false)" />
-}
+<div class="page-shell">
+  <header>
+    <a routerLink="/login" aria-label="Back to login">
+      <img
+        #logo
+        src="/app-icons/dabubble-logo.svg"
+        alt="DABubble logo"
+        [style.visibility]="showIntro() ? 'hidden' : null"
+      />
+    </a>
+  </header>
+  @if (isLoginPage()) {
+    <div class="signup">
+      <p>New to DABubble?</p>
+      <a routerLink="/signup">Create account</a>
+    </div>
+  }
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+  <footer>
+    <a routerLink="/legal-notice">Legal Notice</a><a routerLink="/privacy-policy">Privacy Policy</a>
+  </footer>
+  @if (showIntro()) {
+    <app-intro [target]="logo" (finished)="showIntro.set(false)" />
+  }
+</div>
