@@ -122,6 +122,7 @@ footer {
 @media (max-width: 768px) {
   .page-shell {
     row-gap: 12px;
+    padding-block-start: 20px;
     grid-template-columns: 1fr;
     grid-template-areas:
       'logo'
