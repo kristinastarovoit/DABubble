@@ -33,6 +33,11 @@ export class EditChannel {
   /** UID of the currently signed-in user. */
   currentUserId = input('');
 
+  /** Whether the signed-in user is included in the active channel's member list. */
+  isCurrentUserMember = computed(() =>
+    this.channelMembers().some((member) => member.uid === this.currentUserId()),
+  );
+
   /** Whether the inline add-member form is visible. */
   showAddMembers = signal(false);
 

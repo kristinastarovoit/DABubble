@@ -209,9 +209,11 @@
             }
         </div>
         <div class="channel-settings__actions">
+            @if (isCurrentUserMember()) {
             <button class="channel-settings__leave-btn" (click)="leaveChannel()">
                 Leave Channel
             </button>
+            }
         </div>
     </div>
 </dialog>
