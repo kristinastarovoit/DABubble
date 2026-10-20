@@ -375,7 +375,16 @@
     </div>
   }
 
-  <app-message-input [placeholder]="'Reply...'" (send)="sendReply($event)"></app-message-input>
+  <app-message-input
+    [placeholder]="
+      activeThread()?.channelId && !isChannelMember()
+        ? 'Join #' + (originChannel()?.name ?? '') + ' to write messages'
+        : 'Reply...'
+    "
+    [joinRequired]="!!activeThread()?.channelId && !isChannelMember()"
+    [disabled]="!!activeThread()?.channelId && !isChannelMember()"
+    (send)="sendReply($event)"
+  ></app-message-input>
 </aside>
 
 <app-usercard-dialog

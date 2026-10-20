@@ -66,6 +66,13 @@ export class Thread {
   /** The identifier of the signed-in user. */
   currentUserId = computed(() => this.authService.currentUserId() ?? '');
 
+  /** Whether the signed-in user belongs to the channel containing the open thread. */
+  isChannelMember = computed(() => {
+    const channel = this.originChannel();
+    const userId = this.currentUserId();
+    return !!channel && !!userId && channel.memberIds.includes(userId);
+  });
+
   /** The replies loaded for the currently open thread. */
   replies = signal<ThreadMessage[]>([]);
 
