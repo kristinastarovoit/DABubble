@@ -52,12 +52,14 @@
       <span class="channel-header__count">{{ channelMembers().length }}</span>
     </div>
 
-    <button class="channel-header__add-btn channel-header__meta--desktop" (click)="openAddMembers()">
-      <img src="app-icons/add-members.svg" alt="Add Members"
-        class="channel-header__add-icon channel-header__add-icon--default" />
-      <img src="app-icons/add_members_purple.svg" alt="Add Members"
-        class="channel-header__add-icon channel-header__add-icon--hover" />
-    </button>
+    @if (isCurrentUserMember()) {
+      <button class="channel-header__add-btn channel-header__meta--desktop" (click)="openAddMembers()">
+        <img src="app-icons/add-members.svg" alt="Add Members"
+          class="channel-header__add-icon channel-header__add-icon--default" />
+        <img src="app-icons/add_members_purple.svg" alt="Add Members"
+          class="channel-header__add-icon channel-header__add-icon--hover" />
+      </button>
+    }
 
     <button class="channel-header__add-btn channel-header__add-btn--mobile" (click)="openMembersList()">
       <img src="app-icons/add-members.svg" alt="Add Members"
@@ -73,7 +75,7 @@
 <app-edit-channel #editChannel [channelMembers]="channelMembers()" [currentUserId]="currentUserId()"></app-edit-channel>
 
 <dialog #membersDialog class="members-dialog" (click)="onBackdropClick($event)">
-  @if (!showAddMembersView()) {
+  @if (!showAddMembersView() || !isCurrentUserMember()) {
   <div class="members-dialog__content">
     <div class="members-dialog__header">
       <h2 class="members-dialog__title">Members</h2>
@@ -113,12 +115,14 @@
       </li>
       }
 
-      <li class="members-dialog__item members-dialog__item--add" (click)="showAddMembersView.set(true)">
-        <span class="members-dialog__add-icon">
-          <img src="app-icons/add-members.svg" alt="" />
-        </span>
-        <span class="members-dialog__name">Add Members</span>
-      </li>
+      @if (isCurrentUserMember()) {
+        <li class="members-dialog__item members-dialog__item--add" (click)="showAddMembersView.set(true)">
+          <span class="members-dialog__add-icon">
+            <img src="app-icons/add-members.svg" alt="" />
+          </span>
+          <span class="members-dialog__name">Add Members</span>
+        </li>
+      }
     </ul>
   </div>
   } @else {
