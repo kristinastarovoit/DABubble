@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { email, FieldContext, form, FormField, minLength, required, submit, validate} from '@angular/forms/signals';
+import { FieldContext, form, FormField, minLength, required, submit, validate} from '@angular/forms/signals';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth';
 import { UserService } from '../../../shared/services/users';
@@ -11,6 +11,15 @@ interface SignupFormModel {
   email: string;
   password: string;
   acceptedPolicy: boolean;
+}
+
+/** Requires a proper domain with a dot and a top-level part of at least two characters. */
+const emailDomainPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+/** Validates that the email has a real domain, not just a single character after the @. */
+function emailDomain(ctx: FieldContext<string>) {
+  const isValid = emailDomainPattern.test(ctx.value());
+  return isValid ? null : { kind: 'emailDomain', message: 'Please enter a valid email address.' };
 }
 
 /** Validates that the name contains at least two parts made of letters, apostrophes, or hyphens. */
@@ -51,7 +60,7 @@ export class Signup {
     required(f.name);
     validate(f.name, fullName);
     required(f.email);
-    email(f.email);
+    validate(f.email, emailDomain);
     required(f.password);
     minLength(f.password, 8);
     required(f.acceptedPolicy);
