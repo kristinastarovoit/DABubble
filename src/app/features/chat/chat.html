@@ -81,6 +81,7 @@
       (send)="onSend($event)"
       (composerFocused)="onComposerFocus()"
       #messageInput
+      [joinRequired]="!!channelId() && !isChannelMember()"
       [disabled]="(!channelId() && !dmId()) || (!!channelId() && !isChannelMember())"
       [placeholder]="
         channelId() && !isChannelMember()

@@ -36,6 +36,11 @@
     &::placeholder {
       color: $dark-grey;
     }
+
+    &--join-required::placeholder {
+      color: $midtone-purple-three;
+      font-weight: 700;
+    }
   }
 
   &__mention-panel {

@@ -40,6 +40,9 @@ export class MessageInput {
   /** Placeholder displayed in the message field. */
   @Input() placeholder = 'Write Message';
 
+  /** Whether the current user must join the channel before writing. */
+  @Input() joinRequired = false;
+
   /** Whether sending is currently disabled, e.g. while no recipient has been chosen yet. */
   @Input() disabled = false;
 

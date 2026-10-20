@@ -27,7 +27,7 @@
 
     <textarea #textarea class="message-input__field" (keydown)="onKeydown($event)" [value]="text()"
       (input)="onInput($event)" (focus)="composerFocused.emit()" [disabled]="disabled"
-      [placeholder]="placeholder"></textarea>
+      [placeholder]="placeholder" [class.message-input__field--join-required]="joinRequired"></textarea>
   </div>
 
   <div class="message-input__actions">
