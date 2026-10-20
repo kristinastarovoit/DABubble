@@ -170,6 +170,7 @@
                     </span>
                 </li>
                 }
+                @if (isCurrentUserMember()) {
                 <li class="channel-settings__member channel-settings__member--add">
                     <button type="button" class="channel-settings__add-member" (click)="openAddMembers()">
                         <span class="channel-settings__add-member-icon">
@@ -178,8 +179,9 @@
                         <span>Add Members</span>
                     </button>
                 </li>
+                }
             </ul>
-            @if (showAddMembers()) {
+            @if (showAddMembers() && isCurrentUserMember()) {
             <div class="channel-settings__add-members-form">
                 <input type="text" class="channel-settings__input" placeholder="Enter name" [ngModel]="addMemberQuery()"
                     (ngModelChange)="addMemberQuery.set($event); addMemberError.set('')" name="addMemberQuery" />

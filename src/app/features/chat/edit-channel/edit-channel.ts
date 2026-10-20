@@ -142,6 +142,7 @@ export class EditChannel {
 
   /** Opens the inline form for adding channel members. */
   openAddMembers(): void {
+    if (!this.isCurrentUserMember()) return;
     this.showAddMembers.set(true);
     this.addMemberQuery.set('');
     this.addMemberError.set('');

@@ -8,7 +8,6 @@ import {
   effect,
   ViewChild,
   ElementRef,
-  AfterViewInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -121,6 +120,12 @@ export class ChannelHeader {
 
   /** UID of the currently logged-in user. */
   currentUserId = computed(() => this.auth.currentUser?.uid ?? '');
+
+  /** Whether the signed-in user belongs to the active channel. */
+  isCurrentUserMember = computed(() => {
+    const userId = this.currentUserId();
+    return !!userId && (this.activeChannel()?.memberIds.includes(userId) ?? false);
+  });
 
   /** Messages belonging to the currently selected channel. */
   messages = signal<Message[]>([]);
@@ -256,6 +261,7 @@ export class ChannelHeader {
 
   /** Opens the dialog directly in "add members" mode. */
   openAddMembers(): void {
+    if (!this.isCurrentUserMember()) return;
     this.showAddMembersView.set(true);
     this.addMemberError = '';
     this.showMemberSuggestions.set(false);
