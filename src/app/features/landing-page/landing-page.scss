@@ -1,5 +1,13 @@
 :host {
   display: grid;
+  grid-template-columns: 1fr;
+  min-height: 100dvh;
+  width: 100%;
+  background: #eceefe;
+}
+
+.page-shell {
+  display: grid;
   grid-template-columns: auto 1fr;
   grid-template-areas:
     'logo signup'
@@ -8,20 +16,22 @@
   row-gap: 24px;
   min-height: 100dvh;
   width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
   padding-inline: clamp(1rem, -0.676rem + 8.38vw, 4.6875rem);
   padding-block-start: clamp(5px, calc(-261px + 28vh), 75px);
   padding-block-end: clamp(5px, calc(-158.4px + 17.2vh), 48px);
-  background: #eceefe;
+  box-sizing: border-box;
 }
 
 @media (max-width: 800px) {
-  :host {
+  .page-shell {
     padding-inline: 32px;
   }
 }
 
 @media (max-width: 650px) {
-  :host {
+  .page-shell {
     padding-inline: 16px;
   }
 }
@@ -110,8 +120,9 @@ footer {
 }
 
 @media (max-width: 768px) {
-  :host {
+  .page-shell {
     row-gap: 12px;
+    padding-block-start: 20px;
     grid-template-columns: 1fr;
     grid-template-areas:
       'logo'

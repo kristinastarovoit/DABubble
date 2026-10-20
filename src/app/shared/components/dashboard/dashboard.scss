@@ -1,5 +1,18 @@
 @use '../../../../styles/variables' as *;
 
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: $pastel-purple-bg;
+}
+
+.dashboard-shell {
+  width: 100%;
+  max-width: 1440px;
+  min-height: 100dvh;
+  margin-inline: auto;
+}
+
 .app-wrapper {
   display: grid;
   grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, auto);
@@ -71,7 +84,7 @@
 }
 
 @media (max-width: 900px) {
-  :host {
+  .dashboard-shell {
     display: flex;
     flex-direction: column;
     height: 100vh;
