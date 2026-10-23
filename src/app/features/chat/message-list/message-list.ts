@@ -5,6 +5,8 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ReactionBar } from '../reaction-bar/reaction-bar';
 import { Message, MessageReaction } from '../../../shared/interfaces/message';
 import { UserService } from '../../../shared/services/users';
+import { ChannelService } from '../../../shared/services/channel-service';
+import { AuthService } from '../../../shared/services/auth';
 import { UserModel } from '../../../shared/model/user.model';
 import { DmService } from '../../../shared/services/dm-service';
 import { UsercardDialog } from '../../../shared/components/usercard-dialog/usercard-dialog';
@@ -16,6 +18,12 @@ import { CURATED_EMOJIS } from '../../../shared/utilities/emoji-set';
 interface MessageGroup {
   dateLabel: string;
   messages: Message[];
+}
+
+interface MentionOption {
+  id: string;
+  label: string;
+  avatar?: string;
 }
 
 @Component({
@@ -32,6 +40,8 @@ export class MessageList {
   showEmojiPicker = signal(false);
 
   private userService = inject(UserService);
+  private channelService = inject(ChannelService);
+  private authService = inject(AuthService);
   private navigationService = inject(MessageNavigationService);
   private dmService = inject(DmService);
   selectedUser = signal<UserModel | undefined>(undefined);
@@ -60,6 +70,32 @@ export class MessageList {
   /** The current inline edit text for the active message. */
   editText = signal('');
 
+  /** Trigger and query for the mention dropdown in the active inline editor. */
+  mentionTrigger = signal<'@' | '#' | null>(null);
+  private mentionStartIndex = signal<number | null>(null);
+  private mentionQuery = signal('');
+  activeMentionIndex = signal(0);
+  private editTextarea = viewChild<ElementRef<HTMLTextAreaElement>>('editTextarea');
+
+  /** Users and channels matching the current inline-edit mention query. */
+  mentionOptions = computed<MentionOption[]>(() => {
+    const trigger = this.mentionTrigger();
+    if (!trigger) return [];
+    const query = this.mentionQuery().toLowerCase();
+    const options: MentionOption[] =
+      trigger === '@'
+        ? this.userService
+            .users()
+            .filter((user) => user.uid !== this.authService.currentUserId())
+            .map((user) => ({ id: user.uid, label: user.name, avatar: user.avatar }))
+        : this.channelService.channels().map((channel) => ({ id: channel.id, label: channel.name }));
+    return options.filter((option) => option.label.toLowerCase().includes(query));
+  });
+
+  showMentionDropdown = computed(
+    () => this.mentionTrigger() !== null && this.mentionOptions().length > 0,
+  );
+
   /** Resolves the reactions for a message, including the current user's own state. */
   protected messageReactions(message: Message): MessageReaction[] {
     return toMessageReactions(message.reactions, this.currentUserId());
@@ -86,6 +122,107 @@ export class MessageList {
   selectEmoji(emoji: string): void {
     this.editText.set(this.editText() + emoji);
     this.showEmojiPicker.set(false);
+  }
+
+  /** Inserts an @ at the caret and opens user suggestions in the inline editor. */
+  insertMention(): void {
+    const textarea = this.editTextarea()?.nativeElement;
+    const value = this.editText();
+    const caret = textarea?.selectionStart ?? value.length;
+    this.editText.set(value.slice(0, caret) + '@' + value.slice(caret));
+    this.openMentionDropdown('@', caret);
+    this.updateEditTextarea(caret + 1);
+  }
+
+  /** Updates draft text and mention suggestions while the inline editor is being typed in. */
+  onEditInput(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+    this.editText.set(textarea.value);
+    const beforeCaret = textarea.value.slice(0, textarea.selectionStart);
+    const match = /(?:^|\s)([@#])([^\s@#]*)$/.exec(beforeCaret);
+    if (!match) {
+      this.closeMentionDropdown();
+      return;
+    }
+    this.openMentionDropdown(match[1] as '@' | '#', beforeCaret.lastIndexOf(match[1]), match[2]);
+  }
+
+  /** Handles suggestion navigation or accepts the active suggestion from the inline editor. */
+  onEditKeydown(event: KeyboardEvent, message: Message): void {
+    if (this.showMentionDropdown()) {
+      const options = this.mentionOptions();
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const direction = event.key === 'ArrowDown' ? 1 : -1;
+        this.activeMentionIndex.update(
+          (index) => (index + direction + options.length) % options.length,
+        );
+        return;
+      }
+      if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault();
+        this.selectMentionOption(options[this.activeMentionIndex()]);
+        return;
+      }
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        this.closeMentionDropdown();
+        return;
+      }
+    }
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.saveEditedMessage(message);
+    }
+  }
+
+  /** Saves the active inline edit and closes its suggestion dropdown. */
+  saveEditedMessage(message: Message): void {
+    this.editSaved.emit({ message, text: this.editText() });
+    this.editingMessageId.set(undefined);
+    this.closeMentionDropdown();
+  }
+
+  /** Cancels the active inline edit and closes its suggestion dropdown. */
+  cancelEditing(): void {
+    this.editingMessageId.set(undefined);
+    this.closeMentionDropdown();
+  }
+
+  /** Replaces the active trigger with the selected user or channel. */
+  selectMentionOption(option: MentionOption): void {
+    const trigger = this.mentionTrigger();
+    const startIndex = this.mentionStartIndex();
+    if (!trigger || startIndex === null) return;
+    const insertion = `${trigger}${option.label} `;
+    const endIndex = startIndex + 1 + this.mentionQuery().length;
+    this.editText.set(
+      this.editText().slice(0, startIndex) + insertion + this.editText().slice(endIndex),
+    );
+    this.closeMentionDropdown();
+    this.updateEditTextarea(startIndex + insertion.length);
+  }
+
+  private openMentionDropdown(trigger: '@' | '#', startIndex: number, query = ''): void {
+    this.mentionTrigger.set(trigger);
+    this.mentionStartIndex.set(startIndex);
+    this.mentionQuery.set(query);
+    this.activeMentionIndex.set(0);
+  }
+
+  private closeMentionDropdown(): void {
+    this.mentionTrigger.set(null);
+    this.mentionStartIndex.set(null);
+    this.mentionQuery.set('');
+    this.activeMentionIndex.set(0);
+  }
+
+  private updateEditTextarea(caret: number): void {
+    const textarea = this.editTextarea()?.nativeElement;
+    if (!textarea) return;
+    textarea.value = this.editText();
+    textarea.focus();
+    textarea.setSelectionRange(caret, caret);
   }
 
   /** Follows new messages or jumps to a pending navigation target after each render. */
@@ -127,6 +264,7 @@ export class MessageList {
     this.editingMessageId.set(message.id);
     this.editText.set(message.text);
     this.showEmojiPicker.set(false);
+    this.closeMentionDropdown();
   }
 
   /** Groups messages by their calendar date. */

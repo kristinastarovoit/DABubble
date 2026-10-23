@@ -16,6 +16,12 @@ import { MentionHighlightPipe } from '../../shared/utilities/mention-highlight.p
 import { CURATED_EMOJIS } from '../../shared/utilities/emoji-set';
 import { toggleReaction } from '../../shared/utilities/reaction-toggle.utils';
 
+interface MentionOption {
+  id: string;
+  label: string;
+  avatar?: string;
+}
+
 /** Displays a message thread, its replies, and related actions. */
 @Component({
   imports: [CommonModule, MessageInput, ReactionBar, ReactionPicker, UsercardDialog, MentionHighlightPipe],
@@ -100,6 +106,34 @@ export class Thread {
   /** The scrollable content container of the thread panel. */
   private threadContentElement = viewChild<ElementRef<HTMLDivElement>>('threadContent');
 
+  /** The active inline-edit textarea for the parent message or reply. */
+  private editTextarea = viewChild<ElementRef<HTMLTextAreaElement>>('editTextarea');
+
+  /** Trigger and query for the mention dropdown in the active inline editor. */
+  mentionTrigger = signal<'@' | '#' | null>(null);
+  private mentionStartIndex = signal<number | null>(null);
+  private mentionQuery = signal('');
+  activeMentionIndex = signal(0);
+
+  /** Users and channels matching the current inline-edit mention query. */
+  mentionOptions = computed<MentionOption[]>(() => {
+    const trigger = this.mentionTrigger();
+    if (!trigger) return [];
+    const query = this.mentionQuery().toLowerCase();
+    const options: MentionOption[] =
+      trigger === '@'
+        ? this.userService
+            .users()
+            .filter((user) => user.uid !== this.currentUserId())
+            .map((user) => ({ id: user.uid, label: user.name, avatar: user.avatar }))
+        : this.channelService.channels().map((channel) => ({ id: channel.id, label: channel.name }));
+    return options.filter((option) => option.label.toLowerCase().includes(query));
+  });
+
+  showMentionDropdown = computed(
+    () => this.mentionTrigger() !== null && this.mentionOptions().length > 0,
+  );
+
   /** Whether the content should follow new replies by scrolling to the bottom. */
   private shouldAutoScroll = true;
 
@@ -121,6 +155,96 @@ export class Thread {
   selectEmoji(emoji: string): void {
     this.editText.set(this.editText() + emoji);
     this.showEmojiPicker.set(false);
+  }
+
+  /** Inserts an @ at the caret in the active inline-edit field. */
+  insertMention(): void {
+    const textarea = this.editTextarea()?.nativeElement;
+    const value = this.editText();
+    const caret = textarea?.selectionStart ?? value.length;
+
+    this.editText.set(value.slice(0, caret) + '@' + value.slice(caret));
+    this.openMentionDropdown('@', caret);
+
+    this.updateEditTextarea(caret + 1);
+  }
+
+  /** Updates draft text and mention suggestions while the inline editor is being typed in. */
+  onEditInput(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+    this.editText.set(textarea.value);
+    const beforeCaret = textarea.value.slice(0, textarea.selectionStart);
+    const match = /(?:^|\s)([@#])([^\s@#]*)$/.exec(beforeCaret);
+    if (!match) {
+      this.closeMentionDropdown();
+      return;
+    }
+    this.openMentionDropdown(match[1] as '@' | '#', beforeCaret.lastIndexOf(match[1]), match[2]);
+  }
+
+  /** Handles suggestion navigation or accepts the active suggestion from the inline editor. */
+  onEditKeydown(event: KeyboardEvent): void {
+    if (this.showMentionDropdown()) {
+      const options = this.mentionOptions();
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const direction = event.key === 'ArrowDown' ? 1 : -1;
+        this.activeMentionIndex.update(
+          (index) => (index + direction + options.length) % options.length,
+        );
+        return;
+      }
+      if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault();
+        this.selectMentionOption(options[this.activeMentionIndex()]);
+        return;
+      }
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        this.closeMentionDropdown();
+        return;
+      }
+    }
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      void this.saveEditedMessage();
+    }
+  }
+
+  /** Replaces the active trigger with the selected user or channel. */
+  selectMentionOption(option: MentionOption): void {
+    const trigger = this.mentionTrigger();
+    const startIndex = this.mentionStartIndex();
+    if (!trigger || startIndex === null) return;
+    const insertion = `${trigger}${option.label} `;
+    const endIndex = startIndex + 1 + this.mentionQuery().length;
+    this.editText.set(
+      this.editText().slice(0, startIndex) + insertion + this.editText().slice(endIndex),
+    );
+    this.closeMentionDropdown();
+    this.updateEditTextarea(startIndex + insertion.length);
+  }
+
+  private openMentionDropdown(trigger: '@' | '#', startIndex: number, query = ''): void {
+    this.mentionTrigger.set(trigger);
+    this.mentionStartIndex.set(startIndex);
+    this.mentionQuery.set(query);
+    this.activeMentionIndex.set(0);
+  }
+
+  private closeMentionDropdown(): void {
+    this.mentionTrigger.set(null);
+    this.mentionStartIndex.set(null);
+    this.mentionQuery.set('');
+    this.activeMentionIndex.set(0);
+  }
+
+  private updateEditTextarea(caret: number): void {
+    const textarea = this.editTextarea()?.nativeElement;
+    if (!textarea) return;
+    textarea.value = this.editText();
+    textarea.focus();
+    textarea.setSelectionRange(caret, caret);
   }
   
   /** Re-subscribes to the open thread's parent message and replies whenever it changes. */
@@ -191,6 +315,7 @@ export class Thread {
   /** Starts editing the parent message in the active thread. */
   startEditingParentMessage(): void {
     this.showEmojiPicker.set(false);
+    this.closeMentionDropdown();
     const parentMessage = this.parentMessage();
     if (!parentMessage) return;
 
@@ -202,6 +327,7 @@ export class Thread {
   /** Starts editing a thread reply message. */
   startEditingReply(reply: ThreadMessage): void {
     this.showEmojiPicker.set(false);
+    this.closeMentionDropdown();
     if (!reply.id) return;
 
     this.editingParentMessage.set(false);
@@ -225,6 +351,7 @@ export class Thread {
       await this.saveReplyEdit(thread, messageId, replyId, text);
     }
     this.editText.set('');
+    this.closeMentionDropdown();
   }
 
   /** Clears the inline-edit state without persisting anything. */
@@ -232,6 +359,7 @@ export class Thread {
     this.editingParentMessage.set(false);
     this.editingReplyId.set(null);
     this.editText.set('');
+    this.closeMentionDropdown();
   }
 
   /**
