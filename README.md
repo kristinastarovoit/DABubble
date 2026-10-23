@@ -1,6 +1,6 @@
-# DABubble
+# ChatBubble
 
-DABubble is a team chat application (Slack clone) built with Angular and Firebase. Users can sign up or log in (email/password, Google, or as a guest), chat in channels and direct messages, reply in threads, react to messages, and search. It is a group project by Mathias Mayer, Kristina Starovoit, and Anne Manthey.
+ChatBubble is a team chat application (Slack clone) built with Angular and Firebase. Users can sign up or log in (email/password, Google, or as a guest), chat in channels and direct messages, reply in threads, react to messages, and search. It is a group project by Mathias Mayer, Kristina Starovoit, and Anne Manthey.
 
 ## Quickstart
 

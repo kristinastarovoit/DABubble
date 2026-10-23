@@ -5,12 +5,15 @@
   inset: 0;
   z-index: 1000;
   cursor: pointer;
+  max-height: 100dvh;
+  overflow-y: hidden;
 }
 
 .backdrop {
   position: absolute;
   inset: 0;
   background: $dark-purple-one;
+  overflow-y: hidden;
 }
 
 .logo {

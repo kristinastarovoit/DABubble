@@ -107,7 +107,7 @@ export class Login {
     if (creationTime !== lastSignInTime) return;
     await this.userService.createUserProfile(
       user.uid,
-      user.displayName ?? 'DABubble User',
+      user.displayName ?? 'ChatBubble User',
       user.email ?? '',
       user.photoURL ?? 'app-icons/avatar_default.svg',
     );
@@ -116,6 +116,6 @@ export class Login {
   /** Generates a short, human-friendlier placeholder email for guest accounts. */
   private generateGuestEmail(): string {
     const randomNumber = Math.floor(1000 + Math.random() * 9000); // Four-digit number from 1000 to 9999.
-    return `guest${randomNumber}@dabubble.de`;
+    return `guest${randomNumber}@chatbubble.de`;
   }
 }

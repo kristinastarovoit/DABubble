@@ -1,9 +1,32 @@
+@use '../../../styles.scss' as *;
+
 :host {
   display: grid;
   grid-template-columns: 1fr;
   min-height: 100dvh;
   width: 100%;
   background: #eceefe;
+}
+
+.header {
+  &__logo {
+    display: flex;
+    width: 350px;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+
+    &-img {
+      width: 350px;
+    }
+
+    &-text {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: $black;
+      white-space: nowrap;
+    }
+  }
 }
 
 .page-shell {
@@ -19,8 +42,8 @@
   max-width: 1440px;
   margin-inline: auto;
   padding-inline: clamp(1rem, -0.676rem + 8.38vw, 4.6875rem);
-  padding-block-start: clamp(20px, calc(-261px + 28vh), 75px);
-  padding-block-end: clamp(5px, calc(-158.4px + 17.2vh), 48px);
+  padding-block-start: clamp(36px, calc(-261px + 28vh), 75px);
+  padding-block-end: clamp(36px, calc(-158.4px + 17.2vh), 48px);
   box-sizing: border-box;
 }
 
@@ -41,10 +64,10 @@ header {
   display: flex;
   justify-content: space-between;
 
-  img {
-    width: clamp(12.756rem, 11.68rem + 5.4vw, 15.132rem);
-    height: clamp(3.5rem, 3.1rem + 1.99vw, 4.375rem);
-  }
+  // img {
+  //   width: clamp(12.756rem, 11.68rem + 5.4vw, 15.132rem);
+  //   height: clamp(3.5rem, 3.1rem + 1.99vw, 4.375rem);
+  // }
 }
 
 main {

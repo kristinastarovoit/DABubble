@@ -9,5 +9,5 @@ import { RouterOutlet } from '@angular/router';
 })
 export class App {
   /** Application title used by the root component. */
-  protected readonly title = signal('dabubble');
+  protected readonly title = signal('chatbubble');
 }
